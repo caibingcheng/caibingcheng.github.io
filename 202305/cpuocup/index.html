@@ -1,0 +1,213 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>设置CPU使用率的工具-cpuocup - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="设置CPU使用率的工具-cpuocup"><meta property="og:description" content="cpuocup是一款设置CPU使用率的工具, 可以设置若干线程的CPU使用率, 可以将线程绑定到对应的CPU核心, 也可以设置线程的执行优先级(需要sudo权限). 在一些需要低效CPU的测试场合, 该工具可能帮得上忙."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202305/cpuocup/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2023-05-09T22:02:11+08:00"><meta property="article:modified_time" content="2023-05-09T22:02:11+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="设置CPU使用率的工具-cpuocup"><meta name=twitter:description content="cpuocup是一款设置CPU使用率的工具, 可以设置若干线程的CPU使用率, 可以将线程绑定到对应的CPU核心, 也可以设置线程的执行优先级(需要sudo权限). 在一些需要低效CPU的测试场合, 该工具可能帮得上忙."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202305/cpuocup/><link rel=prev href=https://imcbc.cn/202303/terminal-sudoku/><link rel=next href=https://imcbc.cn/202307/3k-diypc-nasup/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"设置CPU使用率的工具-cpuocup","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202305\/cpuocup\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","wordcount":2383,"url":"https:\/\/imcbc.cn\/202305\/cpuocup\/","datePublished":"2023-05-09T22:02:11+08:00","dateModified":"2023-05-09T22:02:11+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>设置CPU使用率的工具-cpuocup<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2023-05-09>2023-05-09</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2383 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><ul><li><a href=#体验copilot>体验Copilot</a></li><li><a href=#小结>小结</a></li></ul></li></ul></nav></div></div><div class=content id=content><p><code>cpuocup</code>是一款设置CPU使用率的工具, 可以设置若干线程的CPU使用率, 可以将线程绑定到对应的CPU核心, 也可以设置线程的执行优先级(需要sudo权限). 在一些需要低效CPU的测试场合, 该工具可能帮得上忙.</p><ul><li>项目地址: <a href=https://github.com/caibingcheng/cpuocup target=_blank rel="noopener noreffer">caibingcheng/cpuocup (github.com)</a></li></ul><blockquote><p>已经很久没有更新. 在二月份的时候经历了裁员, 三月份开始找工作, 入职了一家新公司, 每个工作日都需要花费3个小时的通勤时间, 有点累&mldr; 停更了很久, 其实在这期间也写了一些内容, 但是因为工作的原因没有及时更新和润色, 并且有些玩意儿做的不是很好, 还需要改进, 所以并没有贴出来. 现在已经工作一个多月, 对工作和通勤都适应起来了, 所以, 博客也要继续搞起来. 期望可以保持原来的更新速度, 以及学习和探索一些更有意思的问题.</p></blockquote><p>没有什么十分明确的契机, 可能因为最近用上了Copilot, 工作上又做了一些性能测试相关的内容, 便想到了做这样一个和性能有些相关的东西.</p><p>详细用法可以见仓库的README, 简单用法如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>cpuocup 0.5
+</span></span><span class=line><span class=cl>#set thread 0 to 50% usage
+</span></span><span class=line><span class=cl>cpuocup 1,0.5
+</span></span><span class=line><span class=cl>#set thread 1 to 50% usage, and bind to cpu 1
+</span></span></code></pre></td></tr></table></div></div><p>设计上, <code>cpuocup</code>最多可以启动cpu核心数个线程, 以确保可以让每个核心分配一个工作线程.</p><p>如以上<code>cpuocup 0.5</code>指令, 会启动一个线程, 将线程的cpu占用率设置为50%附近, 但是不会绑定到某个核心, 因此实际情况上, 可能会又多个核心分担这个线程的资源消耗, 从而在使用top指令观察的时候, 可能看不到某个核心占用为50%的情况.</p><p>又如<code>cpuocup 1,0.5</code> 指令, 会启动一个线程, 将线程的cpu占用率设置为50%附近, 并且将该线程绑定到cpu 1上, 因此在使用top指令观察时, 是可以观察到cpu 1的占用率接近50%的. 当然如果有其他线程也在消耗这个核心, 那么其占用率可能是超过50%的.</p><h3 id=体验copilot>体验Copilot</h3><p>关于<code>cpuocup</code>这个工具, 其实<strong>我的核心是体验Copilot</strong>. 通过Copilot, 可以减少在浏览器和编辑器之间的切换次数. 还在学校的时候, 我试用过<code>tabnine</code>, <code>tabnine</code>更像是上下文提示(现在不知道是什么程度了), Copilot远不止如此.</p><p>比如, 当需要写cpu绑核相关代码的时候, 我可能不知道对应API是什么, 以及如何使用, 那么我可以:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// bind thread to cpu
+</span></span></span></code></pre></td></tr></table></div></div><p>只需要相关的注释, Copilot就有可能帮助我完成相关的代码. 比如, 它可能为我生成:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=cl><span class=n>cpu_set_t</span> <span class=n>set</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>CPU_ZERO</span><span class=p>(</span><span class=o>&amp;</span><span class=n>set</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>CPU_SET</span><span class=p>(</span><span class=n>arg</span><span class=p>.</span><span class=n>cpu_id</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>set</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>pthread_setaffinity_np</span><span class=p>(</span><span class=n>threads</span><span class=p>.</span><span class=n>back</span><span class=p>().</span><span class=n>native_handle</span><span class=p>(),</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>cpu_set_t</span><span class=p>),</span> <span class=o>&amp;</span><span class=n>set</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>在这之后, 我先验证设置是否成功, 也只需要注释:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>// check if cpu affinity set success
+</span></span></code></pre></td></tr></table></div></div><p>那么Copilot就可以帮助生成验证cpu affinity设置时候成功的代码, 比如:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>cpu_set_t get;
+</span></span><span class=line><span class=cl>CPU_ZERO(&amp;get);
+</span></span><span class=line><span class=cl>pthread_getaffinity_np(threads.back().native_handle(), sizeof(cpu_set_t), &amp;get);
+</span></span><span class=line><span class=cl>check(CPU_ISSET(arg.cpu_id, &amp;get), &#34;Set cpu affinity failed&#34;);
+</span></span></code></pre></td></tr></table></div></div><p>注意到, 它还自己动调用了我在这份文件中写的check接口, 并且帮助生成了错误提示代码.</p><p>又比如, 我想为每个command绑定函数的时候, 有这样一段代码:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>unordered_map</span><span class=o>&lt;</span><span class=kt>char</span><span class=p>,</span> <span class=n>cmd_job_t</span><span class=o>&gt;</span> <span class=n>g_cmd_jobs</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span><span class=sc>&#39;f&#39;</span><span class=p>,</span> <span class=p>[](</span><span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>thread_args</span><span class=o>&gt;&amp;</span> <span class=n>args</span><span class=p>,</span> <span class=n>thread_args</span><span class=o>&amp;</span> <span class=n>arg</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=k>auto</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>args</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>args</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>arg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}},</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span><span class=sc>&#39;F&#39;</span><span class=p>,</span> <span class=p>[](</span><span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>thread_args</span><span class=o>&gt;&amp;</span> <span class=n>args</span><span class=p>,</span> <span class=n>thread_args</span><span class=o>&amp;</span> <span class=n>arg</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=k>auto</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>args</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>args</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>arg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>args</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>cpu_id</span> <span class=o>=</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}},</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span><span class=sc>&#39;r&#39;</span><span class=p>,</span> <span class=p>[](</span><span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>thread_args</span><span class=o>&gt;&amp;</span> <span class=n>args</span><span class=p>,</span> <span class=n>thread_args</span><span class=o>&amp;</span> <span class=n>arg</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=k>auto</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>args</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>args</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>specific</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>args</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>arg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}},</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span><span class=sc>&#39;R&#39;</span><span class=p>,</span> <span class=p>[](</span><span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>thread_args</span><span class=o>&gt;&amp;</span> <span class=n>args</span><span class=p>,</span> <span class=n>thread_args</span><span class=o>&amp;</span> <span class=n>arg</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=k>auto</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>args</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>args</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>specific</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>args</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>arg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>                <span class=n>args</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>cpu_id</span> <span class=o>=</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}},</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>这是Copilot帮助生成的. 在这之前, 我在<code>parse_args</code>函数内部实现了相关的代码, 在整理代码的时候我想改成map的形式, 因此, 当我输入<code>std::unordered_map</code>这几个字符的时候, Copilot就以及帮助我生成了剩下的代码, 我几乎不需要再去修改, 只需要将原来的代码删除即可.</p><p>另外, 在忘记<code>#include &lt;unordered_map></code>时, 光标移动到include区域, Copilot也自动补全了缺少的部分.</p><p>再比如, <code>helper_str</code>也是Copilot生成的, 可以看看它的内容:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>string</span> <span class=n>g_helper_str</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl><span class=c1>// unix style helper
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=s>&#34;</span><span class=se>\033</span><span class=s>[1mNAME</span><span class=se>\033</span><span class=s>[0m</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    cpuocup - set cpu userspace usage rate</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;</span><span class=se>\033</span><span class=s>[1mVERSION</span><span class=se>\033</span><span class=s>[0m</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    &#34;</span> <span class=o>+</span> <span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=p>(</span><span class=n>VERSION_STRING</span><span class=p>)</span> <span class=o>+</span> <span class=s>&#34;</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;</span><span class=se>\033</span><span class=s>[1mUSAGE</span><span class=se>\033</span><span class=s>[0m</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=c1>// can set [rate] [cpu_id,rate] [cpu_id,priority,rate] [cmd,rate] [cmd,priority,rate]
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mcpuocup</span><span class=se>\033</span><span class=s>[0m [</span><span class=se>\033</span><span class=s>[4mrate</span><span class=se>\033</span><span class=s>[0m] [</span><span class=se>\033</span><span class=s>[4mcpu_id</span><span class=se>\033</span><span class=s>[0m,</span><span class=se>\033</span><span class=s>[4mrate</span><span class=se>\033</span><span class=s>[0m] [</span><span class=se>\033</span><span class=s>[4mcpu_id</span><span class=se>\033</span><span class=s>[0m,</span><span class=se>\033</span><span class=s>[4mpriority</span><span class=se>\033</span><span class=s>[0m,</span><span class=se>\033</span><span class=s>[4mrate</span><span class=se>\033</span><span class=s>[0m] [</span><span class=se>\033</span><span class=s>[4mcmd</span><span class=se>\033</span><span class=s>[0m,</span><span class=se>\033</span><span class=s>[4mrate</span><span class=se>\033</span><span class=s>[0m] [</span><span class=se>\033</span><span class=s>[4mcmd</span><span class=se>\033</span><span class=s>[0m,</span><span class=se>\033</span><span class=s>[4mpriority</span><span class=se>\033</span><span class=s>[0m,</span><span class=se>\033</span><span class=s>[4mrate</span><span class=se>\033</span><span class=s>[0m] ...</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;</span><span class=se>\033</span><span class=s>[1mDESCRIPTION</span><span class=se>\033</span><span class=s>[0m</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    This program is used to set cpu rate. Max &#34;</span> <span class=o>+</span> <span class=n>std</span><span class=o>::</span><span class=n>to_string</span><span class=p>(</span><span class=n>g_hardware_threads</span><span class=p>)</span> <span class=o>+</span> <span class=s>&#34; threads are supported at the device.</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mrate</span><span class=se>\033</span><span class=s>[0m: thread rate, 0.0 &lt;= rate &lt;= 1.0</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mcpu_id</span><span class=se>\033</span><span class=s>[0m: cpu id, -1 means thread not bind any cpu, range: [-1, &#34;</span> <span class=o>+</span> <span class=n>std</span><span class=o>::</span><span class=n>to_string</span><span class=p>(</span><span class=n>g_hardware_threads</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span> <span class=o>+</span> <span class=s>&#34;]</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mpriority</span><span class=se>\033</span><span class=s>[0m: thread priority, range: [0, 99]</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=c1>// cmd support: f, F, r, R
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mcmd</span><span class=se>\033</span><span class=s>[0m: f, r, F, R</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        f: set to all threads</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        r: set to all threads which is not specific</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        F: set to all threads, and bind to corresponding cpu</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        R: set to all threads which is not specific, and bind to corresponding cpu</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;</span><span class=se>\033</span><span class=s>[1mEXAMPLE</span><span class=se>\033</span><span class=s>[0m</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=c1>// give 5 classic examples of each usage, and explain the meaning of each example
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mcpuocup</span><span class=se>\033</span><span class=s>[0m 0.5 0.9</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        set thread 0 to 50% usage, and thread 1 to 90% usage</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mcpuocup</span><span class=se>\033</span><span class=s>[0m 1,0.5</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        set thread 1 to 50% usage, and bind to cpu 1</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mcpuocup</span><span class=se>\033</span><span class=s>[0m 1,20,0.5</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        set thread 1 to 50% usage, and bind to cpu 1, and set thread priority to 20</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mcpuocup</span><span class=se>\033</span><span class=s>[0m f,0.5</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        set all threads to 50% usage</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    </span><span class=se>\033</span><span class=s>[1mcpuocup</span><span class=se>\033</span><span class=s>[0m 1,20,0.5, r,40,0.9</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        set thread 1 to 50% usage, and bind to cpu 1, and set thread priority to 20</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;        set all threads which is not specific to 90% usage, and set thread priority to 40, and bind to corresponding cpus</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;</span><span class=se>\033</span><span class=s>[1mAUTHOR</span><span class=se>\033</span><span class=s>[0m</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    Written by </span><span class=se>\033</span><span class=s>[1mcaibingcheng</span><span class=se>\033</span><span class=s>[0m.</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;</span><span class=se>\033</span><span class=s>[1mREPORTING BUGS</span><span class=se>\033</span><span class=s>[0m</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    Report bugs to </span><span class=se>\033</span><span class=s>[1mjack_cbc@163.com</span><span class=se>\033</span><span class=s>[0m.</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;</span><span class=se>\033</span><span class=s>[1mCOPYRIGHT</span><span class=se>\033</span><span class=s>[0m</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    This is free software: you are free to change and redistribute it.</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=s>&#34;    There is NO WARRANTY, to the extent permitted by law.</span><span class=se>\n</span><span class=s>&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>当然, 这已经是迭代了好几个版本之后的内容, 在Copilot描述的<code>cpuocup</code>用法上, 稍微有点不准, 但是需要修改的地方不多. 在生成<code>helper_str</code>的过程中, 我同样只需要填写注释, 比如开头填写:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// unix style helper
+</span></span></span></code></pre></td></tr></table></div></div><p>那么, 它会帮助我生成UNIX风格的helper信息. 在用法描述上, Copilot有缺失项, 那么我同样用注释告知其正确用法:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c++ data-lang=c++><span class=line><span class=cl><span class=c1>// can set [rate] [cpu_id,rate] [cpu_id,priority,rate] [cmd,rate] [cmd,priority,rate]
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=小结>小结</h3><p>以上.</p><p>项目中, 有注释的部分基本都是Copilot协助完成的, 这些部分, 我基本只需要输出注释, 有些注释因为在早期开发变动较大, 就删除了. 项目中的一些重复性较大的代码, 也是由Copilot协助完成.</p><p>对此, 我最大的感触是, 对于这些独立的小项目, 我只需要关心整体设计, 至于代码如何实现, 接口如何调用我已经不需要关心了, 甚至也不需要浏览器. 不过对于比较大的项目, 目录结构比较复杂, Copilot就显得没有那么"机智"了.</p><p>(这篇文章有点水~除去代码时间, 文章内容可能只准备两个小时. 不过博客可算更新了, 也算是又步入正轨了吧, 用输出来促进我的输入! 前段时间还做了心率检测相关的东西, 以及调查了文件buffer指针相关的内容, 期望能尽快有输出. 还有, Copilot体验还是非常好的!)</p></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2023-05-09</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section></section><section class=post-tags></section></div><div class=post-nav><a href=/202303/terminal-sudoku/ class=prev rel=prev title=终端数独游戏><i class="fas fa-angle-left fa-fw"></i>终端数独游戏</a>
+<a href=/202307/3k-diypc-nasup/ class=next rel=next title=3000元装机和NAS升级>3000元装机和NAS升级<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:51+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

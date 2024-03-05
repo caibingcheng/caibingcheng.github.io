@@ -1,0 +1,217 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>《UCB CS61a SICP Python 中文》一周目笔记(一) - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="《UCB CS61a SICP Python 中文》一周目笔记(一)"><meta property="og:description" content="UCB SICP译文, 看这里.
+令我印象深刻的是MIT SICP第一章中的例子题1.5:应用序和正则序."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202108/sicp-python-read1/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-08-10T09:47:34+08:00"><meta property="article:modified_time" content="2021-08-10T09:47:34+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="《UCB CS61a SICP Python 中文》一周目笔记(一)"><meta name=twitter:description content="UCB SICP译文, 看这里.
+令我印象深刻的是MIT SICP第一章中的例子题1.5:应用序和正则序."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202108/sicp-python-read1/><link rel=prev href=https://imcbc.cn/202107/cpp-modern-feature/><link rel=next href=https://imcbc.cn/202108/secguide_c_tc/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"《UCB CS61a SICP Python 中文》一周目笔记(一)","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202108\/sicp-python-read1\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"SICP, Python","wordcount":3246,"url":"https:\/\/imcbc.cn\/202108\/sicp-python-read1\/","datePublished":"2021-08-10T09:47:34+08:00","dateModified":"2021-08-10T09:47:34+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>《UCB CS61a SICP Python 中文》一周目笔记(一)<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-08-10>2021-08-10</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3246 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 7 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#使用函数构建抽象>使用函数构建抽象</a><ul><li><a href=#中缀记号和函数>中缀记号和函数</a></li><li><a href=#全局环境和局部环境>全局环境和局部环境</a><ul><li><a href=#全局环境帧>全局环境(帧)</a></li><li><a href=#局部环境帧>局部环境(帧)</a></li><li><a href=#小结>小结</a></li></ul></li><li><a href=#函数抽象>函数抽象</a><ul><li><a href=#黑盒>黑盒</a><ul><li><a href=#一个反例>一个反例</a></li></ul></li><li><a href=#什么应该抽象为函数>什么应该抽象为函数</a></li><li><a href=#小结-1>小结</a></li></ul></li><li><a href=#高阶函数>高阶函数</a><ul><li><a href=#参数是函数>参数是函数</a></li><li><a href=#返回是函数>返回是函数</a></li><li><a href=#小结-2>小结</a></li></ul></li><li><a href=#总结>总结</a></li></ul></li></ul></nav></div></div><div class=content id=content><p>UCB SICP译文, 看<a href=https://wizardforcel.gitbooks.io/sicp-py/content/ch1.html target=_blank rel="noopener noreffer">这里</a>.</p><p>令我印象深刻的是MIT SICP第一章中的例子<a href=https://sicp.readthedocs.io/en/latest/chp1/5.html target=_blank rel="noopener noreffer">题1.5:应用序和正则序</a>.</p><h2 id=使用函数构建抽象>使用函数构建抽象</h2><p>第一大章初会觉得很简单, 但是仔细看还是可以看到很多忽略的知识点, 比如我印象最深的, 对调用栈的解释, 这里用的名词是环境(应该是一个意思).</p><h3 id=中缀记号和函数>中缀记号和函数</h3><p>一个很容易观察到, 但是容易被忽略的问题:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=mi>2</span> <span class=o>+</span> <span class=mi>3</span>
+</span></span><span class=line><span class=cl><span class=mi>5</span>
+</span></span><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=n>add</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=mi>5</span>
+</span></span></code></pre></td></tr></table></div></div><p>在简短的表达式中, <code>2 + 3</code>是很容易被使用的. 但是<code>2 + 3</code>和<code>add(2, 3)</code>的区别我却没有花心思去考虑过:</p><ol><li><p><code>2 + 3</code>仅适合两个元素;</p></li><li><p><code>add</code>可以适应任意多个元素;</p></li></ol><p>当然, 并不是说都需要将中缀记号替换为函数, 这本来就是不合理的. 比如说:</p><blockquote><p>对于简单的算术运算, Python 在惯例上倾向于运算符而不是调用表达式.</p></blockquote><p>这里仅仅是让你注意到这一点. 在后面章节中会提到<code>add</code>函数的其他优点.</p><h3 id=全局环境和局部环境>全局环境和局部环境</h3><ol><li><p>实参是怎么传入到形参的?</p></li><li><p>形参为什么可以重名?</p></li></ol><h4 id=全局环境帧>全局环境(帧)</h4><p>内建函数/用户定义的全局变量/用户定义的全局函数等等, 会作为<strong>全局环境</strong>的组成部分.</p><p><img class=lazyload src=/svg/loading.min.svg data-src=https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_assignment.png data-srcset="https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_assignment.png, https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_assignment.png 1.5x, https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_assignment.png 2x" data-sizes=auto alt=https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_assignment.png title=img></p><p>如上图, 表示一个全局环境, 其中<code>pi</code>/<code>tau</code>等变量是通过导入和赋值加入到全局环境中的.</p><blockquote><p><strong>赋值和导入语句会向当前环境的第一个帧添加条目</strong></p></blockquote><p>根据上面这个原理, 当前环境是全局环境, 所以导入和赋值引入的变量等名字将会导入到当前环境中, 也就是全局环境.</p><h4 id=局部环境帧>局部环境(帧)</h4><p>比如这样一个函数:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=k>def</span> <span class=nf>square</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>mul</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>x</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>将会有自己的局部环境, <code>square</code>的环境和全局环境是不一样的, 但是全局环境可以指向这个局部环境.</p><p>比如下图, 虽然都有一个叫做<code>x</code>的东西, 但是他们在不同的局部环境, 所以不会互相干扰.</p><p><img class=lazyload src=/svg/loading.min.svg data-src=https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_def.png data-srcset="https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_def.png, https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_def.png 1.5x, https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_def.png 2x" data-sizes=auto alt=https://wizardforcel.gitbooks.io/sicp-py/content/img/global_frame_def.png title=img></p><p>那么, 上述square函数的局部环境如何?</p><p><img class=lazyload src=/svg/loading.min.svg data-src=https://wizardforcel.gitbooks.io/sicp-py/content/img/evaluate_square.png data-srcset="https://wizardforcel.gitbooks.io/sicp-py/content/img/evaluate_square.png, https://wizardforcel.gitbooks.io/sicp-py/content/img/evaluate_square.png 1.5x, https://wizardforcel.gitbooks.io/sicp-py/content/img/evaluate_square.png 2x" data-sizes=auto alt=https://wizardforcel.gitbooks.io/sicp-py/content/img/evaluate_square.png title=img></p><p>上述调用过程总结如下:</p><ol><li>在全局环境中计算表达式<code>-2</code>的结果;</li><li>在全局环境中搜索<code>square</code>;</li><li>切换到<code>square</code>局部环境, 发现x, 将-2绑定到x;</li><li>在当前环境(<code>square</code>局部环境)计算<code>x*x</code>;</li><li>退出到全局环境, <code>square</code>计算结果输出到全局环境.</li></ol><h4 id=小结>小结</h4><p>关于环境, 看做是一个映射表, 全局环境或这局部环境都是key(名字), value(真正的内容)会指向其他地方, 在同一个环境中, 只需要关系key不一样就可以了, 不关心value是不是一样.</p><ul><li>问题1: 实参是怎么传入到形参的?</li></ul><p>实参在函数的局部环境中被绑定到形参上.</p><ul><li>问题2: 形参为什么可以重名?</li></ul><p>因为采用了局部环境, 在不同的环境中, 相同的名字不影响.</p><h3 id=函数抽象>函数抽象</h3><ol><li>函数抽象举例.</li><li>为什么要做函数抽象?</li></ol><h4 id=黑盒>黑盒</h4><p>以下例子令我有种醍醐灌顶的感觉:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>square</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>mul</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>square</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>mul</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>x</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span> <span class=o>+</span> <span class=n>x</span>
+</span></span></code></pre></td></tr></table></div></div><p>函数返回的结果一样, 但是里面实现不一样. 这就是<strong>黑盒</strong>. 实际上, 我认为我们确实应该把函数当做黑盒. 但是实现起来并没有那么容器.</p><p>举例C++的STL, 每个容器的实现都当做黑盒, 所以如果某某能知道各种STL函数, 但是不理解里面的实现, 也没什么了不起的啦. 黑盒确实没必要过分探究.</p><p>再说STL, 实际上我们也不是完全不需要关系黑盒内部. 比如<code>vector</code>/<code>list</code>等, 在某些需求下, 可以认为是对等关系的, 但是我们用户却需要考虑到这些容器的内部实现, 以做出更佳的选择, 比如遇到多线程问题时, <code>vector</code>可能需要被慎重考虑了. 所以STL在使用上, 也不是那么的"无脑".</p><p>这里给我的提示就是:</p><blockquote><p>用户不应该需要知道如何实现来调用.</p></blockquote><p>这句话是值得思考的, 我的理解是:</p><ol><li>用户不需要知道内部实现(通俗的理解);</li><li>用户不会惊讶于函数的返回(黑盒函数的返回值是正常的可以理解的, 而不会放回一些意外的东西);</li><li>用户不会惊讶于函数的输入(类似2, 函数的输入是合乎常理的, 不会有意外的输入, 下面我会举一个真实的例子).</li></ol><h5 id=一个反例>一个反例</h5><p>某同事期望定制一个基类, 并且他将类定义为了模板类. 他的问题是, 模板并不能代表这个类的意义, 仅是为了其中某些成员函数而引入了模板.</p><p>将STL作为对比, 使用<code>vector</code>等容器的时候, 传入<code>int</code>等模板是有意义的, 它告诉你这是一个<code>int</code>容器. 或者放开想象, 可以直接将<code>vector</code>看成某种特殊的<code>int</code>, 因为这时候的<code>vector&lt;int></code>我们就是在当做一个<code>int</code>在做.</p><p>但是他的做法, 使用模板类, 但是模板类的模板只是指代类中某些个函数的输入类型, 和这个类完全没关系.</p><p>比如说:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>template &lt;typename T&gt;
+</span></span><span class=line><span class=cl>class A{
+</span></span><span class=line><span class=cl>public:
+</span></span><span class=line><span class=cl>	//...
+</span></span><span class=line><span class=cl>	T get(){ //... }
+</span></span><span class=line><span class=cl>	void set(const T&amp; t) { //... }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>private:
+</span></span><span class=line><span class=cl>	_container&lt;T&gt; m_data;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>以上, 我认为是一个好的定义, 模板<code>T</code>代表这个类的类型, 用户操作这个类的时候, 就像在操作<code>T</code>一样, 因为<code>get</code>的返回和<code>set</code>的输入都是<code>T</code>, 并且其中主要参与作用的数据也是<code>T</code>(<code>m_data</code>, 当然底层数据是用户无需关心的.)</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>template &lt;typename T&gt;
+</span></span><span class=line><span class=cl>class A{
+</span></span><span class=line><span class=cl>public:
+</span></span><span class=line><span class=cl>	//...
+</span></span><span class=line><span class=cl>	int get(){ //... }
+</span></span><span class=line><span class=cl>	void set(const T&amp; t) { //... }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>private:
+</span></span><span class=line><span class=cl>	_container&lt;int&gt; m_data;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>以上, 引入了模板<code>T</code>, 但是这个的表现并不像<code>T</code>, 因为<code>get</code>的返回和<code>T</code>无关, <code>set</code>的输入虽然是<code>T</code>, 但是和这个类无关, 因为这个类的主要数据<code>m_data</code>的类型是<code>int</code>. 这就是不好的做法, 为了用模板而用模板. 这就不是一个黑盒!</p><h4 id=什么应该抽象为函数>什么应该抽象为函数</h4><p>这个应该好好想想. 我以及我周围很多人都做不好. 要不是抽象的部分太大, 要不是抽象的部分太特殊以至于只有写的人自己用了.</p><p>这个例子我认为挺好的:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=k>def</span> <span class=nf>pressure</span><span class=p>(</span><span class=n>v</span><span class=p>,</span> <span class=n>t</span><span class=p>,</span> <span class=n>n</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;Compute the pressure in pascals of an ideal gas.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>        Applies the ideal gas law: http://en.wikipedia.org/wiki/Ideal_gas_law
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>        v -- volume of gas, in cubic meters
+</span></span></span><span class=line><span class=cl><span class=s2>        t -- absolute temperature in degrees kelvin
+</span></span></span><span class=line><span class=cl><span class=s2>        n -- particles of gas
+</span></span></span><span class=line><span class=cl><span class=s2>        &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=n>k</span> <span class=o>=</span> <span class=mf>1.38e-23</span>  <span class=c1># Boltzmann&#39;s constant</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>n</span> <span class=o>*</span> <span class=n>k</span> <span class=o>*</span> <span class=n>t</span> <span class=o>/</span> <span class=n>v</span>
+</span></span></code></pre></td></tr></table></div></div><p>可以看出来, 这里是某个公式. 如果直接把公式写出来, 外行人非常容易疑惑, 但是抽象为函数, 则容易理解多了. 这也是一个黑盒.</p><p>另外不仅仅是抽象为函数, 也可以是一个变量:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>pressure</span> <span class=o>=</span> <span class=c1>#...</span>
+</span></span></code></pre></td></tr></table></div></div><p>变量做法我在一些判断式中经常用. 比如:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>if</span><span class=p>(</span> <span class=n>exp1</span> <span class=o>&amp;&amp;</span> <span class=n>exp2</span> <span class=o>&amp;&amp;</span> <span class=n>exp3</span> <span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// ...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里的<code>exp*</code>应该抽象出来, 指代每一个<code>exp</code>的具体含义, 比如:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>is_range_ok = //...
+</span></span><span class=line><span class=cl>is_size_ok = //...
+</span></span><span class=line><span class=cl>is_empty = //...
+</span></span><span class=line><span class=cl>if (!is_empty &amp;&amp; is_range_ok &amp;&amp; is_size_ok) {
+</span></span><span class=line><span class=cl>	// ...
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>这时候会容易理解多了.</p><p>其实还没有解答我的问题, 可能这是一个经验性的问题吧~ 以上例子仅做参考, 不同的人可能有不同的想法.</p><h4 id=小结-1>小结</h4><ol><li>怎么写黑盒? 就是让黑盒的行为不超出用户的意外, 输入输出看起来都很<strong>自然</strong>.</li><li>函数抽象也应该像黑盒一样, 不仅仅是将一段重复使用的代码写成函数就好了.</li></ol><h3 id=高阶函数>高阶函数</h3><ol><li>高阶函数概念.</li><li>高阶函数举例.</li></ol><p>第一小节我们提到了<code>add</code>函数, 实际上<code>add</code>是一个很宽泛的行为. 我们可以直接<code>add</code>, 也可以是绝对值<code>add</code>, 平方值<code>add</code>等等. 这里就涉及到了高阶函数.</p><p>推荐阅读MIT的SICP(我还没看完&mldr;), 在LISP里面使用高阶函数看起来太自然了, 在Python中多多少少有点别扭&mldr;</p><p>我们需要思考的问题是:</p><blockquote><p>为什么要使用高阶函数? 什么时候应该用高阶函数?</p></blockquote><h4 id=参数是函数>参数是函数</h4><p>摘抄原文的三个求和的例子:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=k>def</span> <span class=nf>sum_naturals</span><span class=p>(</span><span class=n>n</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>total</span><span class=p>,</span> <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>        <span class=k>while</span> <span class=n>k</span> <span class=o>&lt;=</span> <span class=n>n</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>total</span><span class=p>,</span> <span class=n>k</span> <span class=o>=</span> <span class=n>total</span> <span class=o>+</span> <span class=n>k</span><span class=p>,</span> <span class=n>k</span> <span class=o>+</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>total</span>
+</span></span><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=n>sum_naturals</span><span class=p>(</span><span class=mi>100</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=mi>5050</span>
+</span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=k>def</span> <span class=nf>sum_cubes</span><span class=p>(</span><span class=n>n</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>total</span><span class=p>,</span> <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>        <span class=k>while</span> <span class=n>k</span> <span class=o>&lt;=</span> <span class=n>n</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>total</span><span class=p>,</span> <span class=n>k</span> <span class=o>=</span> <span class=n>total</span> <span class=o>+</span> <span class=nb>pow</span><span class=p>(</span><span class=n>k</span><span class=p>,</span> <span class=mi>3</span><span class=p>),</span> <span class=n>k</span> <span class=o>+</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>total</span>
+</span></span><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=n>sum_cubes</span><span class=p>(</span><span class=mi>100</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=mi>25502500</span>
+</span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=k>def</span> <span class=nf>pi_sum</span><span class=p>(</span><span class=n>n</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>total</span><span class=p>,</span> <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>        <span class=k>while</span> <span class=n>k</span> <span class=o>&lt;=</span> <span class=n>n</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>total</span><span class=p>,</span> <span class=n>k</span> <span class=o>=</span> <span class=n>total</span> <span class=o>+</span> <span class=mi>8</span> <span class=o>/</span> <span class=p>(</span><span class=n>k</span> <span class=o>*</span> <span class=p>(</span><span class=n>k</span> <span class=o>+</span> <span class=mi>2</span><span class=p>)),</span> <span class=n>k</span> <span class=o>+</span> <span class=mi>4</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>total</span>
+</span></span><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=n>pi_sum</span><span class=p>(</span><span class=mi>100</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=mf>3.121594652591009</span>
+</span></span></code></pre></td></tr></table></div></div><p>以上三个函数实现了不同的功能, 但是仔细观察可以发现, 函数的抽象功能是一样的. 总结就是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=o>&lt;</span><span class=n>name</span><span class=o>&gt;</span><span class=p>(</span><span class=n>n</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>total</span><span class=p>,</span> <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=n>k</span> <span class=o>&lt;=</span> <span class=n>n</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>total</span><span class=p>,</span> <span class=n>k</span> <span class=o>=</span> <span class=n>total</span> <span class=o>+</span> <span class=o>&lt;</span><span class=n>term</span><span class=o>&gt;</span><span class=p>(</span><span class=n>k</span><span class=p>),</span> <span class=o>&lt;</span><span class=nb>next</span><span class=o>&gt;</span><span class=p>(</span><span class=n>k</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>total</span>
+</span></span></code></pre></td></tr></table></div></div><p>不同的仅仅是<code>term</code>和<code>next</code>, 一个用于计算部分结果, 一个用于返回下一个值.</p><p>最外层函数也是有意义的, 它的作用是计算
+$$
+s(N) = \sum_{i=1, k=f(i)}^{N}{g(k)}
+$$
+所以, 这三个例子相当于是三个函数的组合, 最外层的$s$, 以及内层的$f$和$g$.</p><h4 id=返回是函数>返回是函数</h4><p>例子:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=k>def</span> <span class=nf>compose1</span><span class=p>(</span><span class=n>f</span><span class=p>,</span> <span class=n>g</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>def</span> <span class=nf>h</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>f</span><span class=p>(</span><span class=n>g</span><span class=p>(</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>h</span>
+</span></span><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=n>add_one_and_square</span> <span class=o>=</span> <span class=n>compose1</span><span class=p>(</span><span class=n>square</span><span class=p>,</span> <span class=n>successor</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=o>&gt;&gt;&gt;</span> <span class=n>add_one_and_square</span><span class=p>(</span><span class=mi>12</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=mi>169</span>
+</span></span></code></pre></td></tr></table></div></div><p>读懂例子并不难, 但是要好好理解. 那上三个例子举例, 如果计算某函数的<code>sum</code>, 按照上述例子, 需要三个参数, $n$/$f$/$g$, 返回值是求某上限是$n$的$f$|$s$的和的值. 如果将函数作为返回值, 此处值需要两个参数, 返回值代表<strong>求某$f$|$g$的和的方法</strong>, 意义是不一样的.</p><p>修饰器等相当于是语言的语法糖, 这里不就记述了.</p><h4 id=小结-2>小结</h4><p>什么时候用到高阶函数? 当我们在<strong>函数内部还能抽象出某些函数的时候</strong>, 就应该使用高阶函数了.</p><h3 id=总结>总结</h3><ol><li>注意中缀记号和函数调用的优缺点, 一个简洁, 一个扩展性高;</li><li>程序运行依赖于环境, 有全局环境和对每个函数的局部环境;</li><li>黑盒应该让用户用起来很自然, 没有任何意外的输入或输出;</li><li>当函数内部还能抽象出一些通用方法是, 应该考虑考虑高阶函数;</li></ol></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-08-10</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/>软件设计</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/sicp/>SICP</a>,&nbsp;<a href=/tags/python/>Python</a></section></div><div class=post-nav><a href=/202107/cpp-modern-feature/ class=prev rel=prev title=现代C++容易忽略的一些特性><i class="fas fa-angle-left fa-fw"></i>现代C++容易忽略的一些特性</a>
+<a href=/202108/secguide_c_tc/ class=next rel=next title=C,C++安全指南>C,C++安全指南<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

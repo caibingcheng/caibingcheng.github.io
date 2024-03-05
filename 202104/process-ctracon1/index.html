@@ -1,0 +1,1718 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>进程控制和通信(一) - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="进程控制和通信(一)"><meta property="og:description" content="Linux系统的进程由PCB(Process Control Block)管理.
+PCB
+推荐https://code.woboq.org/阅读linux源码."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202104/process-ctracon1/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-04-21T19:59:07+08:00"><meta property="article:modified_time" content="2021-05-18T19:06:18+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="进程控制和通信(一)"><meta name=twitter:description content="Linux系统的进程由PCB(Process Control Block)管理.
+PCB
+推荐https://code.woboq.org/阅读linux源码."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202104/process-ctracon1/><link rel=prev href=https://imcbc.cn/202104/pandt-what/><link rel=next href=https://imcbc.cn/202104/process-ctracon2/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"进程控制和通信(一)","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202104\/process-ctracon1\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"进程, 进程通信, 虚拟内存, Linux, PCB, task_struct","wordcount":7501,"url":"https:\/\/imcbc.cn\/202104\/process-ctracon1\/","datePublished":"2021-04-21T19:59:07+08:00","dateModified":"2021-05-18T19:06:18+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>进程控制和通信(一)<span class=single-title> · 进程控制</span><sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-04-21>2021-04-21</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 7501 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 15 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#pcb>PCB</a></li><li><a href=#fork>fork</a><ul><li><a href=#写时复制>写时复制</a></li><li><a href=#一秒死机程序>一秒死机程序</a></li><li><a href=#再探fork>再探fork</a></li></ul></li><li><a href=#vfork>vfork</a></li><li><a href=#clone>clone</a></li><li><a href=#总结>总结</a></li></ul></nav></div></div><div class=content id=content><p>Linux系统的进程由PCB(Process Control Block)管理.</p><h2 id=pcb>PCB</h2><p>推荐<a href=https://code.woboq.org/ target=_blank rel="noopener noreffer">https://code.woboq.org/</a>阅读linux源码.</p><p>Linux PCB 可以在<a href=https://code.woboq.org/linux/linux/include/linux/sched.h.html#task_struct target=_blank rel="noopener noreffer">https://code.woboq.org/linux/linux/include/linux/sched.h.html#task_struct</a>找到, 对应<code>task_struct</code>结构体.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span><span class=lnt>109
+</span><span class=lnt>110
+</span><span class=lnt>111
+</span><span class=lnt>112
+</span><span class=lnt>113
+</span><span class=lnt>114
+</span><span class=lnt>115
+</span><span class=lnt>116
+</span><span class=lnt>117
+</span><span class=lnt>118
+</span><span class=lnt>119
+</span><span class=lnt>120
+</span><span class=lnt>121
+</span><span class=lnt>122
+</span><span class=lnt>123
+</span><span class=lnt>124
+</span><span class=lnt>125
+</span><span class=lnt>126
+</span><span class=lnt>127
+</span><span class=lnt>128
+</span><span class=lnt>129
+</span><span class=lnt>130
+</span><span class=lnt>131
+</span><span class=lnt>132
+</span><span class=lnt>133
+</span><span class=lnt>134
+</span><span class=lnt>135
+</span><span class=lnt>136
+</span><span class=lnt>137
+</span><span class=lnt>138
+</span><span class=lnt>139
+</span><span class=lnt>140
+</span><span class=lnt>141
+</span><span class=lnt>142
+</span><span class=lnt>143
+</span><span class=lnt>144
+</span><span class=lnt>145
+</span><span class=lnt>146
+</span><span class=lnt>147
+</span><span class=lnt>148
+</span><span class=lnt>149
+</span><span class=lnt>150
+</span><span class=lnt>151
+</span><span class=lnt>152
+</span><span class=lnt>153
+</span><span class=lnt>154
+</span><span class=lnt>155
+</span><span class=lnt>156
+</span><span class=lnt>157
+</span><span class=lnt>158
+</span><span class=lnt>159
+</span><span class=lnt>160
+</span><span class=lnt>161
+</span><span class=lnt>162
+</span><span class=lnt>163
+</span><span class=lnt>164
+</span><span class=lnt>165
+</span><span class=lnt>166
+</span><span class=lnt>167
+</span><span class=lnt>168
+</span><span class=lnt>169
+</span><span class=lnt>170
+</span><span class=lnt>171
+</span><span class=lnt>172
+</span><span class=lnt>173
+</span><span class=lnt>174
+</span><span class=lnt>175
+</span><span class=lnt>176
+</span><span class=lnt>177
+</span><span class=lnt>178
+</span><span class=lnt>179
+</span><span class=lnt>180
+</span><span class=lnt>181
+</span><span class=lnt>182
+</span><span class=lnt>183
+</span><span class=lnt>184
+</span><span class=lnt>185
+</span><span class=lnt>186
+</span><span class=lnt>187
+</span><span class=lnt>188
+</span><span class=lnt>189
+</span><span class=lnt>190
+</span><span class=lnt>191
+</span><span class=lnt>192
+</span><span class=lnt>193
+</span><span class=lnt>194
+</span><span class=lnt>195
+</span><span class=lnt>196
+</span><span class=lnt>197
+</span><span class=lnt>198
+</span><span class=lnt>199
+</span><span class=lnt>200
+</span><span class=lnt>201
+</span><span class=lnt>202
+</span><span class=lnt>203
+</span><span class=lnt>204
+</span><span class=lnt>205
+</span><span class=lnt>206
+</span><span class=lnt>207
+</span><span class=lnt>208
+</span><span class=lnt>209
+</span><span class=lnt>210
+</span><span class=lnt>211
+</span><span class=lnt>212
+</span><span class=lnt>213
+</span><span class=lnt>214
+</span><span class=lnt>215
+</span><span class=lnt>216
+</span><span class=lnt>217
+</span><span class=lnt>218
+</span><span class=lnt>219
+</span><span class=lnt>220
+</span><span class=lnt>221
+</span><span class=lnt>222
+</span><span class=lnt>223
+</span><span class=lnt>224
+</span><span class=lnt>225
+</span><span class=lnt>226
+</span><span class=lnt>227
+</span><span class=lnt>228
+</span><span class=lnt>229
+</span><span class=lnt>230
+</span><span class=lnt>231
+</span><span class=lnt>232
+</span><span class=lnt>233
+</span><span class=lnt>234
+</span><span class=lnt>235
+</span><span class=lnt>236
+</span><span class=lnt>237
+</span><span class=lnt>238
+</span><span class=lnt>239
+</span><span class=lnt>240
+</span><span class=lnt>241
+</span><span class=lnt>242
+</span><span class=lnt>243
+</span><span class=lnt>244
+</span><span class=lnt>245
+</span><span class=lnt>246
+</span><span class=lnt>247
+</span><span class=lnt>248
+</span><span class=lnt>249
+</span><span class=lnt>250
+</span><span class=lnt>251
+</span><span class=lnt>252
+</span><span class=lnt>253
+</span><span class=lnt>254
+</span><span class=lnt>255
+</span><span class=lnt>256
+</span><span class=lnt>257
+</span><span class=lnt>258
+</span><span class=lnt>259
+</span><span class=lnt>260
+</span><span class=lnt>261
+</span><span class=lnt>262
+</span><span class=lnt>263
+</span><span class=lnt>264
+</span><span class=lnt>265
+</span><span class=lnt>266
+</span><span class=lnt>267
+</span><span class=lnt>268
+</span><span class=lnt>269
+</span><span class=lnt>270
+</span><span class=lnt>271
+</span><span class=lnt>272
+</span><span class=lnt>273
+</span><span class=lnt>274
+</span><span class=lnt>275
+</span><span class=lnt>276
+</span><span class=lnt>277
+</span><span class=lnt>278
+</span><span class=lnt>279
+</span><span class=lnt>280
+</span><span class=lnt>281
+</span><span class=lnt>282
+</span><span class=lnt>283
+</span><span class=lnt>284
+</span><span class=lnt>285
+</span><span class=lnt>286
+</span><span class=lnt>287
+</span><span class=lnt>288
+</span><span class=lnt>289
+</span><span class=lnt>290
+</span><span class=lnt>291
+</span><span class=lnt>292
+</span><span class=lnt>293
+</span><span class=lnt>294
+</span><span class=lnt>295
+</span><span class=lnt>296
+</span><span class=lnt>297
+</span><span class=lnt>298
+</span><span class=lnt>299
+</span><span class=lnt>300
+</span><span class=lnt>301
+</span><span class=lnt>302
+</span><span class=lnt>303
+</span><span class=lnt>304
+</span><span class=lnt>305
+</span><span class=lnt>306
+</span><span class=lnt>307
+</span><span class=lnt>308
+</span><span class=lnt>309
+</span><span class=lnt>310
+</span><span class=lnt>311
+</span><span class=lnt>312
+</span><span class=lnt>313
+</span><span class=lnt>314
+</span><span class=lnt>315
+</span><span class=lnt>316
+</span><span class=lnt>317
+</span><span class=lnt>318
+</span><span class=lnt>319
+</span><span class=lnt>320
+</span><span class=lnt>321
+</span><span class=lnt>322
+</span><span class=lnt>323
+</span><span class=lnt>324
+</span><span class=lnt>325
+</span><span class=lnt>326
+</span><span class=lnt>327
+</span><span class=lnt>328
+</span><span class=lnt>329
+</span><span class=lnt>330
+</span><span class=lnt>331
+</span><span class=lnt>332
+</span><span class=lnt>333
+</span><span class=lnt>334
+</span><span class=lnt>335
+</span><span class=lnt>336
+</span><span class=lnt>337
+</span><span class=lnt>338
+</span><span class=lnt>339
+</span><span class=lnt>340
+</span><span class=lnt>341
+</span><span class=lnt>342
+</span><span class=lnt>343
+</span><span class=lnt>344
+</span><span class=lnt>345
+</span><span class=lnt>346
+</span><span class=lnt>347
+</span><span class=lnt>348
+</span><span class=lnt>349
+</span><span class=lnt>350
+</span><span class=lnt>351
+</span><span class=lnt>352
+</span><span class=lnt>353
+</span><span class=lnt>354
+</span><span class=lnt>355
+</span><span class=lnt>356
+</span><span class=lnt>357
+</span><span class=lnt>358
+</span><span class=lnt>359
+</span><span class=lnt>360
+</span><span class=lnt>361
+</span><span class=lnt>362
+</span><span class=lnt>363
+</span><span class=lnt>364
+</span><span class=lnt>365
+</span><span class=lnt>366
+</span><span class=lnt>367
+</span><span class=lnt>368
+</span><span class=lnt>369
+</span><span class=lnt>370
+</span><span class=lnt>371
+</span><span class=lnt>372
+</span><span class=lnt>373
+</span><span class=lnt>374
+</span><span class=lnt>375
+</span><span class=lnt>376
+</span><span class=lnt>377
+</span><span class=lnt>378
+</span><span class=lnt>379
+</span><span class=lnt>380
+</span><span class=lnt>381
+</span><span class=lnt>382
+</span><span class=lnt>383
+</span><span class=lnt>384
+</span><span class=lnt>385
+</span><span class=lnt>386
+</span><span class=lnt>387
+</span><span class=lnt>388
+</span><span class=lnt>389
+</span><span class=lnt>390
+</span><span class=lnt>391
+</span><span class=lnt>392
+</span><span class=lnt>393
+</span><span class=lnt>394
+</span><span class=lnt>395
+</span><span class=lnt>396
+</span><span class=lnt>397
+</span><span class=lnt>398
+</span><span class=lnt>399
+</span><span class=lnt>400
+</span><span class=lnt>401
+</span><span class=lnt>402
+</span><span class=lnt>403
+</span><span class=lnt>404
+</span><span class=lnt>405
+</span><span class=lnt>406
+</span><span class=lnt>407
+</span><span class=lnt>408
+</span><span class=lnt>409
+</span><span class=lnt>410
+</span><span class=lnt>411
+</span><span class=lnt>412
+</span><span class=lnt>413
+</span><span class=lnt>414
+</span><span class=lnt>415
+</span><span class=lnt>416
+</span><span class=lnt>417
+</span><span class=lnt>418
+</span><span class=lnt>419
+</span><span class=lnt>420
+</span><span class=lnt>421
+</span><span class=lnt>422
+</span><span class=lnt>423
+</span><span class=lnt>424
+</span><span class=lnt>425
+</span><span class=lnt>426
+</span><span class=lnt>427
+</span><span class=lnt>428
+</span><span class=lnt>429
+</span><span class=lnt>430
+</span><span class=lnt>431
+</span><span class=lnt>432
+</span><span class=lnt>433
+</span><span class=lnt>434
+</span><span class=lnt>435
+</span><span class=lnt>436
+</span><span class=lnt>437
+</span><span class=lnt>438
+</span><span class=lnt>439
+</span><span class=lnt>440
+</span><span class=lnt>441
+</span><span class=lnt>442
+</span><span class=lnt>443
+</span><span class=lnt>444
+</span><span class=lnt>445
+</span><span class=lnt>446
+</span><span class=lnt>447
+</span><span class=lnt>448
+</span><span class=lnt>449
+</span><span class=lnt>450
+</span><span class=lnt>451
+</span><span class=lnt>452
+</span><span class=lnt>453
+</span><span class=lnt>454
+</span><span class=lnt>455
+</span><span class=lnt>456
+</span><span class=lnt>457
+</span><span class=lnt>458
+</span><span class=lnt>459
+</span><span class=lnt>460
+</span><span class=lnt>461
+</span><span class=lnt>462
+</span><span class=lnt>463
+</span><span class=lnt>464
+</span><span class=lnt>465
+</span><span class=lnt>466
+</span><span class=lnt>467
+</span><span class=lnt>468
+</span><span class=lnt>469
+</span><span class=lnt>470
+</span><span class=lnt>471
+</span><span class=lnt>472
+</span><span class=lnt>473
+</span><span class=lnt>474
+</span><span class=lnt>475
+</span><span class=lnt>476
+</span><span class=lnt>477
+</span><span class=lnt>478
+</span><span class=lnt>479
+</span><span class=lnt>480
+</span><span class=lnt>481
+</span><span class=lnt>482
+</span><span class=lnt>483
+</span><span class=lnt>484
+</span><span class=lnt>485
+</span><span class=lnt>486
+</span><span class=lnt>487
+</span><span class=lnt>488
+</span><span class=lnt>489
+</span><span class=lnt>490
+</span><span class=lnt>491
+</span><span class=lnt>492
+</span><span class=lnt>493
+</span><span class=lnt>494
+</span><span class=lnt>495
+</span><span class=lnt>496
+</span><span class=lnt>497
+</span><span class=lnt>498
+</span><span class=lnt>499
+</span><span class=lnt>500
+</span><span class=lnt>501
+</span><span class=lnt>502
+</span><span class=lnt>503
+</span><span class=lnt>504
+</span><span class=lnt>505
+</span><span class=lnt>506
+</span><span class=lnt>507
+</span><span class=lnt>508
+</span><span class=lnt>509
+</span><span class=lnt>510
+</span><span class=lnt>511
+</span><span class=lnt>512
+</span><span class=lnt>513
+</span><span class=lnt>514
+</span><span class=lnt>515
+</span><span class=lnt>516
+</span><span class=lnt>517
+</span><span class=lnt>518
+</span><span class=lnt>519
+</span><span class=lnt>520
+</span><span class=lnt>521
+</span><span class=lnt>522
+</span><span class=lnt>523
+</span><span class=lnt>524
+</span><span class=lnt>525
+</span><span class=lnt>526
+</span><span class=lnt>527
+</span><span class=lnt>528
+</span><span class=lnt>529
+</span><span class=lnt>530
+</span><span class=lnt>531
+</span><span class=lnt>532
+</span><span class=lnt>533
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>struct</span> <span class=n>task_struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_THREAD_INFO_IN_TASK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * For reasons of header soup (see current_thread_info()), this
+</span></span></span><span class=line><span class=cl><span class=cm>	 * must be the first element of task_struct.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>thread_info</span>		<span class=n>thread_info</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* -1 unrunnable, 0 runnable, &gt;0 stopped: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>volatile</span> <span class=kt>long</span>			<span class=n>state</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * This begins the randomizable portion of task_struct. Only
+</span></span></span><span class=line><span class=cl><span class=cm>	 * scheduling-critical items should be added above here.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=n>randomized_struct_fields_start</span>
+</span></span><span class=line><span class=cl>	<span class=kt>void</span>				<span class=o>*</span><span class=n>stack</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>refcount_t</span>			<span class=n>usage</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Per task flags (PF_*), defined further below: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>flags</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>ptrace</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_SMP
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>llist_node</span>		<span class=n>wake_entry</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>on_cpu</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_THREAD_INFO_IN_TASK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Current CPU: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>cpu</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>wakee_flips</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>wakee_flip_decay_ts</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>task_struct</span>		<span class=o>*</span><span class=n>last_wakee</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * recent_used_cpu is initially set as the last CPU used by a task
+</span></span></span><span class=line><span class=cl><span class=cm>	 * that wakes affine another task. Waker/wakee relationships can
+</span></span></span><span class=line><span class=cl><span class=cm>	 * push tasks around a CPU where each wakeup moves to the next one.
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Tracking a recently used CPU allows a quick search for a recently
+</span></span></span><span class=line><span class=cl><span class=cm>	 * used CPU that may be idle.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>recent_used_cpu</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>wake_cpu</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>int</span>				<span class=n>on_rq</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>prio</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>static_prio</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>normal_prio</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>rt_priority</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=k>struct</span> <span class=n>sched_class</span>	<span class=o>*</span><span class=n>sched_class</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>sched_entity</span>		<span class=n>se</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>sched_rt_entity</span>		<span class=n>rt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_CGROUP_SCHED
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>task_group</span>		<span class=o>*</span><span class=n>sched_task_group</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>sched_dl_entity</span>		<span class=n>dl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_PREEMPT_NOTIFIERS
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* List of struct preempt_notifier: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>hlist_head</span>		<span class=n>preempt_notifiers</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_BLK_DEV_IO_TRACE
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>btrace_seq</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>policy</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>nr_cpus_allowed</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>cpumask_t</span>			<span class=n>cpus_allowed</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_PREEMPT_RCU
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>int</span>				<span class=n>rcu_read_lock_nesting</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>union</span> <span class=n>rcu_special</span>		<span class=n>rcu_read_unlock_special</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>rcu_node_entry</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>rcu_node</span>			<span class=o>*</span><span class=n>rcu_blocked_node</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=cm>/* #ifdef CONFIG_PREEMPT_RCU */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_TASKS_RCU
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>rcu_tasks_nvcsw</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u8</span>				<span class=n>rcu_tasks_holdout</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u8</span>				<span class=n>rcu_tasks_idx</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>rcu_tasks_idle_cpu</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>rcu_tasks_holdout_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=cm>/* #ifdef CONFIG_TASKS_RCU */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>sched_info</span>		<span class=n>sched_info</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>tasks</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_SMP
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>plist_node</span>		<span class=n>pushable_tasks</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>rb_node</span>			<span class=n>pushable_dl_tasks</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>mm_struct</span>		<span class=o>*</span><span class=n>mm</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mm_struct</span>		<span class=o>*</span><span class=n>active_mm</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Per-thread vma caching: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>vmacache</span>			<span class=n>vmacache</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef SPLIT_RSS_COUNTING
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>task_rss_stat</span>		<span class=n>rss_stat</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>int</span>				<span class=n>exit_state</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>exit_code</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>exit_signal</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* The signal sent when the parent dies: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>pdeath_signal</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* JOBCTL_*, siglock protected: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>jobctl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Used for emulating ABI behavior of previous Linux versions: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>personality</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Scheduler bits, serialized by scheduler locks: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=nl>sched_reset_on_fork</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=nl>sched_contributes_to_load</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=nl>sched_migrated</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=nl>sched_remote_wakeup</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_PSI
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span>			<span class=nl>sched_psi_wake_requeue</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Force alignment to the next boundary: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=o>:</span><span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Unserialized, strictly &#39;current&#39; */</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Bit to tell LSMs we&#39;re in execve(): */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=nl>in_execve</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=nl>in_iowait</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifndef TIF_RESTORE_SIGMASK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span>			<span class=nl>restore_sigmask</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_MEMCG
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span>			<span class=nl>in_user_fault</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_COMPAT_BRK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span>			<span class=nl>brk_randomized</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_CGROUPS
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* disallow userland-initiated cgroup migration */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=nl>no_cgroup_migration</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_BLK_CGROUP
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* to be used once the psi infrastructure lands upstream. */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>			<span class=nl>use_memdelay</span><span class=p>:</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>atomic_flags</span><span class=p>;</span> <span class=cm>/* Flags requiring atomic access. */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>restart_block</span>		<span class=n>restart_block</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>pid_t</span>				<span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>pid_t</span>				<span class=n>tgid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_STACKPROTECTOR
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Canary value for the -fstack-protector GCC feature: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>stack_canary</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Pointers to the (original) parent process, youngest child, younger sibling,
+</span></span></span><span class=line><span class=cl><span class=cm>	 * older sibling, respectively.  (p-&gt;father can be replaced with
+</span></span></span><span class=line><span class=cl><span class=cm>	 * p-&gt;real_parent-&gt;pid)
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Real parent process: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>task_struct</span> <span class=n>__rcu</span>	<span class=o>*</span><span class=n>real_parent</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Recipient of SIGCHLD, wait4() reports: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>task_struct</span> <span class=n>__rcu</span>	<span class=o>*</span><span class=n>parent</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Children/sibling form the list of natural children:
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>children</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>sibling</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>task_struct</span>		<span class=o>*</span><span class=n>group_leader</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * &#39;ptraced&#39; is the list of tasks this task is using ptrace() on.
+</span></span></span><span class=line><span class=cl><span class=cm>	 *
+</span></span></span><span class=line><span class=cl><span class=cm>	 * This includes both natural children and PTRACE_ATTACH targets.
+</span></span></span><span class=line><span class=cl><span class=cm>	 * &#39;ptrace_entry&#39; is this task&#39;s link on the p-&gt;parent-&gt;ptraced list.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>ptraced</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>ptrace_entry</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* PID/PID hash table linkage. */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>pid</span>			<span class=o>*</span><span class=n>thread_pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>hlist_node</span>		<span class=n>pid_links</span><span class=p>[</span><span class=n>PIDTYPE_MAX</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>thread_group</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>thread_node</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>completion</span>		<span class=o>*</span><span class=n>vfork_done</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* CLONE_CHILD_SETTID: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>__user</span>			<span class=o>*</span><span class=n>set_child_tid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* CLONE_CHILD_CLEARTID: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>__user</span>			<span class=o>*</span><span class=n>clear_child_tid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>utime</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>stime</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_ARCH_HAS_SCALED_CPUTIME
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>u64</span>				<span class=n>utimescaled</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>stimescaled</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>u64</span>				<span class=n>gtime</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>prev_cputime</span>		<span class=n>prev_cputime</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_VIRT_CPU_ACCOUNTING_GEN
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>vtime</span>			<span class=n>vtime</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_NO_HZ_FULL
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>atomic_t</span>			<span class=n>tick_dep_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Context switch counts: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>nvcsw</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>nivcsw</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Monotonic time in nsecs: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>start_time</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Boot based time in nsecs: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>real_start_time</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* MM fault and swap info: this can arguably be seen as either mm-specific or thread-specific: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>min_flt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>maj_flt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_POSIX_TIMERS
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>task_cputime</span>		<span class=n>cputime_expires</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>cpu_timers</span><span class=p>[</span><span class=mi>3</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Process credentials: */</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Tracer&#39;s credentials at attach: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=k>struct</span> <span class=n>cred</span> <span class=n>__rcu</span>		<span class=o>*</span><span class=n>ptracer_cred</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Objective and real subjective task credentials (COW): */</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=k>struct</span> <span class=n>cred</span> <span class=n>__rcu</span>		<span class=o>*</span><span class=n>real_cred</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Effective (overridable) subjective task credentials (COW): */</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=k>struct</span> <span class=n>cred</span> <span class=n>__rcu</span>		<span class=o>*</span><span class=n>cred</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * executable name, excluding path.
+</span></span></span><span class=line><span class=cl><span class=cm>	 *
+</span></span></span><span class=line><span class=cl><span class=cm>	 * - normally initialized setup_new_exec()
+</span></span></span><span class=line><span class=cl><span class=cm>	 * - access it with [gs]et_task_comm()
+</span></span></span><span class=line><span class=cl><span class=cm>	 * - lock it with task_lock()
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>char</span>				<span class=n>comm</span><span class=p>[</span><span class=n>TASK_COMM_LEN</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>nameidata</span>		<span class=o>*</span><span class=n>nameidata</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_SYSVIPC
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>sysv_sem</span>			<span class=n>sysvsem</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>sysv_shm</span>			<span class=n>sysvshm</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_DETECT_HUNG_TASK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>last_switch_count</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>last_switch_time</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Filesystem information: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>fs_struct</span>		<span class=o>*</span><span class=n>fs</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Open file information: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>files_struct</span>		<span class=o>*</span><span class=n>files</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Namespaces: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>nsproxy</span>			<span class=o>*</span><span class=n>nsproxy</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Signal handlers: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>signal_struct</span>		<span class=o>*</span><span class=n>signal</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>sighand_struct</span>		<span class=o>*</span><span class=n>sighand</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>sigset_t</span>			<span class=n>blocked</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>sigset_t</span>			<span class=n>real_blocked</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Restored if set_restore_sigmask() was used: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>sigset_t</span>			<span class=n>saved_sigmask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>sigpending</span>		<span class=n>pending</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>sas_ss_sp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>size_t</span>				<span class=n>sas_ss_size</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>sas_ss_flags</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>callback_head</span>		<span class=o>*</span><span class=n>task_works</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_AUDIT
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_AUDITSYSCALL
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>audit_context</span>		<span class=o>*</span><span class=n>audit_context</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>kuid_t</span>				<span class=n>loginuid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>sessionid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>seccomp</span>			<span class=n>seccomp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Thread group tracking: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>u32</span>				<span class=n>parent_exec_id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u32</span>				<span class=n>self_exec_id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Protection against (de-)allocation: mm, files, fs, tty, keyrings, mems_allowed, mempolicy: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>spinlock_t</span>			<span class=n>alloc_lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Protection of the PI data structures: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>raw_spinlock_t</span>			<span class=n>pi_lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>wake_q_node</span>		<span class=n>wake_q</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_RT_MUTEXES
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* PI waiters blocked on a rt_mutex held by this task: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>rb_root_cached</span>		<span class=n>pi_waiters</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Updated under owner&#39;s pi_lock and rq lock */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>task_struct</span>		<span class=o>*</span><span class=n>pi_top_task</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Deadlock detection and priority inheritance handling: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>rt_mutex_waiter</span>		<span class=o>*</span><span class=n>pi_blocked_on</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_DEBUG_MUTEXES
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Mutex deadlock detection: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mutex_waiter</span>		<span class=o>*</span><span class=n>blocked_on</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_TRACE_IRQFLAGS
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>irq_events</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>hardirq_enable_ip</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>hardirq_disable_ip</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>hardirq_enable_event</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>hardirq_disable_event</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>hardirqs_enabled</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>hardirq_context</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>softirq_disable_ip</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>softirq_enable_ip</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>softirq_disable_event</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>softirq_enable_event</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>softirqs_enabled</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>softirq_context</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_LOCKDEP
+</span></span></span><span class=line><span class=cl><span class=cp># define MAX_LOCK_DEPTH			48UL
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>u64</span>				<span class=n>curr_chain_key</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>lockdep_depth</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>lockdep_recursion</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>held_lock</span>		<span class=n>held_locks</span><span class=p>[</span><span class=n>MAX_LOCK_DEPTH</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_UBSAN
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>in_ubsan</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Journalling filesystem info: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>void</span>				<span class=o>*</span><span class=n>journal_info</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Stacked block device info: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>bio_list</span>			<span class=o>*</span><span class=n>bio_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_BLOCK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Stack plugging: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>blk_plug</span>			<span class=o>*</span><span class=n>plug</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* VM state: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>reclaim_state</span>		<span class=o>*</span><span class=n>reclaim_state</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>backing_dev_info</span>		<span class=o>*</span><span class=n>backing_dev_info</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>io_context</span>		<span class=o>*</span><span class=n>io_context</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_COMPACTION
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>capture_control</span>		<span class=o>*</span><span class=n>capture_control</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Ptrace state: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>ptrace_message</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>kernel_siginfo_t</span>		<span class=o>*</span><span class=n>last_siginfo</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>task_io_accounting</span>	<span class=n>ioac</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_PSI
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Pressure stall state */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>psi_flags</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_TASK_XACCT
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Accumulated RSS usage: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>acct_rss_mem1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Accumulated virtual memory usage: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>acct_vm_mem1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* stime + utime since last update: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>acct_timexpd</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_CPUSETS
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Protected by -&gt;alloc_lock: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>nodemask_t</span>			<span class=n>mems_allowed</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Seqence number to catch updates: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>seqcount_t</span>			<span class=n>mems_allowed_seq</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>cpuset_mem_spread_rotor</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>cpuset_slab_spread_rotor</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_CGROUPS
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Control Group info protected by css_set_lock: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>css_set</span> <span class=n>__rcu</span>		<span class=o>*</span><span class=n>cgroups</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* cg_list protected by css_set_lock and tsk-&gt;alloc_lock: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>cg_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_X86_CPU_RESCTRL
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>u32</span>				<span class=n>closid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u32</span>				<span class=n>rmid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_FUTEX
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>robust_list_head</span> <span class=n>__user</span>	<span class=o>*</span><span class=n>robust_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_COMPAT
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>compat_robust_list_head</span> <span class=n>__user</span> <span class=o>*</span><span class=n>compat_robust_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>pi_state_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>futex_pi_state</span>		<span class=o>*</span><span class=n>pi_state_cache</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_PERF_EVENTS
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>perf_event_context</span>	<span class=o>*</span><span class=n>perf_event_ctxp</span><span class=p>[</span><span class=n>perf_nr_task_contexts</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mutex</span>			<span class=n>perf_event_mutex</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>		<span class=n>perf_event_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_DEBUG_PREEMPT
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>preempt_disable_ip</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_NUMA
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Protected by alloc_lock: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mempolicy</span>		<span class=o>*</span><span class=n>mempolicy</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>short</span>				<span class=n>il_prev</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>short</span>				<span class=n>pref_node_fork</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_NUMA_BALANCING
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>int</span>				<span class=n>numa_scan_seq</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>numa_scan_period</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>numa_scan_period_max</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>numa_preferred_nid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>numa_migrate_retry</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Migration stamp: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>node_stamp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>last_task_numa_placement</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>last_sum_exec_runtime</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>callback_head</span>		<span class=n>numa_work</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>numa_group</span>		<span class=o>*</span><span class=n>numa_group</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * numa_faults is an array split into four regions:
+</span></span></span><span class=line><span class=cl><span class=cm>	 * faults_memory, faults_cpu, faults_memory_buffer, faults_cpu_buffer
+</span></span></span><span class=line><span class=cl><span class=cm>	 * in this precise order.
+</span></span></span><span class=line><span class=cl><span class=cm>	 *
+</span></span></span><span class=line><span class=cl><span class=cm>	 * faults_memory: Exponential decaying average of faults on a per-node
+</span></span></span><span class=line><span class=cl><span class=cm>	 * basis. Scheduling placement decisions are made based on these
+</span></span></span><span class=line><span class=cl><span class=cm>	 * counts. The values remain static for the duration of a PTE scan.
+</span></span></span><span class=line><span class=cl><span class=cm>	 * faults_cpu: Track the nodes the process was running on when a NUMA
+</span></span></span><span class=line><span class=cl><span class=cm>	 * hinting fault was incurred.
+</span></span></span><span class=line><span class=cl><span class=cm>	 * faults_memory_buffer and faults_cpu_buffer: Record faults per node
+</span></span></span><span class=line><span class=cl><span class=cm>	 * during the current scan window. When the scan completes, the counts
+</span></span></span><span class=line><span class=cl><span class=cm>	 * in faults_memory and faults_cpu decay and these values are copied.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=o>*</span><span class=n>numa_faults</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>total_numa_faults</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * numa_faults_locality tracks if faults recorded during the last
+</span></span></span><span class=line><span class=cl><span class=cm>	 * scan window were remote/local or failed to migrate. The task scan
+</span></span></span><span class=line><span class=cl><span class=cm>	 * period is adapted based on the locality of the faults with different
+</span></span></span><span class=line><span class=cl><span class=cm>	 * weights depending on whether they were shared or private faults
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>numa_faults_locality</span><span class=p>[</span><span class=mi>3</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>numa_pages_migrated</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=cm>/* CONFIG_NUMA_BALANCING */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_RSEQ
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>rseq</span> <span class=n>__user</span> <span class=o>*</span><span class=n>rseq</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u32</span> <span class=n>rseq_len</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u32</span> <span class=n>rseq_sig</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * RmW on rseq_event_mask must be performed atomically
+</span></span></span><span class=line><span class=cl><span class=cm>	 * with respect to preemption.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>rseq_event_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>tlbflush_unmap_batch</span>	<span class=n>tlb_ubc</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>rcu_head</span>			<span class=n>rcu</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Cache last used pipe for splice(): */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>pipe_inode_info</span>		<span class=o>*</span><span class=n>splice_pipe</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>page_frag</span>		<span class=n>task_frag</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_TASK_DELAY_ACCT
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>task_delay_info</span>		<span class=o>*</span><span class=n>delays</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_FAULT_INJECTION
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>int</span>				<span class=n>make_it_fail</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>fail_nth</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * When (nr_dirtied &gt;= nr_dirtied_pause), it&#39;s time to call
+</span></span></span><span class=line><span class=cl><span class=cm>	 * balance_dirty_pages() for a dirty throttling pause:
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>nr_dirtied</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>nr_dirtied_pause</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Start of a write-and-pause period: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>dirty_paused_when</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_LATENCYTOP
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>int</span>				<span class=n>latency_record_count</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>latency_record</span>		<span class=n>latency_record</span><span class=p>[</span><span class=n>LT_SAVECOUNT</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Time slack values; these are used to round up poll() and
+</span></span></span><span class=line><span class=cl><span class=cm>	 * select() etc timeout values. These are in nanoseconds.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>timer_slack_ns</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>				<span class=n>default_timer_slack_ns</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_KASAN
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>kasan_depth</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_FUNCTION_GRAPH_TRACER
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Index of current stored address in ret_stack: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>curr_ret_stack</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>curr_ret_depth</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Stack of return addresses for return function tracing: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>ftrace_ret_stack</span>		<span class=o>*</span><span class=n>ret_stack</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Timestamp for last schedule: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=kt>long</span>		<span class=n>ftrace_timestamp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Number of functions that haven&#39;t been traced
+</span></span></span><span class=line><span class=cl><span class=cm>	 * because of depth overrun:
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=n>atomic_t</span>			<span class=n>trace_overrun</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Pause tracing: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>atomic_t</span>			<span class=n>tracing_graph_pause</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_TRACING
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* State flags for use by tracers: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>trace</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Bitmask and counter of trace recursion: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>trace_recursion</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=cm>/* CONFIG_TRACING */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_KCOV
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Coverage collection mode enabled for this task (0 if disabled): */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>kcov_mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Size of the kcov_area: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>kcov_size</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Buffer for coverage collection: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>void</span>				<span class=o>*</span><span class=n>kcov_area</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* KCOV descriptor wired with this task or NULL: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>kcov</span>			<span class=o>*</span><span class=n>kcov</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_MEMCG
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>mem_cgroup</span>		<span class=o>*</span><span class=n>memcg_in_oom</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>gfp_t</span>				<span class=n>memcg_oom_gfp_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span>				<span class=n>memcg_oom_order</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Number of pages to reclaim on returning to userland: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>memcg_nr_pages_over_high</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Used by memcontrol for targeted memcg charge: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mem_cgroup</span>		<span class=o>*</span><span class=n>active_memcg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_BLK_CGROUP
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>request_queue</span>		<span class=o>*</span><span class=n>throttle_queue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_UPROBES
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>uprobe_task</span>		<span class=o>*</span><span class=n>utask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#if defined(CONFIG_BCACHE) || defined(CONFIG_BCACHE_MODULE)
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>sequential_io</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>sequential_io_avg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_DEBUG_ATOMIC_SLEEP
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>task_state_change</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>int</span>				<span class=n>pagefault_disabled</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_MMU
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>task_struct</span>		<span class=o>*</span><span class=n>oom_reaper_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_VMAP_STACK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>vm_struct</span>		<span class=o>*</span><span class=n>stack_vm_area</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_THREAD_INFO_IN_TASK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* A live task holds one reference: */</span>
+</span></span><span class=line><span class=cl>	<span class=n>refcount_t</span>			<span class=n>stack_refcount</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_LIVEPATCH
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>int</span> <span class=n>patch_state</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_SECURITY
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Used by LSM modules for access restriction: */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>void</span>				<span class=o>*</span><span class=n>security</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_GCC_PLUGIN_STACKLEAK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>lowest_stack</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>prev_lowest_stack</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * New fields for task_struct should be added above here, so that
+</span></span></span><span class=line><span class=cl><span class=cm>	 * they are included in the randomized portion of task_struct.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=n>randomized_struct_fields_end</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* CPU-specific state of this task: */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>thread_struct</span>		<span class=kr>thread</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * WARNING: on x86, &#39;thread_struct&#39; contains a variable-sized
+</span></span></span><span class=line><span class=cl><span class=cm>	 * structure.  It *MUST* be at the end of &#39;task_struct&#39;.
+</span></span></span><span class=line><span class=cl><span class=cm>	 *
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Do not put anything below here!
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>对<code>task_struct</code>, 这里有比较好的分类和总结(不太全):<figure><a class=lightgallery href="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==,size_16,color_FFFFFF,t_70" title=&amp;ldquo;task_struct&amp;rdquo; data-thumbnail="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==,size_16,color_FFFFFF,t_70" data-sub-html="<h2>task_struct</h2><p>&amp;ldquo;task_struct&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==,size_16,color_FFFFFF,t_70" data-srcset="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark%2ctype_ZmFuZ3poZW5naGVpdGk%2cshadow_10%2ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==%2csize_16%2ccolor_FFFFFF%2ct_70, https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark%2ctype_ZmFuZ3poZW5naGVpdGk%2cshadow_10%2ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==%2csize_16%2ccolor_FFFFFF%2ct_70 1.5x, https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark%2ctype_ZmFuZ3poZW5naGVpdGk%2cshadow_10%2ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==%2csize_16%2ccolor_FFFFFF%2ct_70 2x" data-sizes=auto alt="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==,size_16,color_FFFFFF,t_70"></a><figcaption class=image-caption>task_struct</figcaption></figure></p><p>一个PCB会包含以下信息:</p><ul><li>任务ID: 用于区分进程, 是进程的身份证, 比如pid就属于任务ID</li><li>亲缘关系: 包含兄弟进程, 父子进程的信息</li><li>任务状态: 用于标识当前进程的运行状态, 比如running, runable, stop, wait等;</li><li>权限: 进程权限信息, 包括本进程对外以及外对本进程的权限</li><li>运行统计: 包括启动时间, cpu占用时间等信息</li><li>调度相关: 包含进程优先级, 调度策略等信息</li><li>信号处理: 阻塞/等待等信息, 以及信号处理函数(见<a href=/202105/process-ctracon3 rel>进程控制和进程通信三</a>)</li><li>内存管理: 进程虚拟内存空间</li><li>文件与文件系统: 进程文件</li><li>内核栈: 内核栈地址</li></ul><h2 id=fork>fork</h2><p>C语言中的fork用于创建进程. 如上一篇我们讲的进程是系统进行资源分配的最小单元, 所以在创建进程的时候, 自然而然主要是考虑进程的资源如何创建.</p><p>C语言中的fork类似于github中的fork, 会把资源"完全"复制一份. 类比github, fork一个仓库, 在fork的时候, 原始仓库和fork之后的仓库内容完全一样, 并且在新仓库会有指针(链接)指向原始仓库, fork之后两个仓库的修改完全无关, 仓库内容开始分叉.</p><p>调用C语言的fork, 先是会复制调用进程的上下文, 包括虚拟空间, 映射关系, 调用栈等等, 然后会激活一个新的进程, 这个新的进程是调用进程的子进程, 调用进程是新进程的父进程. 如上述, 子进程会复制父进程的资源, 所以子进程也会有和父进程相同的PC指针, 在fork调用返回后, 父进程和子进程都会从程序的同一地址开始运行(即fork函数之后), 但是父子进程开始走向分化, 互不相关.</p><p>如下图, fork之后子进程会复制父进程的资源, PC指针指向相同的虚拟地址, 所以子进程从fork的位置开始运行.</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87fe46f20b.png title=&amp;ldquo;fork复制进程&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87fe46f20b.png data-sub-html="<h2>fork复制进程</h2><p>&amp;ldquo;fork复制进程&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87fe46f20b.png data-srcset="https://bu.dusays.com/2022/06/26/62b87fe46f20b.png, https://bu.dusays.com/2022/06/26/62b87fe46f20b.png 1.5x, https://bu.dusays.com/2022/06/26/62b87fe46f20b.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87fe46f20b.png></a><figcaption class=image-caption>fork复制进程</figcaption></figure></p><p>以上, 调用<code>fork</code>即会生成一个新的进程, 通过fork的返回值pid可以判断当前进程是父进程还是子进程.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>int</span> <span class=n>pid</span> <span class=o>=</span> <span class=n>fork</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// fork error
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// children processor
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=k>else</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// parrent processor
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>我们可以验证一下fork父子进程互不干扰的结论:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>void</span> <span class=nf>inc</span><span class=p>(</span><span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>s</span><span class=p>,</span> <span class=kt>int</span> <span class=n>pid</span><span class=p>,</span> <span class=kt>int</span> <span class=n>i</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%s processor [%d %d] %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>s</span><span class=p>,</span> <span class=n>getppid</span><span class=p>(),</span> <span class=n>getpid</span><span class=p>(),</span> <span class=n>i</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>volatile</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>pid</span> <span class=o>=</span> <span class=n>fork</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>i</span> <span class=o>=</span> <span class=mi>100</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;fork error&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=mi>100</span><span class=p>;</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>inc</span><span class=p>(</span><span class=s>&#34;child&#34;</span><span class=p>,</span> <span class=n>pid</span><span class=p>,</span> <span class=n>i</span><span class=o>++</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=mi>20</span><span class=p>;</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>inc</span><span class=p>(</span><span class=s>&#34;parent&#34;</span><span class=p>,</span> <span class=n>pid</span><span class=p>,</span> <span class=n>i</span><span class=o>++</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>使用<code>volatile</code>保证变量<code>i</code>保存在内存而不是寄存器. <code>fork</code>会创建子进程循环100次输出, 父进程循化20次输出. 编译执行我们可以看到子进程从100-199输出, 父进程从100-119输出, 互不干扰.</p><p>同时我们<code>printf</code>了父进程ID和当前进程ID, 可以看到:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>parent processor [29629 20195] 100
+</span></span><span class=line><span class=cl>parent processor [29629 20195] 101
+</span></span><span class=line><span class=cl>parent processor [29629 20195] 102
+</span></span></code></pre></td></tr></table></div></div><p>29629是父进程ID, 20195是当前进程ID, 当前进程就是我们执行的程序, 所以这里的父进程就是执行程序的终端的进程.</p><p>子进程被唤醒执行后, 有如下输出:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>child processor [20195 20196] 100
+</span></span><span class=line><span class=cl>parent processor [29629 20195] 110
+</span></span><span class=line><span class=cl>child processor [20195 20196] 101
+</span></span><span class=line><span class=cl>parent processor [29629 20195] 111
+</span></span></code></pre></td></tr></table></div></div><p>20195就是当前程序进程ID, 20196是<code>fork</code>之后的子进程ID.</p><p>最后也会有一些"不符合预期"的输出:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>child processor [1 20196] 138
+</span></span><span class=line><span class=cl>child processor [1 20196] 139
+</span></span><span class=line><span class=cl>child processor [1 20196] 140
+</span></span></code></pre></td></tr></table></div></div><p>子进程的父进程ID变成了1? 因为这时候原来执行程序的进程(20195)已经退出了, Linux一般不允许进程没有父进程, 所以得为还在执行的子进程找到一个父进程, 这就是1号进程.</p><p>Linux中0号进程是内核启动进程, 也就是系统第一个启动的进程. 0号进程会创建一个新的进程, 即1号进程, 1号进程负责启动init程序并监视其他进程.</p><h3 id=写时复制>写时复制</h3><p>我们可以想到一个问题, 如果<code>fork</code>完全复制进程的上下文, 势必会造成资源浪费.</p><p>比如一个进程快要执行完了, 这时候通过<strong>缺页中断</strong>这个进程在物理内存中已经占据了不少的空间, 如果<code>fork</code>完全复制则子进程也需要复制父进程的物理内存. 可以想象, 在<code>fork</code>之前, 可以认为这有两个完全一样的进程, 所有内容共享, <code>fork</code>之后两进程开始分叉. 如果是完全复制, 则<code>fork</code>之前共享的内容也需要全部复制, 但是新进程不一定还需要使用之前的内容了, 这时候就会造成资源的浪费.</p><p>上述例子比较片面, 需要表达意思就是<code>fork</code>不需要完全复制物理内存, 因为可能有些是不需要再访问的.</p><p>Linux帧对这种潜在的资源浪费提出的解法就是写时复制.</p><p>在<code>fork</code>的时候完全不复制物理内存, 仅复制虚拟内存和映射表. 所以在<code>fork</code>返回之后, 父子进程是共享的物理内存. 只有在有写操作时, 才会触发中断, 重新在物理内存中申请内存空间, 以区分父子进程的资源.</p><p>如下图, 是<code>fork</code>执行之后的某个时刻, 父子进程的PC指向将会分化, 指向不同的虚拟地址, 映射表的映射关系也会出现分化, 指向不同的物理内存或者不同的磁盘地址, 两者互不干扰. 需要注意的是, 图中标注的<code>fork</code>之前的地址映射关系相同, 并不是说<code>fork</code>所在地址之前的映射关系就一定会相同, 实际上也可能不同, 因为<code>fork</code>之后父子进程的某些操作也可能影响之前的值.</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87fe8c9a73.png title=&amp;ldquo;写时复制&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87fe8c9a73.png data-sub-html="<h2>写时复制</h2><p>&amp;ldquo;写时复制&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87fe8c9a73.png data-srcset="https://bu.dusays.com/2022/06/26/62b87fe8c9a73.png, https://bu.dusays.com/2022/06/26/62b87fe8c9a73.png 1.5x, https://bu.dusays.com/2022/06/26/62b87fe8c9a73.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87fe8c9a73.png></a><figcaption class=image-caption>写时复制</figcaption></figure></p><p>写时复制的好处就是可以减少资源浪费, 能共享的就共享, 不能共享的就重新创建. 但是我认为写时复制也有一些性能问题, 比如需要在进程运行时不断触发中断, 如果包含频繁写操作的程序运行, 使用写时复制可能会比完全复制的时间复杂度更高.</p><h3 id=一秒死机程序>一秒死机程序</h3><p>在学习<code>fork</code>之前, 如果写一些让电脑死机的恶作剧程序可能只会想到开大量线程, 然后线程不停申请内存空间, 使内存占满.</p><p>学习<code>fork</code>之后, 我们就可以用<code>fork</code>来干活了. 进程作为系统资源分配的最小单元, 相比于线程会消耗系统更多的资源(线程一般也就共享一个进程的资源), 所以我们可以写一个程序, 不停的创建进程, 这样系统中就会充斥大量的无用进程, 无用进程多到一定数量的时候, 系统命中有用进程的概率就会降低. 并且, 一般系统都会有最大进程数, 一般是65535, 如果无用进程把所有有效pid用完了, 则正常进程将无pid可分配, 也就可能造成正常无法启动.</p><p>流程如下图, 父进程不停创建子进程, 子进程死循环, 不停<code>malloc</code>和<code>memset</code>. 如上一篇所说, <code>malloc</code>只分配了虚拟内存, 当我们访问的时候会触发缺页中断, 才会真正分配物理内存, 所以<code>malloc</code>之后<code>memset</code>一下.<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87fec7506f.png title=&amp;ldquo;死机fork流程&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87fec7506f.png data-sub-html="<h2>死机fork流程</h2><p>&amp;ldquo;死机fork流程&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87fec7506f.png data-srcset="https://bu.dusays.com/2022/06/26/62b87fec7506f.png, https://bu.dusays.com/2022/06/26/62b87fec7506f.png 1.5x, https://bu.dusays.com/2022/06/26/62b87fec7506f.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87fec7506f.png></a><figcaption class=image-caption>死机fork流程</figcaption></figure></p><p>下面来干活, 代码很少:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;stdlib.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;unistd.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>pid</span> <span class=o>=</span> <span class=n>fork</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span><span class=k>return</span> <span class=mi>1</span><span class=p>;}</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span> <span class=k>break</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span> <span class=p>{</span> <span class=k>continue</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>long</span> <span class=kt>long</span> <span class=n>s</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=kt>int</span><span class=p>)</span> <span class=o>*</span> <span class=mi>1024</span> <span class=o>*</span> <span class=mi>1024</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=o>*</span><span class=n>p</span> <span class=o>=</span> <span class=n>malloc</span><span class=p>(</span><span class=n>s</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>memset</span><span class=p>(</span><span class=n>p</span><span class=p>,</span> <span class=n>i</span><span class=o>++</span><span class=p>,</span> <span class=n>s</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>保存代码为<code>onesecond.c</code>, 记得先<strong>保存重要文件</strong>, 编译并执行:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-Shell data-lang=Shell><span class=line><span class=cl>gcc -o onesecond ./onesecond.c <span class=o>&amp;&amp;</span> ./onesecond
+</span></span></code></pre></td></tr></table></div></div><p>也可以下载编译好的程序, <a href=./onesecond rel>点击下载</a>.</p><p>好了, 不出意外, 数秒内你的电脑就死机了.</p><h3 id=再探fork>再探fork</h3><p>再来深入了解一下<code>fork</code>.</p><p>搜索<code>fork</code>, 可以找到<code>_do_fork</code>函数</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm> *  Ok, this is the main fork-routine.
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm> * It copies the process, and if successful kick-starts
+</span></span></span><span class=line><span class=cl><span class=cm> * it and waits for it to finish using the VM if required.
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=kt>long</span> <span class=nf>_do_fork</span><span class=p>(</span><span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>clone_flags</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	      <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>stack_start</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	      <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>stack_size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	      <span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=n>parent_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	      <span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=n>child_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	      <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>tls</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>completion</span> <span class=n>vfork</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>pid</span> <span class=o>*</span><span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>task_struct</span> <span class=o>*</span><span class=n>p</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>trace</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>long</span> <span class=n>nr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 根据clone_flags判断clone分支
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Determine whether and which event to report to ptracer.  When
+</span></span></span><span class=line><span class=cl><span class=cm>	 * called from kernel_thread or CLONE_UNTRACED is explicitly
+</span></span></span><span class=line><span class=cl><span class=cm>	 * requested, no event is reported; otherwise, report if the event
+</span></span></span><span class=line><span class=cl><span class=cm>	 * for the type of forking is enabled.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=p>(</span><span class=n>clone_flags</span> <span class=o>&amp;</span> <span class=n>CLONE_UNTRACED</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>clone_flags</span> <span class=o>&amp;</span> <span class=n>CLONE_VFORK</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>			<span class=n>trace</span> <span class=o>=</span> <span class=n>PTRACE_EVENT_VFORK</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=k>else</span> <span class=k>if</span> <span class=p>((</span><span class=n>clone_flags</span> <span class=o>&amp;</span> <span class=n>CSIGNAL</span><span class=p>)</span> <span class=o>!=</span> <span class=n>SIGCHLD</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>			<span class=n>trace</span> <span class=o>=</span> <span class=n>PTRACE_EVENT_CLONE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=k>else</span>
+</span></span><span class=line><span class=cl>			<span class=n>trace</span> <span class=o>=</span> <span class=n>PTRACE_EVENT_FORK</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>likely</span><span class=p>(</span><span class=o>!</span><span class=n>ptrace_event_enabled</span><span class=p>(</span><span class=n>current</span><span class=p>,</span> <span class=n>trace</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl>			<span class=n>trace</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>//根据clone_flags copy_process
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=n>p</span> <span class=o>=</span> <span class=n>copy_process</span><span class=p>(</span><span class=n>clone_flags</span><span class=p>,</span> <span class=n>stack_start</span><span class=p>,</span> <span class=n>stack_size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			 <span class=n>child_tidptr</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=n>trace</span><span class=p>,</span> <span class=n>tls</span><span class=p>,</span> <span class=n>NUMA_NO_NODE</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=n>add_latent_entropy</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>IS_ERR</span><span class=p>(</span><span class=n>p</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>		<span class=k>return</span> <span class=n>PTR_ERR</span><span class=p>(</span><span class=n>p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Do this prior waking up the new thread - the thread pointer
+</span></span></span><span class=line><span class=cl><span class=cm>	 * might get invalid after that point, if the thread exits quickly.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=n>trace_sched_process_fork</span><span class=p>(</span><span class=n>current</span><span class=p>,</span> <span class=n>p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=n>pid</span> <span class=o>=</span> <span class=n>get_task_pid</span><span class=p>(</span><span class=n>p</span><span class=p>,</span> <span class=n>PIDTYPE_PID</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=n>nr</span> <span class=o>=</span> <span class=n>pid_vnr</span><span class=p>(</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>clone_flags</span> <span class=o>&amp;</span> <span class=n>CLONE_PARENT_SETTID</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=n>put_user</span><span class=p>(</span><span class=n>nr</span><span class=p>,</span> <span class=n>parent_tidptr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>clone_flags</span> <span class=o>&amp;</span> <span class=n>CLONE_VFORK</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=n>p</span><span class=o>-&gt;</span><span class=n>vfork_done</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>vfork</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=n>init_completion</span><span class=p>(</span><span class=o>&amp;</span><span class=n>vfork</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=n>get_task_struct</span><span class=p>(</span><span class=n>p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>//唤醒子进程
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=n>wake_up_new_task</span><span class=p>(</span><span class=n>p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* forking complete and child started to run, tell ptracer */</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>unlikely</span><span class=p>(</span><span class=n>trace</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>		<span class=n>ptrace_event_pid</span><span class=p>(</span><span class=n>trace</span><span class=p>,</span> <span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>clone_flags</span> <span class=o>&amp;</span> <span class=n>CLONE_VFORK</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>wait_for_vfork_done</span><span class=p>(</span><span class=n>p</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>vfork</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>			<span class=n>ptrace_event_pid</span><span class=p>(</span><span class=n>PTRACE_EVENT_VFORK_DONE</span><span class=p>,</span> <span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=n>put_pid</span><span class=p>(</span><span class=n>pid</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>nr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>大概分为三段:</p><ol><li>根据<code>clone_flags</code>选择需要clone的内容;</li><li>唤醒子进程</li><li>获取并返回子进程pid</li></ol><p><code>clone_flags</code>可选项.<div class="details admonition note open"><div class="details-summary admonition-title"><i class="icon fas fa-pencil-alt fa-fw"></i>注意<i class="details-icon fas fa-angle-right fa-fw"></i></div><div class=details-content><div class=admonition-content><code>clone_flags</code>的被宏<code>__USE_GNU</code>保护了, 所以在使用的时候要记得<code>#define __USE_GNU</code>.</div></div></div></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#ifdef __USE_GNU
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=cm>/* Cloning flags.  */</span>
+</span></span><span class=line><span class=cl><span class=cp># define CSIGNAL       0x000000ff </span><span class=cm>/* Signal mask to be sent at exit.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_VM      0x00000100 </span><span class=cm>/* Set if VM shared between processes.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_FS      0x00000200 </span><span class=cm>/* Set if fs info shared between processes.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_FILES   0x00000400 </span><span class=cm>/* Set if open files shared between processes.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_SIGHAND 0x00000800 </span><span class=cm>/* Set if signal handlers shared.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_PTRACE  0x00002000 </span><span class=cm>/* Set if tracing continues on the child.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_VFORK   0x00004000 </span><span class=cm>/* Set if the parent wants the child to
+</span></span></span><span class=line><span class=cl><span class=cm>                                     wake it up on mm_release.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_PARENT  0x00008000 </span><span class=cm>/* Set if we want to have the same
+</span></span></span><span class=line><span class=cl><span class=cm>                                     parent as the cloner.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_THREAD  0x00010000 </span><span class=cm>/* Set to add to same thread group.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_NEWNS   0x00020000 </span><span class=cm>/* Set to create new namespace.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_SYSVSEM 0x00040000 </span><span class=cm>/* Set to shared SVID SEM_UNDO semantics.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_SETTLS  0x00080000 </span><span class=cm>/* Set TLS info.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_PARENT_SETTID 0x00100000 </span><span class=cm>/* Store TID in userlevel buffer
+</span></span></span><span class=line><span class=cl><span class=cm>                                           before MM copy.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_CHILD_CLEARTID 0x00200000 </span><span class=cm>/* Register exit futex and memory
+</span></span></span><span class=line><span class=cl><span class=cm>                                            location to clear.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_DETACHED 0x00400000 </span><span class=cm>/* Create clone detached.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_UNTRACED 0x00800000 </span><span class=cm>/* Set if the tracing process can&#39;t
+</span></span></span><span class=line><span class=cl><span class=cm>                                      force CLONE_PTRACE on this clone.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_CHILD_SETTID 0x01000000 </span><span class=cm>/* Store TID in userlevel buffer in
+</span></span></span><span class=line><span class=cl><span class=cm>                                          the child.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_NEWCGROUP    0x02000000        </span><span class=cm>/* New cgroup namespace.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_NEWUTS        0x04000000        </span><span class=cm>/* New utsname group.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_NEWIPC        0x08000000        </span><span class=cm>/* New ipcs.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_NEWUSER        0x10000000        </span><span class=cm>/* New user namespace.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_NEWPID        0x20000000        </span><span class=cm>/* New pid namespace.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_NEWNET        0x40000000        </span><span class=cm>/* New network namespace.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp># define CLONE_IO        0x80000000        </span><span class=cm>/* Clone I/O context.  */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></td></tr></table></div></div><p>上述调用的<code>fork</code>函数定义如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#ifdef __ARCH_WANT_SYS_FORK
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>SYSCALL_DEFINE0</span><span class=p>(</span><span class=n>fork</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_MMU
+</span></span></span><span class=line><span class=cl><span class=cp></span>                   <span class=c1>//17 = 0x11
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=k>return</span> <span class=n>_do_fork</span><span class=p>(</span><span class=n>SIGCHLD</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* can not support in nommu mode */</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=o>-</span><span class=n>EINVAL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></td></tr></table></div></div><p><code>SIGCHLD</code>怎么作用在<code>copy_process</code>, 需要更多关注<code>copy_process</code>函数, 这里不再叙述了.</p><h2 id=vfork>vfork</h2><p>搜索<code>vfork</code>, 可以找到<code>vfork</code>的代码:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#ifdef __ARCH_WANT_SYS_VFORK
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>SYSCALL_DEFINE0</span><span class=p>(</span><span class=n>vfork</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>_do_fork</span><span class=p>(</span><span class=n>CLONE_VFORK</span> <span class=o>|</span> <span class=n>CLONE_VM</span> <span class=o>|</span> <span class=n>SIGCHLD</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			<span class=mi>0</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></td></tr></table></div></div><p>同<code>fork</code>, <code>vfork</code>也是调用<code>_do_fork</code>函数, 只是参数不一样.
+相比与<code>fork</code>, <code>vfork</code>的<code>clone_flags</code>增加了<code>CLONE_VFORK</code>和两个属性<code>CLONE_VM</code>. <code>CLONE_VM</code>使得父子进程享受相同的虚拟地址空间, <code>CLONE_VFORK</code>使得父进程被挂起直到被子进程唤醒. (有点像线程了)</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl># define CLONE_VM      0x00000100 /* Set if VM shared between processes.  */
+</span></span><span class=line><span class=cl># define CLONE_VFORK   0x00004000 /* Set if the parent wants the child to
+</span></span><span class=line><span class=cl>                                     wake it up on mm_release.  */
+</span></span></code></pre></td></tr></table></div></div><p>同样, 实验一下<code>vfork</code>的功能.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>void</span> <span class=nf>inc</span><span class=p>(</span><span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>s</span><span class=p>,</span> <span class=kt>int</span> <span class=n>pid</span><span class=p>,</span> <span class=kt>int</span> <span class=n>i</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%s processor [%d %d] %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>s</span><span class=p>,</span> <span class=n>getppid</span><span class=p>(),</span> <span class=n>getpid</span><span class=p>(),</span> <span class=n>i</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>volatile</span> <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>pid</span> <span class=o>=</span> <span class=n>vfork</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>i</span> <span class=o>=</span> <span class=mi>100</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;fork error&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>pid</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=mi>100</span><span class=p>;</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>inc</span><span class=p>(</span><span class=s>&#34;child&#34;</span><span class=p>,</span> <span class=n>pid</span><span class=p>,</span> <span class=n>i</span><span class=o>++</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=mi>20</span><span class=p>;</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>inc</span><span class=p>(</span><span class=s>&#34;parent&#34;</span><span class=p>,</span> <span class=n>pid</span><span class=p>,</span> <span class=n>i</span><span class=o>++</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>程序会先输出child, child输出完后才会输出parent, 但是在程序执行最后会出现异常:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>parent processor [29629 23216] 118
+</span></span><span class=line><span class=cl>parent processor [29629 23216] 119
+</span></span><span class=line><span class=cl>Segmentation fault (core dumped)
+</span></span></code></pre></td></tr></table></div></div><p>因为调用<code>vfork</code>, 子进程需要使用<code>exit</code>或者<code>exec</code>才能不阻塞父进程. 所以我们将最后的<code>return 0;</code>改为<code>exit(0);</code>就可以了.</p><p><code>vfork</code>的出现本来是为了解决<code>fork</code>太过笨重的问题, 在没有写时复制策略之前, <code>fork</code>成本太高, 所以实现了<code>vfork</code>做轻量级的进程.</p><h2 id=clone>clone</h2><p>同样, 我们可以找到<code>clone</code>的实现:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#ifdef __ARCH_WANT_SYS_CLONE
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_CLONE_BACKWARDS
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>SYSCALL_DEFINE5</span><span class=p>(</span><span class=n>clone</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>clone_flags</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>newsp</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=p>,</span> <span class=n>parent_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>tls</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=p>,</span> <span class=n>child_tidptr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=cp>#elif defined(CONFIG_CLONE_BACKWARDS2)
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>SYSCALL_DEFINE5</span><span class=p>(</span><span class=n>clone</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>newsp</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>clone_flags</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=p>,</span> <span class=n>parent_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=p>,</span> <span class=n>child_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>tls</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=cp>#elif defined(CONFIG_CLONE_BACKWARDS3)
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>SYSCALL_DEFINE6</span><span class=p>(</span><span class=n>clone</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>clone_flags</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>newsp</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>int</span><span class=p>,</span> <span class=n>stack_size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=p>,</span> <span class=n>parent_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=p>,</span> <span class=n>child_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>tls</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>SYSCALL_DEFINE5</span><span class=p>(</span><span class=n>clone</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>clone_flags</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>newsp</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=p>,</span> <span class=n>parent_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>int</span> <span class=n>__user</span> <span class=o>*</span><span class=p>,</span> <span class=n>child_tidptr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		 <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>tls</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>_do_fork</span><span class=p>(</span><span class=n>clone_flags</span><span class=p>,</span> <span class=n>newsp</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=n>parent_tidptr</span><span class=p>,</span> <span class=n>child_tidptr</span><span class=p>,</span> <span class=n>tls</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></td></tr></table></div></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#ifdef __USE_GNU
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=cm>/* Clone current process.  */</span>
+</span></span><span class=line><span class=cl><span class=k>extern</span> <span class=kt>int</span> <span class=nf>clone</span> <span class=p>(</span><span class=kt>int</span> <span class=p>(</span><span class=o>*</span><span class=n>__fn</span><span class=p>)</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=n>__arg</span><span class=p>),</span> <span class=kt>void</span> <span class=o>*</span><span class=n>__child_stack</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		  <span class=kt>int</span> <span class=n>__flags</span><span class=p>,</span> <span class=kt>void</span> <span class=o>*</span><span class=n>__arg</span><span class=p>,</span> <span class=p>...)</span> <span class=n>__THROW</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#endif
+</span></span></span></code></pre></td></tr></table></div></div><p>C语言线程库, 最终调用的也是<code>clone</code>函数. <code>clone</code>最终调用<code>_do_fork</code>, 但是功能比<code>fork</code>更加强大, 传入函数指针, 子进程栈空间, <code>clone_flag</code>, 和函数参数, 就可以实现在子进程中调用函数, 这就是我们常用的线程.</p><p>简单使用一下<code>clone</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>int</span> <span class=nf>addone</span><span class=p>(</span><span class=kt>int</span> <span class=o>*</span><span class=n>n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=o>*</span><span class=n>n</span> <span class=o>=</span> <span class=mi>21</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;[%d %d] add one %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>getppid</span><span class=p>(),</span> <span class=n>getpid</span><span class=p>(),</span> <span class=p>(</span><span class=o>*</span><span class=n>n</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>volatile</span> <span class=kt>int</span> <span class=n>n</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span><span class=o>*</span> <span class=n>st</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>st</span> <span class=o>=</span> <span class=n>malloc</span><span class=p>(</span><span class=n>FIBER_STACK</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>st</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;error malloc</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;create clone</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;[%d %d] before add %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>getppid</span><span class=p>(),</span> <span class=n>getpid</span><span class=p>(),</span> <span class=n>n</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>clone</span><span class=p>(</span><span class=o>&amp;</span><span class=n>addone</span><span class=p>,</span> <span class=p>(</span><span class=kt>char</span> <span class=o>*</span><span class=p>)</span><span class=n>st</span> <span class=o>+</span> <span class=n>FIBER_STACK</span><span class=p>,</span> <span class=n>CLONE_VM</span><span class=o>|</span><span class=n>CLONE_VFORK</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>n</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;[%d %d] after add %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>getppid</span><span class=p>(),</span> <span class=n>getpid</span><span class=p>(),</span> <span class=n>n</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>free</span><span class=p>(</span><span class=n>st</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>输出是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>create clone
+</span></span><span class=line><span class=cl>[29629 25737] before add 0
+</span></span><span class=line><span class=cl>[25737 25738] add one 21
+</span></span><span class=line><span class=cl>[29629 25737] after add 21
+</span></span></code></pre></td></tr></table></div></div><p>即在子进程中的修改可以作用到父进程上.</p><h2 id=总结>总结</h2><p>这一篇介绍了PCB, Linux进程控制主要是操作PCB, PCB主要包含进程ID, 内核栈, 权限, 虚拟内存, CPU资源等信息.</p><p>Linux使用了写时复制(COW)技术降低进程fork操作的成本. 子进程共享父进程的内存资源, 只有在写操作时, 子进程才会复制对应的内存区域.</p><p>glibc库提供了fork, vfork, clone几个函数用来创建进程. fork创建的进程和父进程互不干扰, vfork创建的进程会阻塞父进程, 直到子进程调用exit或者exec. fork和vfork都是通过函数返回值判断是父进程还是子进程. clone提供比较高级的进程功能, 可以开一个进程来运行函数, 并且子进程的修改可以作用在父进程上, pthread库也是通过调用clone实现的.</p></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-05-18</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/>操作系统</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/%E8%BF%9B%E7%A8%8B/>进程</a>,&nbsp;<a href=/tags/%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1/>进程通信</a>,&nbsp;<a href=/tags/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/>虚拟内存</a>,&nbsp;<a href=/tags/linux/>Linux</a>,&nbsp;<a href=/tags/pcb/>PCB</a>,&nbsp;<a href=/tags/task_struct/>task_struct</a></section></div><div class=post-nav><a href=/202104/pandt-what/ class=prev rel=prev title=进程、线程和协程概念><i class="fas fa-angle-left fa-fw"></i>进程、线程和协程概念</a>
+<a href=/202104/process-ctracon2/ class=next rel=next title=进程控制和通信(二)>进程控制和通信(二)<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:51+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

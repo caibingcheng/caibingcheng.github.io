@@ -1,0 +1,451 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>《UCB CS61a SICP Python 中文》一周目笔记(二) - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="《UCB CS61a SICP Python 中文》一周目笔记(二)"><meta property="og:description" content="在上一章中我们主要学习了函数. 关注了函数的调用过程, 也学习了高阶函数. 高阶函数实际上是比较&#34;古老&#34;的技术, 在Lisp原生支持. 但是C语言似乎并没有或者很难实现高阶函数, 不过这一点在C++中有所缓解. 这一篇主要关注程序的数据."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202108/sicp-python-read2/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-08-26T16:29:13+08:00"><meta property="article:modified_time" content="2022-01-28T13:59:57+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="《UCB CS61a SICP Python 中文》一周目笔记(二)"><meta name=twitter:description content="在上一章中我们主要学习了函数. 关注了函数的调用过程, 也学习了高阶函数. 高阶函数实际上是比较&#34;古老&#34;的技术, 在Lisp原生支持. 但是C语言似乎并没有或者很难实现高阶函数, 不过这一点在C++中有所缓解. 这一篇主要关注程序的数据."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202108/sicp-python-read2/><link rel=prev href=https://imcbc.cn/202108/secguide_c_tc/><link rel=next href=https://imcbc.cn/202109/sicp-python-read3/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"《UCB CS61a SICP Python 中文》一周目笔记(二)","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202108\/sicp-python-read2\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"SICP, Python","wordcount":3189,"url":"https:\/\/imcbc.cn\/202108\/sicp-python-read2\/","datePublished":"2021-08-26T16:29:13+08:00","dateModified":"2022-01-28T13:59:57+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>《UCB CS61a SICP Python 中文》一周目笔记(二)<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-08-26>2021-08-26</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3189 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 7 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#使用对象构建抽象>使用对象构建抽象</a><ul><li><a href=#构造器和选择器>构造器和选择器</a><ul><li><a href=#构造器>构造器</a></li><li><a href=#选择器>选择器</a></li></ul></li><li><a href=#约束传播>约束传播</a></li><li><a href=#函数和方法>函数和方法</a></li><li><a href=#通过字典实现类和对象>通过字典实现类和对象</a></li></ul></li></ul></nav></div></div><div class=content id=content><p>在上一章中我们主要学习了函数. 关注了函数的调用过程, 也学习了高阶函数. 高阶函数实际上是比较"古老"的技术, 在Lisp原生支持. 但是C语言似乎并没有或者很难实现高阶函数, 不过这一点在C++中有所缓解. 这一篇主要关注程序的数据.</p><h2 id=使用对象构建抽象>使用对象构建抽象</h2><blockquote><p>数据抽象的基本概念是构造操作抽象数据的程序。也就是说，我们的程序应该以一种方式来使用数据，对数据做出尽可能少的假设。</p></blockquote><p>这句话引起了我对如何构建类或者结构体的思考。</p><p>通俗的说，抽象某个数据时，应该让用户对该数据做出尽可能少的思考，类似于<a href=/202108/sicp-python-read1/ rel>上一篇</a>函数抽象，数据抽象也应该让用户感觉起来非常的自然，而不会惊讶于数据抽象的某些表示。要做到这一点，我们确实需要考虑用户可能对这个数据抽象所进行的操作，并且可能需要删除一些没必要/意料之外的操作。</p><p>下面这句话比较好解释上面的思想：</p><blockquote><p>复数有两种不同表示（平面坐标和极坐标），它们适用于不同的操作。然而，从一些人编写使用复数的程序的角度来看，数据抽象的原则表明，所有操作复数的运算都应该可用，无论计算机使用了哪个表示。</p></blockquote><p>如果打算做复数的数据抽象，那么我们确实应该考虑用户可能的操作。有些用户可能使用平面坐标表示，有些用户可能使用极坐标表示。并且这两种表示确实是复数的常用表示方法。同时，平面表示的复数和极坐标表示的复数也不应该有明显的界限， 这一点表现在两者的运算操作上。想想在学校里学习的复数运算，经常也会涉及平面坐标和极坐标的相互转换和运算。</p><h3 id=构造器和选择器>构造器和选择器</h3><h4 id=构造器>构造器</h4><p>构造器的概念类似于C++中的构造函数。通过SICP我的认知是：构造器只负责构造当前抽象的数据。</p><p>举个例子：文中的有理数构造， 就只构造有理数的分子和分母，其他无关的元素没有参与构造，也不应该参与构造。</p><p>在代码编写过程中，经常容易陷入的误区是，喜欢在构造函数里面做一些和构造无关的操作，比如某些初始化。这些初始化的工作应不应该放在构造函数中呢？没有见过有比较值得信赖的定论。但是目前来看，与数据抽象无关的元素不应该放在构造函数中构造（初始化）。</p><p>所以，即使抽象某个数据的时候，看似很简单，但是还是应该思考清楚哪些是这个数据本身的属性，哪些是额外的属性。本身的属性就需要在构造的时候初始化，额外的属性则不需要在构造的时候初始化。</p><h4 id=选择器>选择器</h4><p>以C++举例，和一般认知一样， 我们不应该把成员变量写在public可见性下，这样会误导用户，使用户直接取用或者修改成员变量的值， 这时候我们应该为运行用户操作的变量提供选择器。 为什么需要这样？ 下面一段例子很好：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Math</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=n>set</span><span class=p>(</span><span class=k>const</span> <span class=n>T</span><span class=o>&amp;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=n>T</span> <span class=nf>get</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>T</span> <span class=nf>sqrt</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>T</span> <span class=nf>square</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>T</span> <span class=n>m_source</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>如上，我们使用set和get方法来选择元素，而不是直接访问元素，这有什么好处呢？</p><ol><li>隔离用户和抽象的数据；</li><li><strong>统一接口</strong>；</li></ol><p>第1点比较好理解，通过选择器访问元素，我们可以在选择器函数中执行一些额外的操作，而用户不需要关心这些操作就能得到他们期望的结果。</p><p>关于第2点， 如果我们不使用选择器访问元素，而让用户有权直接访问到元素，则会造成接口的不统一。比如用户想访问元素本身时，可以直接访问元素：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>math.m_source;
+</span></span></code></pre></td></tr></table></div></div><p>用户甚至可以修改元素的值，而不用通知类。</p><p>如果用户想访问元素的平方根或者平方时，则需要访问：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>math.srqt();
+</span></span><span class=line><span class=cl>math.square();
+</span></span></code></pre></td></tr></table></div></div><p>这和对元素的访问是不一样的。所以，添加选择器方法后，可以规范用户对抽象数据的操作行为。</p><p>复数的例子很好：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>ComplexRI</span><span class=p>(</span><span class=nb>object</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>real</span><span class=p>,</span> <span class=n>imag</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>real</span> <span class=o>=</span> <span class=n>real</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>imag</span> <span class=o>=</span> <span class=n>imag</span>
+</span></span><span class=line><span class=cl>	<span class=nd>@property</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>magnitude</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>real</span> <span class=o>**</span> <span class=mi>2</span> <span class=o>+</span> <span class=bp>self</span><span class=o>.</span><span class=n>imag</span> <span class=o>**</span> <span class=mi>2</span><span class=p>)</span> <span class=o>**</span> <span class=mf>0.5</span>
+</span></span><span class=line><span class=cl>    <span class=nd>@property</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>angle</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>atan2</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>imag</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>real</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__repr__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=s1>&#39;ComplexRI(</span><span class=si>{0}</span><span class=s1>, </span><span class=si>{1}</span><span class=s1>)&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>real</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>imag</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>ComplexMA</span><span class=p>(</span><span class=nb>object</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>magnitude</span><span class=p>,</span> <span class=n>angle</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>magnitude</span> <span class=o>=</span> <span class=n>magnitude</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>angle</span> <span class=o>=</span> <span class=n>angle</span>
+</span></span><span class=line><span class=cl>    <span class=nd>@property</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>real</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>magnitude</span> <span class=o>*</span> <span class=n>cos</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>angle</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nd>@property</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>imag</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>magnitude</span> <span class=o>*</span> <span class=n>sin</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>angle</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__repr__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=s1>&#39;ComplexMA(</span><span class=si>{0}</span><span class=s1>, </span><span class=si>{1}</span><span class=s1>)&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>magnitude</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>angle</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>python有property这个修饰器，所以可以把需要被计算的量当做属性一样访问。比如上例，我们可以像访问实部虚部一样的访问模长和角度。对于C++这种类型的语言，都使用选择器方法可能就比较好了。</p><h3 id=约束传播>约束传播</h3><p><figure><a class=lightgallery href=https://wizardforcel.gitbooks.io/sicp-py/content/img/constraints.png title=约束传播 data-thumbnail=https://wizardforcel.gitbooks.io/sicp-py/content/img/constraints.png data-sub-html="<h2>约束传播</h2><p>约束传播</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://wizardforcel.gitbooks.io/sicp-py/content/img/constraints.png data-srcset="https://wizardforcel.gitbooks.io/sicp-py/content/img/constraints.png, https://wizardforcel.gitbooks.io/sicp-py/content/img/constraints.png 1.5x, https://wizardforcel.gitbooks.io/sicp-py/content/img/constraints.png 2x" data-sizes=auto alt=https://wizardforcel.gitbooks.io/sicp-py/content/img/constraints.png></a><figcaption class=image-caption>约束传播</figcaption></figure></p><p>上图是关于摄氏度和华氏度转换的约束网络，通过设置摄氏度的值可以得到华氏度的结果，设置华氏度的值可以得到摄氏度的结果，只需要通过这个网络传播即可。</p><p>参考<a href=https://wizardforcel.gitbooks.io/sicp-py/content/2.4.html target=_blank rel="noopener noreffer">原文</a>，我实现了以下的约束传播，另外还可以参考<a href=http://notebook.xyli.me/SICP/propagation-of-constraints/ target=_blank rel="noopener noreffer">这篇文章</a>，这里对约束传播讲地更清楚。</p><p>定义连接器，需要的方法有：</p><ol><li>has_val: 判断值是否已知</li><li>set_val: 更新连接器的值</li><li>val: 获取连接器的值</li><li>connect: 关联连接器和其约束</li><li>forget: 让连接器丢弃现在的值</li></ol><p>需要的容器有：</p><ol><li>value: 保存连接器的值，如果是None则代表没有值</li><li>constraints: 保存所有与该连接器相关的约束，如果连接器的值更新了，则需要通知其他约束更新</li><li>informant: 描述连接器的最后一次修改者，以防止连接器的值被不允许的对象修改</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-Python data-lang=Python><span class=line><span class=cl><span class=k>class</span> <span class=nc>connector</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_name</span> <span class=o>=</span> <span class=n>name</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_informant</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>_notify</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>source</span><span class=p>,</span> <span class=n>message</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>notify</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=s1>&#39;new_val&#39;</span><span class=p>:</span> <span class=k>lambda</span> <span class=n>constraint</span> <span class=p>:</span> <span class=n>constraint</span><span class=o>.</span><span class=n>new_val</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>            <span class=s1>&#39;forget&#39;</span><span class=p>:</span> <span class=k>lambda</span> <span class=n>constraint</span> <span class=p>:</span> <span class=n>constraint</span><span class=o>.</span><span class=n>forget</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=n>source</span> <span class=o>!=</span> <span class=n>constraint</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=n>notify</span><span class=p>[</span><span class=n>message</span><span class=p>](</span><span class=n>constraint</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nd>@property</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>val</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nd>@property</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>has_val</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>set_val</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>source</span><span class=p>,</span> <span class=n>val</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_informant</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=n>source</span><span class=p>,</span> <span class=n>val</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>_name</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=nb>print</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_name</span><span class=p>,</span> <span class=s1>&#39;=&#39;</span><span class=p>,</span> <span class=n>val</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_notify</span><span class=p>(</span><span class=n>source</span><span class=p>,</span> <span class=s1>&#39;new_val&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>!=</span> <span class=n>val</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;Contradiction detected:&#39;</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span><span class=p>,</span> <span class=s1>&#39;vs&#39;</span><span class=p>,</span> <span class=n>val</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>connect</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>constraint</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>constraint</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forget</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>source</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>_informant</span> <span class=o>==</span> <span class=n>source</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_informant</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_notify</span><span class=p>(</span><span class=n>source</span><span class=p>,</span> <span class=s1>&#39;forget&#39;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>以下是构造约束条件，这里定义的是三元约束条件，其设计思想是，如果约束条件相关的某两个连接器的值已知，则可以更新另外一个连接器的值。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-Python data-lang=Python><span class=line><span class=cl><span class=k>class</span> <span class=nc>ternary_constraint</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>,</span> <span class=n>ab</span><span class=p>,</span> <span class=n>ca</span><span class=p>,</span> <span class=n>cb</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_a</span> <span class=o>=</span> <span class=n>a</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_b</span> <span class=o>=</span> <span class=n>b</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_c</span> <span class=o>=</span> <span class=n>c</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_ab</span> <span class=o>=</span> <span class=n>ab</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_ca</span> <span class=o>=</span> <span class=n>ca</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_cb</span> <span class=o>=</span> <span class=n>cb</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>connector</span> <span class=ow>in</span> <span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_a</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_b</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_c</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=n>connector</span><span class=o>.</span><span class=n>connect</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>new_val</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>av</span><span class=p>,</span> <span class=n>bv</span><span class=p>,</span> <span class=n>cv</span> <span class=o>=</span> <span class=p>[</span><span class=n>connector</span><span class=o>.</span><span class=n>has_val</span> <span class=k>for</span> <span class=n>connector</span> <span class=ow>in</span> <span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_a</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_b</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_c</span><span class=p>)]</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>av</span> <span class=ow>and</span> <span class=n>bv</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_c</span><span class=o>.</span><span class=n>set_val</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_ab</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_a</span><span class=o>.</span><span class=n>val</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_b</span><span class=o>.</span><span class=n>val</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>elif</span> <span class=n>av</span> <span class=ow>and</span> <span class=n>cv</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_b</span><span class=o>.</span><span class=n>set_val</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_ca</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_c</span><span class=o>.</span><span class=n>val</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_a</span><span class=o>.</span><span class=n>val</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>elif</span> <span class=n>bv</span> <span class=ow>and</span> <span class=n>cv</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_a</span><span class=o>.</span><span class=n>set_val</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_cb</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_c</span><span class=o>.</span><span class=n>val</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_b</span><span class=o>.</span><span class=n>val</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;not satisfied&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forget</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>connector</span> <span class=ow>in</span> <span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_a</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_b</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>_c</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=n>connector</span><span class=o>.</span><span class=n>forget</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>按照华氏度和设置度转换的需求，构造以下几种约束条件：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-Python data-lang=Python><span class=line><span class=cl><span class=k>def</span> <span class=nf>adder</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=kn>from</span> <span class=nn>operator</span> <span class=kn>import</span> <span class=n>add</span><span class=p>,</span> <span class=n>sub</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>ternary_constraint</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>,</span> <span class=n>add</span><span class=p>,</span> <span class=n>sub</span><span class=p>,</span> <span class=n>sub</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>multiplier</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=kn>from</span> <span class=nn>operator</span> <span class=kn>import</span> <span class=n>mul</span><span class=p>,</span> <span class=n>truediv</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>ternary_constraint</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>,</span> <span class=n>mul</span><span class=p>,</span> <span class=n>truediv</span><span class=p>,</span> <span class=n>truediv</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>constant</span><span class=p>(</span><span class=n>connector</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>constraint</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>    <span class=n>connector</span><span class=o>.</span><span class=n>set_val</span><span class=p>(</span><span class=n>constraint</span><span class=p>,</span> <span class=n>value</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>constraint</span>
+</span></span></code></pre></td></tr></table></div></div><p>组合约束条件和连接器，实现华氏度和摄氏度转换的约束传播网络：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-Python data-lang=Python><span class=line><span class=cl><span class=k>def</span> <span class=nf>make_converter</span><span class=p>(</span><span class=n>c</span><span class=p>,</span> <span class=n>f</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Connect c to f with constraints to convert from Celsius to Fahrenheit.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>u</span><span class=p>,</span> <span class=n>v</span><span class=p>,</span> <span class=n>w</span><span class=p>,</span> <span class=n>x</span><span class=p>,</span> <span class=n>y</span> <span class=o>=</span> <span class=p>[</span><span class=n>connector</span><span class=p>()</span> <span class=k>for</span> <span class=n>_</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>5</span><span class=p>)]</span>
+</span></span><span class=line><span class=cl>    <span class=n>multiplier</span><span class=p>(</span><span class=n>c</span><span class=p>,</span> <span class=n>w</span><span class=p>,</span> <span class=n>u</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>multiplier</span><span class=p>(</span><span class=n>v</span><span class=p>,</span> <span class=n>x</span><span class=p>,</span> <span class=n>u</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>adder</span><span class=p>(</span><span class=n>v</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>f</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>constant</span><span class=p>(</span><span class=n>w</span><span class=p>,</span> <span class=mi>9</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>constant</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=mi>5</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>constant</span><span class=p>(</span><span class=n>y</span><span class=p>,</span> <span class=mi>32</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>只需要某个条件已知，就可以按照约束传播网络的约束，更新其他未知的值：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-Python data-lang=Python><span class=line><span class=cl><span class=n>celsius</span> <span class=o>=</span> <span class=n>connector</span><span class=p>(</span><span class=s1>&#39;Celsius&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>fahrenheit</span> <span class=o>=</span> <span class=n>connector</span><span class=p>(</span><span class=s1>&#39;Fahrenheit&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>make_converter</span><span class=p>(</span><span class=n>celsius</span><span class=p>,</span> <span class=n>fahrenheit</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>celsius</span><span class=o>.</span><span class=n>set_val</span><span class=p>(</span><span class=s1>&#39;c&#39;</span><span class=p>,</span> <span class=mi>25</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>celsius</span><span class=o>.</span><span class=n>forget</span><span class=p>(</span><span class=s1>&#39;c&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>celsius</span><span class=o>.</span><span class=n>set_val</span><span class=p>(</span><span class=s1>&#39;c&#39;</span><span class=p>,</span> <span class=mi>30</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=函数和方法>函数和方法</h3><p>【不重要的】操作对象或执行对象特定计算的函数叫做方法。</p><p>有以上的概念，需要思考的是，什么时候应该实现为函数， 什么时候应该实现为方法？ 这将有助于我们理解一个类里面应该包含什么，不应该包含什么。</p><p>我观察到的现象是，所有方法都会操作对象的数据，读或者写。如果某个操作需要读入某个对象的某个数据，但是并不会对其产生影响，输出也与这个类完全无关，那应该定义为一个方法吗？我认为是不应该的。</p><p>比如STL中的容器。</p><p><code>std::vector</code>是一个容器，其作用是存储数据。其基本操作就是，添加数据，删除数据，统计数据长度。对数据排序，这算不算是容器的基本方法呢？目前可以看到，STL不认为这是容器的基本方法，所以STL实现的容器是很纯粹的。但是在Python里面，<code>sort</code>一般是可变容器的默认方法。</p><h3 id=通过字典实现类和对象>通过字典实现类和对象</h3><p>在Linux内核源码中，可以看到不少这样的操作：</p><p>将一系列函数指针包装为一个结构体<code>operation</code>，比如<code>open</code>、<code>close</code>等等，然后其他抽象数据类型的结构结构体（比如VFS，虚拟文件系统）就会包含<code>operation</code>这个结构体，这时候就像是VFS自身的结构体包含了<code>operation</code>里面的操作，是一个类。</p><p>在Python里面自定义一个类更现代：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>make_instance</span><span class=p>(</span><span class=bp>cls</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return a new object instance, which is a dispatch dictionary.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>get_value</span><span class=p>(</span><span class=n>name</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>name</span> <span class=ow>in</span> <span class=n>attributes</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>attributes</span><span class=p>[</span><span class=n>name</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>value</span> <span class=o>=</span> <span class=bp>cls</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=n>name</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>bind_method</span><span class=p>(</span><span class=n>value</span><span class=p>,</span> <span class=n>instance</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>set_value</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>attributes</span><span class=p>[</span><span class=n>name</span><span class=p>]</span> <span class=o>=</span> <span class=n>value</span>
+</span></span><span class=line><span class=cl>    <span class=n>attributes</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>    <span class=n>instance</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;get&#39;</span><span class=p>:</span> <span class=n>get_value</span><span class=p>,</span> <span class=s1>&#39;set&#39;</span><span class=p>:</span> <span class=n>set_value</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>instance</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>bind_method</span><span class=p>(</span><span class=n>value</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return a bound method if value is callable, or value otherwise.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>callable</span><span class=p>(</span><span class=n>value</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>def</span> <span class=nf>method</span><span class=p>(</span><span class=o>*</span><span class=n>args</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>value</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>method</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>value</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>make_class</span><span class=p>(</span><span class=n>attributes</span><span class=p>,</span> <span class=n>base_class</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return a new class, which is a dispatch dictionary.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>get_value</span><span class=p>(</span><span class=n>name</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>name</span> <span class=ow>in</span> <span class=n>attributes</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>attributes</span><span class=p>[</span><span class=n>name</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=k>elif</span> <span class=n>base_class</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>base_class</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=n>name</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>set_value</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>attributes</span><span class=p>[</span><span class=n>name</span><span class=p>]</span> <span class=o>=</span> <span class=n>value</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>new</span><span class=p>(</span><span class=o>*</span><span class=n>args</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>init_instance</span><span class=p>(</span><span class=bp>cls</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=bp>cls</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;get&#39;</span><span class=p>:</span> <span class=n>get_value</span><span class=p>,</span> <span class=s1>&#39;set&#39;</span><span class=p>:</span> <span class=n>set_value</span><span class=p>,</span> <span class=s1>&#39;new&#39;</span><span class=p>:</span> <span class=n>new</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=bp>cls</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>init_instance</span><span class=p>(</span><span class=bp>cls</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return a new object with type cls, initialized with args.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>instance</span> <span class=o>=</span> <span class=n>make_instance</span><span class=p>(</span><span class=bp>cls</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>init</span> <span class=o>=</span> <span class=bp>cls</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=s1>&#39;__init__&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>init</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>init</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>instance</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>make_account_class</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return the Account class, which has deposit and withdraw methods.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>account_holder</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=p>[</span><span class=s1>&#39;set&#39;</span><span class=p>](</span><span class=s1>&#39;holder&#39;</span><span class=p>,</span> <span class=n>account_holder</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=p>[</span><span class=s1>&#39;set&#39;</span><span class=p>](</span><span class=s1>&#39;balance&#39;</span><span class=p>,</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>deposit</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>amount</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;Increase the account balance by amount and return the new balance.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=n>new_balance</span> <span class=o>=</span> <span class=bp>self</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=s1>&#39;balance&#39;</span><span class=p>)</span> <span class=o>+</span> <span class=n>amount</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=p>[</span><span class=s1>&#39;set&#39;</span><span class=p>](</span><span class=s1>&#39;balance&#39;</span><span class=p>,</span> <span class=n>new_balance</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=s1>&#39;balance&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>withdraw</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>amount</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;Decrease the account balance by amount and return the new balance.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=n>balance</span> <span class=o>=</span> <span class=bp>self</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=s1>&#39;balance&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>amount</span> <span class=o>&gt;</span> <span class=n>balance</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=s1>&#39;Insufficient funds&#39;</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=p>[</span><span class=s1>&#39;set&#39;</span><span class=p>](</span><span class=s1>&#39;balance&#39;</span><span class=p>,</span> <span class=n>balance</span> <span class=o>-</span> <span class=n>amount</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=s1>&#39;balance&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>make_class</span><span class=p>({</span><span class=s1>&#39;__init__&#39;</span><span class=p>:</span> <span class=fm>__init__</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                       <span class=s1>&#39;deposit&#39;</span><span class=p>:</span>  <span class=n>deposit</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                       <span class=s1>&#39;withdraw&#39;</span><span class=p>:</span> <span class=n>withdraw</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                       <span class=s1>&#39;interest&#39;</span><span class=p>:</span> <span class=mf>0.02</span><span class=p>})</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Account</span> <span class=o>=</span> <span class=n>make_account_class</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>jim_acct</span> <span class=o>=</span> <span class=n>Account</span><span class=p>[</span><span class=s1>&#39;new&#39;</span><span class=p>](</span><span class=s1>&#39;Jim&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>jim_acct</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=s1>&#39;holder&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>jim_acct</span><span class=p>[</span><span class=s1>&#39;get&#39;</span><span class=p>](</span><span class=s1>&#39;deposit&#39;</span><span class=p>)(</span><span class=mi>20</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>jim_acct</span><span class=p>[</span><span class=s1>&#39;set&#39;</span><span class=p>](</span><span class=s1>&#39;interest&#39;</span><span class=p>,</span> <span class=mf>0.04</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-01-28</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/>软件设计</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/sicp/>SICP</a>,&nbsp;<a href=/tags/python/>Python</a></section></div><div class=post-nav><a href=/202108/secguide_c_tc/ class=prev rel=prev title=C,C++安全指南><i class="fas fa-angle-left fa-fw"></i>C,C++安全指南</a>
+<a href=/202109/sicp-python-read3/ class=next rel=next title="《UCB CS61a SICP Python 中文》一周目笔记(三)">《UCB CS61a SICP Python 中文》一周目笔记(三)<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

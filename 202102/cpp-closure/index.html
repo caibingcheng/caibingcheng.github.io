@@ -1,0 +1,477 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>C++闭包 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="C++闭包"><meta property="og:description" content="C++闭包
+在一些现代对高级语言, 比如Python或者JavaScript中, 经常会提到闭包的概念, 但是在C++里面很少会听说闭包的概念.
+C++可以实现闭包吗? 可以."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202102/cpp-closure/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-02-23T10:00:57+08:00"><meta property="article:modified_time" content="2021-05-14T20:55:56+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="C++闭包"><meta name=twitter:description content="C++闭包
+在一些现代对高级语言, 比如Python或者JavaScript中, 经常会提到闭包的概念, 但是在C++里面很少会听说闭包的概念.
+C++可以实现闭包吗? 可以."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202102/cpp-closure/><link rel=prev href=https://imcbc.cn/202102/salgo-234tree/><link rel=next href=https://imcbc.cn/202102/salgo-heap/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"C++闭包","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202102\/cpp-closure\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Cpp, lambda, constexpr, 编译时","wordcount":2883,"url":"https:\/\/imcbc.cn\/202102\/cpp-closure\/","datePublished":"2021-02-23T10:00:57+08:00","dateModified":"2021-05-14T20:55:56+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>C++闭包<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-02-23>2021-02-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2883 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#c闭包>C++闭包</a></li><li><a href=#lambda表达式>lambda表达式</a><ul><li><a href=#捕获变量>捕获变量</a></li><li><a href=#形参>形参</a></li><li><a href=#一般性用法>一般性用法</a><ul><li><a href=#代码片段打包>代码片段打包</a></li><li><a href=#作为入参>作为入参</a></li></ul></li><li><a href=#lambda展开>lambda展开</a></li><li><a href=#lambda编译期运算>lambda编译期运算</a></li></ul></li></ul></nav></div></div><div class=content id=content><h2 id=c闭包>C++闭包</h2><p>在一些现代对高级语言, 比如Python或者JavaScript中, 经常会提到闭包的概念, 但是在C++里面很少会听说闭包的概念.</p><p>C++可以实现闭包吗? 可以.</p><blockquote><p>闭包函数: 可以理解为函数里面定义的函数;</p></blockquote><blockquote><p>闭包: 可以理解为闭包函数可以访问到外层函数的变量, 即使外层函数已经返回.</p></blockquote><p>这一点可能不是很好理解, 先来看一个例子:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>add</span> <span class=o>=</span> <span class=p>[]</span> <span class=p>(</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>b</span> <span class=o>=</span> <span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;call f1 &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>b</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=p>[</span><span class=n>b</span><span class=p>]</span> <span class=p>(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span><span class=n>c</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=kt>int</span> <span class=n>d</span> <span class=o>=</span> <span class=n>b</span> <span class=o>+</span> <span class=n>c</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;call f2 &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>d</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>d</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>add_2</span> <span class=o>=</span> <span class=n>add</span><span class=p>(</span><span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;------------&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>add_2_3</span> <span class=o>=</span> <span class=n>add_2</span><span class=p>(</span><span class=mi>3</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>定义一个<code>add</code>函数, 作用是$f(x, y) = x * x + y$;</p><p><code>add_2</code>获取了外层函数, 外层函数有局部变量<code>b</code>, $b = a * a$, 存储了入参2的初步计算结果, 返回值是另外一个匿名函数;</p><p><code>add_2_3</code>相当于获取了外层函数的局部变量<code>b</code>, 同时也获取了内层函数对返回值.</p><p>所以, 上述输出会是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>call f1 4
+</span></span><span class=line><span class=cl>------------
+</span></span><span class=line><span class=cl>call f2 7
+</span></span></code></pre></td></tr></table></div></div><p>也可以这样调用:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>auto</span> <span class=n>add_2</span> <span class=o>=</span> <span class=n>add</span><span class=p>(</span><span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>add_2</span><span class=p>(</span><span class=mi>3</span><span class=p>);</span> <span class=c1>//7
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>add_2</span><span class=p>(</span><span class=mi>4</span><span class=p>);</span> <span class=c1>//8
+</span></span></span></code></pre></td></tr></table></div></div><p>上述的调用方法会让<code>add_2</code>看起来和<code>int add_2 = 2</code>之类的定义很像.(就像是一个普通的变量)</p><p>或者:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>add</span><span class=p>(</span><span class=mi>2</span><span class=p>)(</span><span class=mi>3</span><span class=p>);</span>  <span class=c1>//7
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>add</span><span class=p>(</span><span class=mi>4</span><span class=p>)(</span><span class=mi>5</span><span class=p>);</span>  <span class=c1>//13
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=lambda表达式>lambda表达式</h2><blockquote><p>一般形式: [捕获变量] (形参) {语句};</p></blockquote><h3 id=捕获变量>捕获变量</h3><p>一般我们可以用=和&来捕获所有变量, =代表值捕获, &代表应用捕获;</p><p>或者, 可以是某个具体的参数, 如果直接使用参数, 就是值捕获, 如果是参数前带&就是引用捕获;</p><p>再或者, 可以是一条语句, 比如<code>[&, sum = cal_sum()]() {//...}</code>.</p><p>我们来看一个例子:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=n>num</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>num</span><span class=p>](){</span>
+</span></span><span class=line><span class=cl>    <span class=n>num</span> <span class=o>=</span> <span class=mi>2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>num</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}();</span>
+</span></span><span class=line><span class=cl><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>num</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>会编译失败, 提示:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>&lt;source&gt;:36:13: error: assignment of read-only variable &#39;num&#39;
+</span></span></code></pre></td></tr></table></div></div><p>因为lambda模式是const的, 不可修改捕获变量.(可以理解成类中的const成员函数, 捕获变量则理解为成员变量)</p><p>我们可以加一个mutable声明, 同类一样, 加上mutable声明后, 就可以在const成员函数中修改成员变量了, 相当于明确告诉编译器, 我非常明确知道我接下来的操作会有什么影响, 你不用优化了.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=n>num</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>num</span><span class=p>]()</span> <span class=k>mutable</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>num</span> <span class=o>=</span> <span class=mi>2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>num</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}();</span>
+</span></span><span class=line><span class=cl><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>num</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>输出是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>2
+</span></span><span class=line><span class=cl>1
+</span></span></code></pre></td></tr></table></div></div><p>这里和预期是相符的, 因为我们使用的是值捕获, 如果改成引用捕获就会输出:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>2
+</span></span><span class=line><span class=cl>2
+</span></span></code></pre></td></tr></table></div></div><p>引用捕获可以减少拷贝行为, 但是<strong>无脑使用引用捕获也会引起一些问题</strong>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>auto</span> <span class=n>add</span> <span class=o>=</span> <span class=p>[]</span> <span class=p>(</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>c</span> <span class=o>=</span> <span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=p>[</span><span class=o>&amp;</span><span class=n>c</span><span class=p>]</span> <span class=p>(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span><span class=n>b</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>c</span> <span class=o>+</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>add</span><span class=p>(</span><span class=mi>1</span><span class=p>)(</span><span class=mi>2</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>在我的编译环境下, 这段代码对输出是32769, 是意料之外的, 预期输出应该是3.</p><p>问题在于使用了引用捕获, 在<code>add(1)</code>调用外层函数的之后, <code>int c = a * a;</code>作为局部变量已经被释放了, 所以调用<code>add(1)(2)</code>会出现引用错误.</p><p>正确做法是使用值捕获, 会拷贝一次, 但是不管怎样拷贝的值是我们想要的, 不会引起错误.</p><h3 id=形参>形参</h3><p>用到lambda会想到一个问题, 能不能像模板函数一样呢? 可以的.</p><p>比如实现加法计算, 可以如下定义:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>auto</span> <span class=n>add</span> <span class=o>=</span> <span class=p>[]</span> <span class=p>(</span><span class=k>auto</span> <span class=n>a</span><span class=p>,</span> <span class=k>auto</span> <span class=n>b</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>a</span> <span class=o>+</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>add</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mf>2.2</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>如果是模板实现, 则要麻烦得多:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>T</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>auto</span> <span class=n>add</span><span class=p>(</span><span class=n>T</span> <span class=n>a</span><span class=p>,</span> <span class=n>T</span> <span class=n>b</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>a</span> <span class=o>+</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>add</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mf>2.2</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>调用<code>add(1, 2.2)</code>是会报错的, 因为入参2.2时<code>T</code>推导时<code>double</code>, 入参1时推导是<code>int</code>, 找不到匹配函数. 得定义两个模板类型:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>template&lt;typename T1, typename T2&gt;
+</span></span><span class=line><span class=cl>auto add(T1 a, T2 b)
+</span></span><span class=line><span class=cl>{
+</span></span><span class=line><span class=cl>    return a + b;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>很明显, 使用lambda和<code>auto</code>会简单一些.</p><h3 id=一般性用法>一般性用法</h3><h4 id=代码片段打包>代码片段打包</h4><p>一般性, 可以将lambda用于打包小段功能代码, 比如重复性的log:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>const</span> <span class=k>auto</span> <span class=n>stat_log</span> <span class=o>=</span> <span class=p>[</span><span class=o>=</span><span class=p>](</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span><span class=n>index</span><span class=p>,</span> <span class=k>const</span> <span class=n>PROCESSSTAT</span> <span class=o>&amp;</span><span class=n>process_stat</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>logi</span><span class=p>(</span><span class=s>&#34;processing index[{}] stat {} next {}, ret {}&#34;</span><span class=p>,</span> <span class=n>index</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>statStr</span><span class=p>(</span><span class=n>process_stat</span><span class=p>).</span><span class=n>c_str</span><span class=p>(),</span> <span class=n>statStr</span><span class=p>(</span><span class=n>getCurrentStat</span><span class=p>()).</span><span class=n>c_str</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>        <span class=n>statStr</span><span class=p>(</span><span class=n>m_algo_ret</span><span class=p>).</span><span class=n>c_str</span><span class=p>());</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>在需要调用对地方, 只需要调用<code>stat_log</code>函数就行了:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>stat_log</span><span class=p>(</span><span class=n>index</span><span class=p>,</span> <span class=n>PROCESSSTAT</span><span class=o>::</span><span class=n>PROCESSRUN</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>stat_log</span><span class=p>(</span><span class=n>index</span><span class=p>,</span> <span class=n>PROCESSSTAT</span><span class=o>::</span><span class=n>PROCESSERROR</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>相较于非lambda情况, 我们<strong>不再需要在外部定义一个函数, 减少了接口暴露的问题</strong>.</p><h4 id=作为入参>作为入参</h4><p>在以往, 实现回调功能需要使用函数指针实现, 但是C++11之后可以使用function对象.</p><p>lambda表达式是一个function对象, 我们可以将其作为函数对入参. 比如<code>sort</code>函数:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>v</span><span class=p>{</span><span class=mi>4</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=n>sort</span><span class=p>(</span><span class=n>v</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>v</span><span class=p>.</span><span class=n>end</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>    <span class=n>for_each</span><span class=p>(</span><span class=n>v</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>v</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=p>[](</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>a</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>});</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>默认是按照递增排序, 如果需要递减, 则:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>sort</span><span class=p>(</span><span class=n>v</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>v</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=n>greater</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>());</span>
+</span></span></code></pre></td></tr></table></div></div><p>或者, 我们也可以实现自己定义的排序规则, 比如:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>sort</span><span class=p>(</span><span class=n>v</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>v</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=p>[](</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>,</span> <span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>a</span> <span class=o>&lt;</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><p>自定义排序函数, 在对一些复杂结构(如struct)排序时很有用, 我们可以指定排序的参考key.</p><p>再看这一段:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>for_each</span><span class=p>(</span><span class=n>v</span><span class=p>.</span><span class=n>begin</span><span class=p>(),</span> <span class=n>v</span><span class=p>.</span><span class=n>end</span><span class=p>(),</span> <span class=p>[](</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>a</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><p>借用<code>for_each</code>遍历, 使用lambda表达式, 我们可以实现很多不同的功能, 仅仅修改表达式的内容即可.</p><p>比如实现四则运算:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>unordered_map</span><span class=o>&lt;</span><span class=kt>char</span><span class=p>,</span> <span class=n>function</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>(</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span><span class=p>,</span> <span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span><span class=p>)</span><span class=o>&gt;&gt;</span> <span class=n>cal</span><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span><span class=sc>&#39;+&#39;</span><span class=p>,</span>   <span class=p>[](</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>,</span> <span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=n>a</span> <span class=o>+</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>},</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>cal</span><span class=p>[</span><span class=sc>&#39;+&#39;</span><span class=p>](</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=lambda展开>lambda展开</h3><p>lambda表达式的功能很强大, 是怎么做到的呢?</p><p>来看一个简单的例子:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;algorithm&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>lmd_func</span> <span class=o>=</span> <span class=p>[]</span> <span class=p>(</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>b</span> <span class=o>=</span> <span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span> <span class=n>lmd_ret</span> <span class=o>=</span> <span class=n>lmd_func</span><span class=p>(</span><span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>lmd_ret</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>编译过程中, 会将lambda展开, 实际上是一个类, 重载<code>()</code>运算符.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>class</span> <span class=nc>__lambda_8_21</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>        <span class=kr>inline</span> <span class=kt>int</span> <span class=k>operator</span><span class=p>()(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span> <span class=k>const</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>b</span> <span class=o>=</span> <span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>using</span> <span class=n>retType_8_21</span> <span class=o>=</span> <span class=kt>int</span> <span class=p>(</span><span class=o>*</span><span class=p>)(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=kr>inline</span> <span class=k>operator</span> <span class=n>retType_8_21</span> <span class=p>()</span> <span class=k>const</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>__invoke</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>static</span> <span class=kr>inline</span> <span class=kt>int</span> <span class=n>__invoke</span><span class=p>(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>b</span> <span class=o>=</span> <span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// inline /*constexpr */ __lambda_8_21(__lambda_8_21 &amp;&amp;) noexcept = default;
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>__lambda_8_21</span> <span class=n>lmd_func</span> <span class=o>=</span> <span class=n>__lambda_8_21</span><span class=p>(</span><span class=n>__lambda_8_21</span><span class=p>{});</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>lmd_ret</span> <span class=o>=</span> <span class=n>lmd_func</span><span class=p>.</span><span class=k>operator</span><span class=p>()(</span><span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span><span class=p>.</span><span class=k>operator</span><span class=o>&lt;&lt;</span><span class=p>(</span><span class=n>lmd_ret</span><span class=p>).</span><span class=k>operator</span><span class=o>&lt;&lt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>上面的<code>lmd_func</code>被展开成了类<code>__lambda_8_21</code>. 关注这条语句:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__lambda_8_21</span> <span class=n>lmd_func</span> <span class=o>=</span> <span class=n>__lambda_8_21</span><span class=p>(</span><span class=n>__lambda_8_21</span><span class=p>{});</span>
+</span></span></code></pre></td></tr></table></div></div><p>使用了默认构造函数, 为什么要多此一举呢? 在这里直接使用:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__lambda_8_21</span> <span class=n>lmd_func</span> <span class=o>=</span> <span class=n>__lambda_8_21</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><p>也是可以的. 但是, 如果情况稍微复杂一点, 就不能满足了. 比如我们使用捕获:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>int main()
+</span></span><span class=line><span class=cl>{
+</span></span><span class=line><span class=cl>    auto init = 3;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    auto lmd_func = [init] (const int&amp; a) {
+</span></span><span class=line><span class=cl>        int b = a * a + init;
+</span></span><span class=line><span class=cl>        return b;
+</span></span><span class=line><span class=cl>    };
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    auto lmd_ret = lmd_func(2);
+</span></span><span class=line><span class=cl>    cout &lt;&lt; lmd_ret &lt;&lt; endl;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    return 1;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>经过展开后, lambda表达式展开为:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>class</span> <span class=nc>__lambda_10_21</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=kt>int</span> <span class=k>operator</span><span class=p>()(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span> <span class=k>const</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>b</span> <span class=o>=</span> <span class=p>(</span><span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>)</span> <span class=o>+</span> <span class=n>init</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=n>init</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl><span class=c1>// inline /*constexpr */ __lambda_10_21(__lambda_10_21 &amp;&amp;) noexcept = default;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>__lambda_10_21</span><span class=p>(</span><span class=kt>int</span> <span class=o>&amp;</span> <span class=n>_init</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=n>init</span><span class=p>{</span><span class=n>_init</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>捕获变量被构造成了展开类的成员变量, 并且实现了类的带参构造函数, lambda的调用语句被展开成了:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>__lambda_10_21 lmd_func = __lambda_10_21(__lambda_10_21{init});
+</span></span></code></pre></td></tr></table></div></div><p>所以, 上述的值捕获, 在这里是通过构造函数传递给lambda表达式的.</p><blockquote><p>以上展开式使用工具<a href=https://cppinsights.io/ target=_blank rel="noopener noreffer">cppinsights</a></p></blockquote><h3 id=lambda编译期运算>lambda编译期运算</h3><blockquote><p>lambda表达式结果可以在编译期计算</p></blockquote><p>lambda表达式是可以在编译期就计算出结果的.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>auto</span> <span class=n>lmd_func</span> <span class=o>=</span> <span class=p>[]</span> <span class=p>(</span><span class=k>const</span> <span class=kt>int</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>b</span> <span class=o>=</span> <span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>上式展开得到以下的类, 我们看到了<a href=/202103/cpp-const-adconsexpr/ rel>constexpr</a>关键词, 这似乎意味lambda可以作为<a href=/202103/cpp-const-adconsexpr/ rel>constexpr</a>函数.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>class</span> <span class=nc>__lambda_7_21</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kr>inline</span> <span class=cm>/*constexpr */</span> <span class=kt>int</span> <span class=k>operator</span><span class=p>()(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span> <span class=k>const</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>b</span> <span class=o>=</span> <span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>using</span> <span class=n>retType_7_21</span> <span class=o>=</span> <span class=kt>int</span> <span class=p>(</span><span class=o>*</span><span class=p>)(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kr>inline</span> <span class=cm>/*constexpr */</span> <span class=k>operator</span> <span class=n>retType_7_21</span> <span class=p>()</span> <span class=k>const</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>__invoke</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=kr>inline</span> <span class=kt>int</span> <span class=n>__invoke</span><span class=p>(</span><span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span> <span class=n>a</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>b</span> <span class=o>=</span> <span class=n>a</span> <span class=o>*</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// /*constexpr */ __lambda_7_21() = default;
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>目前看来, C++11标准的编译器一般不会默认给lambda表达式添加上<a href=/202103/cpp-const-adconsexpr/ rel>constexpr</a>关键词.</p><p>但是C++17标准后, 给lambda表达式添加上了<a href=/202103/cpp-const-adconsexpr/ rel>constexpr</a>关键词. 所以在C++17编译条件下, 可以这样使用:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>constexpr</span> <span class=kt>int</span> <span class=n>dbl1</span> <span class=o>=</span> <span class=n>lmd_func</span><span class=p>(</span><span class=mi>3</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>这时候就已经是编译期计算, 并且将值赋值给内存.</p><p>在C++11标准为了启动优化, 我们需要加上<code>-O2</code>参数(gcc编译器). 调用接口:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=n>dbl1</span> <span class=o>=</span> <span class=n>lmd_func</span><span class=p>(</span><span class=mi>3</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>在汇编时编译器已经计算出结果, 并赋值给寄存器了(启动编译器优化后, 直接赋值给寄存器, 而不是内存).</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ASM data-lang=ASM><span class=line><span class=cl><span class=nf>mov</span>     <span class=no>esi</span><span class=p>,</span> <span class=mi>9</span>
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-05-14</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/cpp/>Cpp</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/cpp/>Cpp</a>,&nbsp;<a href=/tags/lambda/>lambda</a>,&nbsp;<a href=/tags/constexpr/>constexpr</a>,&nbsp;<a href=/tags/%E7%BC%96%E8%AF%91%E6%97%B6/>编译时</a></section></div><div class=post-nav><a href=/202102/salgo-234tree/ class=prev rel=prev title=数据结构与算法之2-3-4树><i class="fas fa-angle-left fa-fw"></i>数据结构与算法之2-3-4树</a>
+<a href=/202102/salgo-heap/ class=next rel=next title=数据结构与算法之堆>数据结构与算法之堆<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

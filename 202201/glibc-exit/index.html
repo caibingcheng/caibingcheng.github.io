@@ -1,0 +1,446 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>glibc-exit源码阅读 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="glibc-exit源码阅读"><meta property="og:description" content="glibc调用 exit
+在exit.c可以找到exit的实现。"><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202201/glibc-exit/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-01-24T11:21:36+08:00"><meta property="article:modified_time" content="2022-01-24T17:01:12+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="glibc-exit源码阅读"><meta name=twitter:description content="glibc调用 exit
+在exit.c可以找到exit的实现。"><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202201/glibc-exit/><link rel=prev href=https://imcbc.cn/202201/fund-sim/><link rel=next href=https://imcbc.cn/202201/framestack/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"glibc-exit源码阅读","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202201\/glibc-exit\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Linux, glibc","wordcount":3857,"url":"https:\/\/imcbc.cn\/202201\/glibc-exit\/","datePublished":"2022-01-24T11:21:36+08:00","dateModified":"2022-01-24T17:01:12+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>glibc-exit源码阅读<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2022-01-24>2022-01-24</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3857 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#glibc调用-exit>glibc调用 exit</a><ul><li><a href=#第一阶段>第一阶段</a></li><li><a href=#第二阶段>第二阶段</a></li><li><a href=#第三阶段>第三阶段</a></li></ul></li><li><a href=#系统调用-_exit>系统调用 _exit</a></li><li><a href=#return和exit的区别>return和exit的区别</a><ul><li><a href=#栈桢>栈桢</a></li><li><a href=#main函数>main函数</a></li></ul></li></ul></nav></div></div><div class=content id=content><h2 id=glibc调用-exit>glibc调用 exit</h2><p>在<a href=https://code.woboq.org/userspace/glibc/stdlib/exit.c.html target=_blank rel="noopener noreffer">exit.c</a>可以找到<code>exit</code>的实现。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>exit</span> <span class=p>(</span><span class=kt>int</span> <span class=n>status</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>__run_exit_handlers</span> <span class=p>(</span><span class=n>status</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>__exit_funcs</span><span class=p>,</span> <span class=nb>true</span><span class=p>,</span> <span class=nb>true</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>libc_hidden_def</span> <span class=p>(</span><span class=n>exit</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>调用glibc的<code>exit</code>相当于调用了<code>__run_exit_handlers</code>， 下面来看看<code>__run_exit_handlers</code>的实现。</p><p>先看定义：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=n>attribute_hidden</span>
+</span></span><span class=line><span class=cl><span class=n>__run_exit_handlers</span> <span class=p>(</span><span class=kt>int</span> <span class=n>status</span><span class=p>,</span> <span class=k>struct</span> <span class=n>exit_function_list</span> <span class=o>**</span><span class=n>listp</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                     <span class=kt>bool</span> <span class=n>run_list_atexit</span><span class=p>,</span> <span class=kt>bool</span> <span class=n>run_dtors</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>由此知道，调用<code>exit</code>的时候<code>run_list_atexit</code>和<code>run_dtors</code>被设置为了<code>true</code>， <code>exit_function_list</code>被设置为了<code>__exit_funcs</code>；</p><h3 id=第一阶段>第一阶段</h3><p>这个函数执行的时候，首先会判断<code>run_dtors</code>然后调用<code>__call_tls_dtors</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl>  <span class=cm>/* First, call the TLS destructors.  */</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifndef SHARED
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=k>if</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>__call_tls_dtors</span> <span class=o>!=</span> <span class=nb>NULL</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=k>if</span> <span class=p>(</span><span class=n>run_dtors</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=n>__call_tls_dtors</span> <span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><p>什么是<a href=https://gcc.gnu.org/onlinedocs/gcc/Thread-Local.html target=_blank rel="noopener noreffer">TLS</a>？网上查到一些资料说这是一种通信协议，进入<code>__call_tls_dtors</code>阅读，可以发现这里的TLS并不指代TLS协议，阅读这篇文章-<a href=https://www.cnblogs.com/stli/archive/2010/11/03/1867852.html target=_blank rel="noopener noreffer">《TLS&ndash;线程局部存储》</a>-可以对TLS有大概的了解，TLS会与写时复制（COW）比较类似，是一个全局变量，每个线程有自己的副本，从而可以保证每个线程自己修改自己的TLS变量，而不会影响其他线程的TLS变量。</p><p><code>__call_tls_dtors</code>会做什么？注释说的比较清楚了，会调用TLS的析构函数，这个析构函数负责析构<code>thread_local</code>中声明的TLS变量。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Call the destructors.  This is called either when a thread returns from the
+</span></span></span><span class=line><span class=cl><span class=cm>   initial function or when the process exits via the exit function.  */</span>
+</span></span><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>__call_tls_dtors</span> <span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>while</span> <span class=p>(</span><span class=n>tls_dtor_list</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>struct</span> <span class=n>dtor_list</span> <span class=o>*</span><span class=n>cur</span> <span class=o>=</span> <span class=n>tls_dtor_list</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>dtor_func</span> <span class=n>func</span> <span class=o>=</span> <span class=n>cur</span><span class=o>-&gt;</span><span class=n>func</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef PTR_DEMANGLE
+</span></span></span><span class=line><span class=cl><span class=cp></span>      <span class=n>PTR_DEMANGLE</span> <span class=p>(</span><span class=n>func</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>      <span class=n>tls_dtor_list</span> <span class=o>=</span> <span class=n>tls_dtor_list</span><span class=o>-&gt;</span><span class=n>next</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>func</span> <span class=p>(</span><span class=n>cur</span><span class=o>-&gt;</span><span class=n>obj</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=cm>/* Ensure that the MAP dereference happens before
+</span></span></span><span class=line><span class=cl><span class=cm>         l_tls_dtor_count decrement.  That way, we protect this access from a
+</span></span></span><span class=line><span class=cl><span class=cm>         potential DSO unload in _dl_close_worker, which happens when
+</span></span></span><span class=line><span class=cl><span class=cm>         l_tls_dtor_count is 0.  See CONCURRENCY NOTES for more detail.  */</span>
+</span></span><span class=line><span class=cl>      <span class=n>atomic_fetch_add_release</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>cur</span><span class=o>-&gt;</span><span class=n>map</span><span class=o>-&gt;</span><span class=n>l_tls_dtor_count</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=n>free</span> <span class=p>(</span><span class=n>cur</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>TLS析构函数是通过一个全局链表<code>tls_dtor_list</code>调用的，<code>tls_dtor_list</code>是什么时候初始化的呢？通过下面这个函数<code>__cxa_thread_atexit_impl</code>，并且<code>__cxa_thread_atexit_impl</code>是只被编译器调用的。（编译器什么时候会调用就暂不追踪了。）</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Register a destructor for TLS variables declared with the &#39;thread_local&#39;
+</span></span></span><span class=line><span class=cl><span class=cm>   keyword.  This function is only called from code generated by the C++
+</span></span></span><span class=line><span class=cl><span class=cm>   compiler.  FUNC is the destructor function and OBJ is the object to be
+</span></span></span><span class=line><span class=cl><span class=cm>   passed to the destructor.  DSO_SYMBOL is the __dso_handle symbol that each
+</span></span></span><span class=line><span class=cl><span class=cm>   DSO has at a unique address in its map, added from crtbegin.o during the
+</span></span></span><span class=line><span class=cl><span class=cm>   linking phase.  */</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=n>__cxa_thread_atexit_impl</span> <span class=p>(</span><span class=n>dtor_func</span> <span class=n>func</span><span class=p>,</span> <span class=kt>void</span> <span class=o>*</span><span class=n>obj</span><span class=p>,</span> <span class=kt>void</span> <span class=o>*</span><span class=n>dso_symbol</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>以上总结就是，在调用glibc-exit的时候，首先会析构所有的TLS变量。</p><h3 id=第二阶段>第二阶段</h3><p>然后是处理<code>listp</code>，会根据每个节点不同的属性调用不同函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>while</span> <span class=p>(</span><span class=nb>true</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nl>restart</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>cur</span> <span class=o>=</span> <span class=o>*</span><span class=n>listp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=n>cur</span><span class=o>-&gt;</span><span class=n>idx</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>struct</span> <span class=n>exit_function</span> <span class=o>*</span><span class=k>const</span> <span class=n>f</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>cur</span><span class=o>-&gt;</span><span class=n>fns</span><span class=p>[</span><span class=o>--</span><span class=n>cur</span><span class=o>-&gt;</span><span class=n>idx</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>const</span> <span class=kt>uint64_t</span> <span class=n>new_exitfn_called</span> <span class=o>=</span> <span class=n>__new_exitfn_called</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=cm>/* Unlock the list while we call a foreign function.  */</span>
+</span></span><span class=line><span class=cl>        <span class=n>__libc_lock_unlock</span> <span class=p>(</span><span class=n>__exit_funcs_lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>switch</span> <span class=p>(</span><span class=n>f</span><span class=o>-&gt;</span><span class=n>flavor</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>          <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span>          <span class=k>case</span> <span class=nl>ef_free</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>          <span class=k>case</span> <span class=nl>ef_us</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=k>case</span> <span class=nl>ef_on</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>onfct</span> <span class=o>=</span> <span class=n>f</span><span class=o>-&gt;</span><span class=n>func</span><span class=p>.</span><span class=n>on</span><span class=p>.</span><span class=n>fn</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef PTR_DEMANGLE
+</span></span></span><span class=line><span class=cl><span class=cp></span>            <span class=n>PTR_DEMANGLE</span> <span class=p>(</span><span class=n>onfct</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>            <span class=n>onfct</span> <span class=p>(</span><span class=n>status</span><span class=p>,</span> <span class=n>f</span><span class=o>-&gt;</span><span class=n>func</span><span class=p>.</span><span class=n>on</span><span class=p>.</span><span class=n>arg</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=k>case</span> <span class=nl>ef_at</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>atfct</span> <span class=o>=</span> <span class=n>f</span><span class=o>-&gt;</span><span class=n>func</span><span class=p>.</span><span class=n>at</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef PTR_DEMANGLE
+</span></span></span><span class=line><span class=cl><span class=cp></span>            <span class=n>PTR_DEMANGLE</span> <span class=p>(</span><span class=n>atfct</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>            <span class=n>atfct</span> <span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=k>case</span> <span class=nl>ef_cxa</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=cm>/* To avoid dlclose/exit race calling cxafct twice (BZ 22180),
+</span></span></span><span class=line><span class=cl><span class=cm>                we must mark this function as ef_free.  */</span>
+</span></span><span class=line><span class=cl>            <span class=n>f</span><span class=o>-&gt;</span><span class=n>flavor</span> <span class=o>=</span> <span class=n>ef_free</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>cxafct</span> <span class=o>=</span> <span class=n>f</span><span class=o>-&gt;</span><span class=n>func</span><span class=p>.</span><span class=n>cxa</span><span class=p>.</span><span class=n>fn</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef PTR_DEMANGLE
+</span></span></span><span class=line><span class=cl><span class=cp></span>            <span class=n>PTR_DEMANGLE</span> <span class=p>(</span><span class=n>cxafct</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>            <span class=n>cxafct</span> <span class=p>(</span><span class=n>f</span><span class=o>-&gt;</span><span class=n>func</span><span class=p>.</span><span class=n>cxa</span><span class=p>.</span><span class=n>arg</span><span class=p>,</span> <span class=n>status</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=cm>/* Re-lock again before looking at global state.  */</span>
+</span></span><span class=line><span class=cl>        <span class=n>__libc_lock_lock</span> <span class=p>(</span><span class=n>__exit_funcs_lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>__glibc_unlikely</span> <span class=p>(</span><span class=n>new_exitfn_called</span> <span class=o>!=</span> <span class=n>__new_exitfn_called</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>          <span class=cm>/* The last exit function, or another thread, has registered
+</span></span></span><span class=line><span class=cl><span class=cm>              more exit functions.  Start the loop over.  */</span>
+</span></span><span class=line><span class=cl>          <span class=k>goto</span> <span class=n>restart</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里需要关注的是<code>__exit_funcs</code>，<code>__exit_funcs</code>是怎么初始化的？</p><p>在<a href=https://code.woboq.org/userspace/glibc/stdlib/cxa_atexit.c.html target=_blank rel="noopener noreffer">cxa_atexit.c</a>可以找到对<code>__exit_funcs</code>的初始化。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Register a function to be called by exit or when a shared library
+</span></span></span><span class=line><span class=cl><span class=cm>   is unloaded.  This function is only called from code generated by
+</span></span></span><span class=line><span class=cl><span class=cm>   the C++ compiler.  */</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>__cxa_atexit</span> <span class=p>(</span><span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=n>func</span><span class=p>)</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=p>),</span> <span class=kt>void</span> <span class=o>*</span><span class=n>arg</span><span class=p>,</span> <span class=kt>void</span> <span class=o>*</span><span class=n>d</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>__internal_atexit</span> <span class=p>(</span><span class=n>func</span><span class=p>,</span> <span class=n>arg</span><span class=p>,</span> <span class=n>d</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>__exit_funcs</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>libc_hidden_def</span> <span class=p>(</span><span class=n>__cxa_atexit</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>和第一阶段类似，<code>__exit_funcs</code>初始化也是编译器的行为，具体会把哪些函数串在这个链表上呢？暂时不追踪了。</p><p>同时，也提供了用户接口，用户可以自定义一些在<code>exit</code>时执行的函数，下面这一段在<a href=https://code.woboq.org/userspace/glibc/stdlib/on_exit.c.html target=_blank rel="noopener noreffer">on_exit.c</a>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Register a function to be called by exit.  */</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>__on_exit</span> <span class=p>(</span><span class=kt>void</span> <span class=p>(</span><span class=o>*</span><span class=n>func</span><span class=p>)</span> <span class=p>(</span><span class=kt>int</span> <span class=n>status</span><span class=p>,</span> <span class=kt>void</span> <span class=o>*</span><span class=n>arg</span><span class=p>),</span> <span class=kt>void</span> <span class=o>*</span><span class=n>arg</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>exit_function</span> <span class=o>*</span><span class=n>new</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* As a QoI issue we detect NULL early with an assertion instead
+</span></span></span><span class=line><span class=cl><span class=cm>     of a SIGSEGV at program exit when the handler is run (bug 20544).  */</span>
+</span></span><span class=line><span class=cl>  <span class=n>assert</span> <span class=p>(</span><span class=n>func</span> <span class=o>!=</span> <span class=nb>NULL</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>   <span class=n>__libc_lock_lock</span> <span class=p>(</span><span class=n>__exit_funcs_lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>new</span> <span class=o>=</span> <span class=n>__new_exitfn</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>__exit_funcs</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>new</span> <span class=o>==</span> <span class=nb>NULL</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>__libc_lock_unlock</span> <span class=p>(</span><span class=n>__exit_funcs_lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef PTR_MANGLE
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=n>PTR_MANGLE</span> <span class=p>(</span><span class=n>func</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=n>new</span><span class=o>-&gt;</span><span class=n>func</span><span class=p>.</span><span class=n>on</span><span class=p>.</span><span class=n>fn</span> <span class=o>=</span> <span class=n>func</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>new</span><span class=o>-&gt;</span><span class=n>func</span><span class=p>.</span><span class=n>on</span><span class=p>.</span><span class=n>arg</span> <span class=o>=</span> <span class=n>arg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>new</span><span class=o>-&gt;</span><span class=n>flavor</span> <span class=o>=</span> <span class=n>ef_on</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>__libc_lock_unlock</span> <span class=p>(</span><span class=n>__exit_funcs_lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>weak_alias</span> <span class=p>(</span><span class=n>__on_exit</span><span class=p>,</span> <span class=n>on_exit</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>总之，第二阶段也是会执行一些编译器或用户注册的函数。</p><h3 id=第三阶段>第三阶段</h3><p>最后判断<code>run_list_atexit</code>调用<code>__libc_atexit</code>和<code>_exit</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>run_list_atexit</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=n>RUN_HOOK</span> <span class=p>(</span><span class=n>__libc_atexit</span><span class=p>,</span> <span class=p>());</span>
+</span></span><span class=line><span class=cl><span class=n>_exit</span> <span class=p>(</span><span class=n>status</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里关注两个函数<code>__libc_atexit</code>和<code>_exit</code>。</p><p>在<a href=https://code.woboq.org/userspace/glibc/libio/genops.c.html target=_blank rel="noopener noreffer">genops.c</a>可以找到对<code>__libc_atexit</code>的说明。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>text_set_element</span><span class=p>(</span><span class=n>__libc_atexit</span><span class=p>,</span> <span class=n>_IO_cleanup</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>原来<code>__libc_atexit</code>绑定的是一个叫<code>_IO_cleanup</code>的函数，这里就可以猜到，此时会做一些IO清理相关的工作。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>_IO_cleanup</span> <span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* We do *not* want locking.  Some threads might use streams but
+</span></span></span><span class=line><span class=cl><span class=cm>     that is their problem, we flush them underneath them.  */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>result</span> <span class=o>=</span> <span class=n>_IO_flush_all_lockp</span> <span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* We currently don&#39;t have a reliable mechanism for making sure that
+</span></span></span><span class=line><span class=cl><span class=cm>     C++ static destructors are executed in the correct order.
+</span></span></span><span class=line><span class=cl><span class=cm>     So it is possible that other static destructors might want to
+</span></span></span><span class=line><span class=cl><span class=cm>     write to cout - and they&#39;re supposed to be able to do so.
+</span></span></span><span class=line><span class=cl><span class=cm>     The following will make the standard streambufs be unbuffered,
+</span></span></span><span class=line><span class=cl><span class=cm>     which forces any output from late destructors to be written out. */</span>
+</span></span><span class=line><span class=cl>  <span class=n>_IO_unbuffer_all</span> <span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>什么是IO清理相关的工作？比如使用glibc标准stream函数，一般是有IO缓存的，比如读写文件或者标准输入输出，因为需要考虑IO性能和CPU性能的差距，会缓存一段buffer，这段buffer满或者外部触发时就可以出发写入或者读出操作了。</p><p>在调用<code>exit</code>的时候相当于手动将这些缓存buffer输出了。</p><p><code>_exit</code>则是系统调用，会引导退出进程。</p><h2 id=系统调用-_exit>系统调用 _exit</h2><p><code>_exit</code>源码大概在<a href=https://code.woboq.org/userspace/glibc/sysdeps/unix/sysv/linux/i386/_exit.S.html target=_blank rel="noopener noreffer">_exit.S</a>，但是看不太懂&mldr;可以另外关注<a href=https://man7.org/linux/man-pages/man2/exit.2.html target=_blank rel="noopener noreffer">man7</a>的说明：</p><blockquote><p>_exit() terminates the calling process &ldquo;immediately&rdquo;. Any open
+file descriptors belonging to the process are closed. Any
+children of the process are inherited by init(1) (or by the
+nearest &ldquo;subreaper&rdquo; process as defined through the use of the
+prctl(2) PR_SET_CHILD_SUBREAPER operation). The process&rsquo;s parent
+is sent a SIGCHLD signal.</p><p>The value status & 0xFF is returned to the parent process as the
+process&rsquo;s exit status, and can be collected by the parent using
+one of the wait(2) family of calls.</p><p>The function _Exit() is equivalent to _exit().</p></blockquote><p>意思是：</p><ol><li><code>_exit</code>会立刻中断当前进程</li><li>关闭所有属于该进程的文件</li><li>将该进程的所有子进程移交给<code>init</code>进程，这里可以看到例子<a href=/202104/process-ctracon1/#fork rel>《进程控制和通信(一) · 进程控制》</a></li><li>给该进程的父进程发送<code>SIGCHLD</code>信号</li><li><code>_exit</code>的参数<code>status</code>会被返回给父进程，可以被父进程的<code>wait</code>函数接收。</li></ol><blockquote><p>In glibc up to version 2.3, the _exit() wrapper function invoked
+the kernel system call of the same name. Since glibc 2.3, the
+wrapper function invokes exit_group(2), in order to terminate all
+of the threads in a process.</p><p>The raw _exit() system call terminates only the calling thread,
+and actions such as reparenting child processes or sending
+SIGCHLD to the parent process are performed only if this is the
+last thread in the thread group.</p></blockquote><p>glibc调用的<code>_exit</code>会被映射到<code>exit_group</code>，<code>exit_group</code>会中断进程的所有线程，这里和group id有关，在这篇文章中<a href=/202105/process-ctracon4/#%e4%bb%bb%e5%8a%a1id rel>《进程控制和通信(四) · PCB介绍》</a>已经介绍过了，在当前多任务Linux系统中，进程ID指<code>task_struct</code>中的<code>tgid</code>（thread group id），线程id则指<code>pid</code>（process id），有一点区别，主要是为了兼容。</p><p>原生的系统调用<code>_exit</code>只会中断当前的线程，并且仅当当前线程是进程的最后一个线程的时候才会有上述诸如发送<code>SIGCHLD</code>的操作。</p><h2 id=return和exit的区别>return和exit的区别</h2><h3 id=栈桢>栈桢</h3><p>先看一段关于<code>return</code>的代码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>void</span> <span class=nf>func1</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>func2</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>func3</span><span class=p>(</span><span class=kt>int</span> <span class=n>v</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>v</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>v</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>func1</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>func2</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>func3</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>func1</code>翻译成汇编是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl> <span class=n>push</span>   <span class=n>rbp</span>
+</span></span><span class=line><span class=cl> <span class=n>mov</span>    <span class=n>rbp</span><span class=p>,</span><span class=n>rsp</span>
+</span></span><span class=line><span class=cl> <span class=n>pop</span>    <span class=n>rbp</span>
+</span></span><span class=line><span class=cl> <span class=n>ret</span>
+</span></span><span class=line><span class=cl> <span class=n>cs</span> <span class=n>nop</span> <span class=n>WORD</span> <span class=n>PTR</span> <span class=p>[</span><span class=n>rax</span><span class=o>+</span><span class=n>rax</span><span class=o>*</span><span class=mi>1</span><span class=o>+</span><span class=mh>0x0</span><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><p>函数入口处是保存上一个栈帧<code>rbp</code>，然后将当前栈地址赋值给栈帧寄存器<code>rbp</code>。函数退出时会将父栈帧地址<code>pop</code>给栈帧寄存器<code>rbp</code>。</p><p><code>func2</code>翻译成汇编是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl> <span class=n>push</span>   <span class=n>rbp</span>
+</span></span><span class=line><span class=cl> <span class=n>mov</span>    <span class=n>rbp</span><span class=p>,</span><span class=n>rsp</span>
+</span></span><span class=line><span class=cl> <span class=n>mov</span>    <span class=n>eax</span><span class=p>,</span><span class=mh>0x1</span>
+</span></span><span class=line><span class=cl> <span class=n>pop</span>    <span class=n>rbp</span>
+</span></span><span class=line><span class=cl> <span class=n>ret</span>
+</span></span><span class=line><span class=cl> <span class=n>nop</span>    <span class=n>DWORD</span> <span class=n>PTR</span> <span class=p>[</span><span class=n>rax</span><span class=o>+</span><span class=n>rax</span><span class=o>*</span><span class=mi>1</span><span class=o>+</span><span class=mh>0x0</span><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><p>函数入口处是保存上一个栈帧<code>rbp</code>，然后将当前栈地址赋值给栈帧寄存器<code>rbp</code>。函数退出时，会将返回值赋值给寄存器<code>eax</code>，再将父栈帧地址<code>pop</code>给栈帧寄存器<code>rbp</code>。</p><p><code>func3</code>翻译成汇编是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl> <span class=n>push</span>   <span class=n>rbp</span>
+</span></span><span class=line><span class=cl> <span class=n>mov</span>    <span class=n>rbp</span><span class=p>,</span><span class=n>rsp</span>
+</span></span><span class=line><span class=cl> <span class=n>mov</span>    <span class=n>DWORD</span> <span class=n>PTR</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mh>0x4</span><span class=p>],</span><span class=n>edi</span>
+</span></span><span class=line><span class=cl> <span class=n>mov</span>    <span class=n>eax</span><span class=p>,</span><span class=n>DWORD</span> <span class=n>PTR</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mh>0x4</span><span class=p>]</span>
+</span></span><span class=line><span class=cl> <span class=n>add</span>    <span class=n>eax</span><span class=p>,</span><span class=mh>0x1</span>
+</span></span><span class=line><span class=cl> <span class=n>mov</span>    <span class=n>DWORD</span> <span class=n>PTR</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mh>0x4</span><span class=p>],</span><span class=n>eax</span>
+</span></span><span class=line><span class=cl> <span class=n>mov</span>    <span class=n>eax</span><span class=p>,</span><span class=n>DWORD</span> <span class=n>PTR</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mh>0x4</span><span class=p>]</span>
+</span></span><span class=line><span class=cl> <span class=n>pop</span>    <span class=n>rbp</span>
+</span></span><span class=line><span class=cl> <span class=n>ret</span>
+</span></span><span class=line><span class=cl> <span class=n>cs</span> <span class=n>nop</span> <span class=n>WORD</span> <span class=n>PTR</span> <span class=p>[</span><span class=n>rax</span><span class=o>+</span><span class=n>rax</span><span class=o>*</span><span class=mi>1</span><span class=o>+</span><span class=mh>0x0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl> <span class=n>nop</span>
+</span></span></code></pre></td></tr></table></div></div><p>函数入口处是保存上一个栈帧<code>rbp</code>，然后将当前栈地址赋值给栈帧寄存器<code>rbp</code>，然后将函数入参赋值给<code>[rbp-0x4]</code>，因为只有一个参数，所以对应的是栈帧的前4个字节。函数执行时，从<code>[rbp-0x4]</code>取出值给累加器<code>eax</code>，然后累加器<code>eax</code>做<code>+1</code>操作，再将结果返回给<code>[rbp-0x4]</code>。函数退出时，从<code>[rbp-0x4]</code>取值，将返回值赋值给寄存器<code>eax</code>，再将父栈帧地址<code>pop</code>给栈帧寄存器<code>rbp</code>。</p><p>所以<code>return</code>是什么？</p><p><code>return</code>可以将返回值保存在某寄存器，然后将父栈帧弹出，对应的就是赋值/出栈操作。这里介绍的不太仔细，但是对我们目前的问题够用了，不过也算是查漏补缺了（TODO：函数栈帧具体过程，如果只需要大概了解，也可以参考<a href=/202108/sicp-python-read1/ rel>《《UCB CS61a SICP Python 中文》一周目笔记(一)》</a>）。此外，本节内容还参考了：</p><ol><li><a href=https://zhuanlan.zhihu.com/p/27339191 target=_blank rel="noopener noreffer">《x86-64 下函数调用及栈帧原理》</a></li><li><a href=https://zhuanlan.zhihu.com/p/55896356 target=_blank rel="noopener noreffer">《手撕虚拟内存（8）——函数栈桢原理》</a></li></ol><p>所以，<code>return</code>和<code>exit</code>的区别之一： <code>return</code>负责了一些栈桢的退出操作，<code>exit</code>负责程序/进程方面的退出操作。</p><h3 id=main函数>main函数</h3><p>再说到<code>return</code>和<code>exit</code>区别的时候，还想到一个问题，<code>main</code>的<code>return</code>就是进程的退出吗？要回答这个问题得先了解<code>main</code>是怎么执行的。</p><p>程序的入口函数是哪里？是<code>main</code>吗？</p><p>不是的，程序的入口函数是<code>_start</code>，这是<code>glibc</code>约定的入口，可以参考这里<a href=https://stackoverflow.com/questions/29694564/what-is-the-use-of-start-in-c target=_blank rel="noopener noreffer">what-is-the-use-of-start-in-c</a>。</p><p>入口函数的定义看<a href=https://code.woboq.org/userspace/glibc/sysdeps/x86_64/start.S.html#58 target=_blank rel="noopener noreffer">start.S</a>，这里就不贴代码了，在<code>_start</code>开始会做一些初始化工作，比如初始化栈帧，其他的也看不太懂了，不过在<code>_start</code>最后会调用一个函数<code>call *__libc_start_main@GOTPCREL(%rip)</code>，这个函数指向<a href=https://code.woboq.org/userspace/glibc/csu/libc-start.c.html#93 target=_blank rel="noopener noreffer">libc-start.c</a>。在<code>__libc_start_main</code>会做一些准备工作，比如收集输入参数<code>argc</code>和<code>argv</code>，然后会调用用户定义的<code>main</code>函数，最后会用<code>main</code>的返回值调用<code>exit</code>函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Nothing fancy, just call the function.  */</span>
+</span></span><span class=line><span class=cl><span class=n>result</span> <span class=o>=</span> <span class=n>main</span> <span class=p>(</span><span class=n>argc</span><span class=p>,</span> <span class=n>argv</span><span class=p>,</span> <span class=n>__environ</span> <span class=n>MAIN_AUXVEC_PARAM</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>exit</span> <span class=p>(</span><span class=n>result</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里有几点启发：</p><ol><li>在<code>main</code>函数调用<code>return</code>和<code>exit</code>没有太大区别</li><li>正常情况<code>main</code>函数最好返回0（因为C语言一般用0表示Success）, 而不是1（我大部分时候喜欢返回1）</li></ol></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-01-24</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/>操作系统</a>,&nbsp;<a href=/categories/glibc/>glibc</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/linux/>Linux</a>,&nbsp;<a href=/tags/glibc/>glibc</a></section></div><div class=post-nav><a href=/202201/fund-sim/ class=prev rel=prev title=几种定投策略的仿真比较><i class="fas fa-angle-left fa-fw"></i>几种定投策略的仿真比较</a>
+<a href=/202201/framestack/ class=next rel=next title=程序的栈帧>程序的栈帧<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

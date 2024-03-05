@@ -1,0 +1,322 @@
+<title>HIIT运动计时器</title>
+
+<style>
+    html {
+        background-color: #fff;
+        padding: 0 0;
+        margin: 0 0;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    body {
+        background-color: #fff;
+        text-align: center;
+        font-family: sans-serif;
+        font-weight: 300;
+        padding: 0 0;
+        margin: 0 0;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #clockdiv {
+        font-family: sans-serif;
+        color: #00816a;
+        display: inline-block;
+        text-align: center;
+        font-size: 100px;
+        margin: 50px 0;
+        cursor: pointer;
+    }
+
+    #clockdiv>div {
+        width: 240px;
+        height: 180px;
+        font-size: 200px;
+        line-height: 150px;
+        padding: 10px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    #clockdiv div>span {
+        padding: 15px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    #restart {
+        font-family: sans-serif;
+        display: inline-block;
+        background: #00816a;
+        text-align: center;
+        font-size: 20px;
+        color: #fff;
+        margin: 50px 0;
+    }
+
+    #headmsg {
+        display: block;
+        font-size: 80px;
+        margin-bottom: 20px;
+    }
+
+    .wrap {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        padding: 10px;
+    }
+
+    .box {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .fullscreen_box {
+        display: flex;
+        justify-content: space-between;
+        width: inherit;
+        height: 30%;
+    }
+
+    .fullscreen {
+        width: 30%;
+        border-style: solid;
+        border-color: black;
+        box-sizing: border-box;
+    }
+
+    .b1 {
+        border-width: 2px 0 0 2px;
+    }
+
+    .b2 {
+        border-width: 2px 2px 0 0;
+    }
+
+    .b3 {
+        border-width: 0 0 2px 2px;
+    }
+
+    .b4 {
+        border-width: 0 2px 2px 0;
+    }
+
+    .help {
+        position: absolute;
+        top: 5px;
+        right: 45px;
+        padding: 10px;
+        font-size: 20px;
+        text-align: center;
+        vertical-align: center;
+        line-height: 20px;
+        width: 20px;
+        height: 20px;
+        font-weight: bolder;
+        cursor: pointer;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+
+<body>
+    <div class="help" title="帮助">?</div>
+    <div class="wrap" title="全屏">
+        <div class="box" onclick="toggleFullScreen();">
+            <div class="fullscreen_box">
+                <div class="fullscreen b1"></div>
+                <div class="fullscreen b2"></div>
+            </div>
+            <div class="fullscreen_box">
+                <div class="fullscreen b3"></div>
+                <div class="fullscreen b4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="clockdiv">
+        <span id="headmsg"></span>
+        <div>
+            <span class="hours"></span>
+        </div>
+        .
+        <div>
+            <span class="minutes"></span>
+        </div>
+        .
+        <div>
+            <span class="seconds"></span>
+        </div>
+    </div>
+</body>
+
+<script>
+    var clockdiv = document.getElementById('clockdiv');
+    var headmsg = document.getElementById('headmsg');
+    var groups = 0;
+
+    var start_sound = new Howl({
+        src: ['/statics/timereach1.mp3'],
+    });
+    var end_sound = new Howl({
+        src: ['/statics/timereach2.mp3'],
+    });
+
+    function getTimeRemaining(endtime) {
+        function max(a, b) {
+            if (a > b) return a;
+            return b;
+        }
+
+        const total = max(Date.parse(endtime) - Date.parse(new Date()), 0);
+        const seconds = Math.floor((total / 1000) % 60);
+        const minutes = Math.floor((total / 1000 / 60) % 60);
+        const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+
+        return {
+            total,
+            hours,
+            minutes,
+            seconds,
+        };
+    }
+
+    function clearAll() {
+        for (let i = 1; i < 10000; i++) {
+            clearInterval(i);
+            clearTimeout(i);
+        }
+    }
+
+    function initializeClock(id, time, initialize) {
+        if (time.length <= 0) {
+            clearAll();
+            return;
+        }
+
+        let index = groups * 2 - time.length;
+        let hiit_part = (time.length % 2 == 0) ? '运动时间' : '休息时间';
+        headmsg.innerText = '第' + (parseInt(index / 2) + 1) + '/' + groups + '组 - ' + hiit_part;
+
+        let endtime = time.pop();
+        endtime = new Date(
+            Date.parse(new Date()) + endtime * 1000
+        );
+        const clock = document.getElementById(id);
+        const hoursSpan = clock.querySelector(".hours");
+        const minutesSpan = clock.querySelector(".minutes");
+        const secondsSpan = clock.querySelector(".seconds");
+
+        function updateClock() {
+            const t = getTimeRemaining(endtime);
+
+            hoursSpan.innerHTML = ("0" + t.hours).slice(-2);
+            minutesSpan.innerHTML = ("0" + t.minutes).slice(-2);
+            secondsSpan.innerHTML = ("0" + t.seconds).slice(-2);
+
+            if (t.total <= 0) {
+                clearAll();
+                (time.length % 2 == 0) ? start_sound.play() : end_sound.play();
+                setTimeout(() => {
+                    initializeClock(id, time, initialize);
+                }, 5000);
+                return;
+            }
+        }
+
+        updateClock();
+
+        if (initialize == false) {
+            const timeinterval = setInterval(updateClock, 1000);
+        }
+    }
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return (false);
+    }
+
+    let time = getQueryVariable("time");
+    if (time) {
+        time = eval(time);
+    } else { }
+
+    if (time.length == 2) {
+        time.push(1);
+    }
+
+    let loop_times = time.pop();
+    groups = loop_times;
+    time.reverse();
+    let time_tmp = time;
+    while (--loop_times > 0) {
+        time = time.concat(time_tmp);
+    }
+
+    function start(initialize) {
+        clearAll();
+        initializeClock("clockdiv", Array.from(time), initialize);
+    }
+
+    start(true);
+    clockdiv.addEventListener("click", () => {
+        start(false);
+    });
+
+    let fullscreens = document.getElementsByClassName('fullscreen');
+    let fullscreens_arr = ['fullscreen b1', 'fullscreen b2', 'fullscreen b3', 'fullscreen b4'];
+    function toggleFullScreen() {
+        if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            }
+            for (let i = 0; i < fullscreens.length; i++) {
+                fullscreens[i].className = fullscreens_arr[3 - i];
+            }
+        } else {
+            if (document.cancelFullScreen) {
+                document.cancelFullScreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            }
+            for (let i = 0; i < fullscreens.length; i++) {
+                fullscreens[i].className = fullscreens_arr[i]
+            }
+        }
+    }
+    
+    document.getElementsByClassName('help')[0].addEventListener("click", () => {
+        alert(help());
+    });
+    function help() {
+        return '该工具用作HIIT运动时计时器。\n' + 
+               '可以定义运动时间、休息时间、运动组数。\n' +
+               '通过地址栏time字段定义参数，如：\n' +
+               'time=[120,30,3] 表示运动 120 秒，休息 30 秒，做 3 组\n' +
+               'time=[120,30] 表示运动 120 秒，休息 30 秒，做 1 组\n'
+            + '';
+    }
+</script>

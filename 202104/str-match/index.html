@@ -1,0 +1,345 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>数据结构与算法之字符串匹配 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="数据结构与算法之字符串匹配"><meta property="og:description" content="先约定两个概念, 主串和模式串.
+比如在S字符串中查找s字符串, 则S是主串, s是模式串."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202104/str-match/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-04-06T10:58:59+08:00"><meta property="article:modified_time" content="2021-04-07T19:54:29+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="数据结构与算法之字符串匹配"><meta name=twitter:description content="先约定两个概念, 主串和模式串.
+比如在S字符串中查找s字符串, 则S是主串, s是模式串."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202104/str-match/><link rel=prev href=https://imcbc.cn/202103/c-strcut-bits/><link rel=next href=https://imcbc.cn/202104/pandt-what/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"数据结构与算法之字符串匹配","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202104\/str-match\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"字符串, BF, BM, Cpp","wordcount":4079,"url":"https:\/\/imcbc.cn\/202104\/str-match\/","datePublished":"2021-04-06T10:58:59+08:00","dateModified":"2021-04-07T19:54:29+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>数据结构与算法之字符串匹配<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-04-06>2021-04-06</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4079 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#bf>BF</a></li><li><a href=#bm>BM</a><ul><li><a href=#坏字符原则>坏字符原则</a></li><li><a href=#好前缀原则>好前缀原则</a></li><li><a href=#对bm两条原则的思考>对BM两条原则的思考</a></li><li><a href=#bm代码实现>BM代码实现</a><ul><li><a href=#坏字符的代码实现>坏字符的代码实现</a></li><li><a href=#好前缀的代码实现>好前缀的代码实现</a></li><li><a href=#bm完整代码>BM完整代码</a></li></ul></li></ul></li></ul></nav></div></div><div class=content id=content><p>先约定两个概念, 主串和模式串.</p><p>比如在<code>S</code>字符串中查找<code>s</code>字符串, 则<code>S</code>是主串, <code>s</code>是模式串.</p><p>如下, 在主串中搜索"cdf"模式串:</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87aaf01651.png title=&amp;ldquo;主串和模式串&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87aaf01651.png data-sub-html="<h2>主串和模式串</h2><p>&amp;ldquo;主串和模式串&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87aaf01651.png data-srcset="https://bu.dusays.com/2022/06/26/62b87aaf01651.png, https://bu.dusays.com/2022/06/26/62b87aaf01651.png 1.5x, https://bu.dusays.com/2022/06/26/62b87aaf01651.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87aaf01651.png></a><figcaption class=image-caption>主串和模式串</figcaption></figure></p><h2 id=bf>BF</h2><p>暴力匹配是很朴素的字符串匹配算法, 将主串中的字符与模式串的字符一个一个匹配, 如果遇到不匹配的字符对则主串向后滑动一个字符, 从头开始匹配:</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87ab12bd8c.png title=&amp;ldquo;暴力匹配&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87ab12bd8c.png data-sub-html="<h2>暴力匹配</h2><p>&amp;ldquo;暴力匹配&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87ab12bd8c.png data-srcset="https://bu.dusays.com/2022/06/26/62b87ab12bd8c.png, https://bu.dusays.com/2022/06/26/62b87ab12bd8c.png 1.5x, https://bu.dusays.com/2022/06/26/62b87ab12bd8c.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87ab12bd8c.png></a><figcaption class=image-caption>暴力匹配</figcaption></figure></p><p>代码实现如下, <code>strStr</code>的作用是从<code>haystack</code>字符串中找到<code>needle</code>字符串首次出现的位置, 如果没有找到则返回-1. (LC.28)</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>strStr</span><span class=p>(</span><span class=n>string</span> <span class=n>haystack</span><span class=p>,</span> <span class=n>string</span> <span class=n>needle</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>needle</span><span class=p>.</span><span class=n>empty</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>sh</span> <span class=o>=</span> <span class=n>haystack</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>sn</span> <span class=o>=</span> <span class=n>needle</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>sh</span> <span class=o>&lt;</span> <span class=n>sn</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=p>(</span><span class=n>sh</span> <span class=o>-</span> <span class=n>sn</span><span class=p>);</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=n>sn</span><span class=p>;</span> <span class=n>j</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>haystack</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=n>j</span><span class=p>]</span> <span class=o>!=</span> <span class=n>needle</span><span class=p>[</span><span class=n>j</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>j</span> <span class=o>&gt;=</span> <span class=n>sn</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>记主串长度为m, 模式串长度为n, 可以得到暴力匹配的时间复杂度是$O(mn)$, 空间复杂度是$O(1)$;</p><h2 id=bm>BM</h2><p>暴力匹配没有用到主串的一些先验信息. 假设模式串首字符是&rsquo;a&rsquo;, 我们可以记住主串中&rsquo;a&rsquo;出现的位置, 然后用主串中&rsquo;a&rsquo;出现的位置与模式串匹配, 这样可以减少一些比较次数. (实际上最差时间复杂度也没有提高.)</p><p>接下来的BM就用到了主串和模式串中的一些先验信息, 提高空间复杂度, 但是降低了时间复杂度, 不同于暴力匹配, BM算法是从右向左遍历. 为什么需要从右向左遍历呢? 先来看看BM算法的两条规则.</p><h3 id=坏字符原则>坏字符原则</h3><p>对模式串, 从右向左匹配, 如果是错误匹配, 则记主串的字符a, 在模式串中从右向左查找下一个与主串字符a匹配的字符, 再将模式串移动到这个位置. 如果没有找到, 则将整个模式串移动到这个字符后面.</p><p>如下:</p><ol><li>从右向左, 主串&rsquo;d&rsquo;与模式串&rsquo;f&rsquo;不匹配, 则在模式串中从右向左找到下一个与主串&rsquo;d&rsquo;匹配的字符;</li><li>将模式串的下一个与主串&rsquo;d&rsquo;匹配的字符对齐;</li></ol><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87ab34403f.png title=&amp;ldquo;BM-坏字符原则一&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87ab34403f.png data-sub-html="<h2>BM-坏字符原则一</h2><p>&amp;ldquo;BM-坏字符原则一&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87ab34403f.png data-srcset="https://bu.dusays.com/2022/06/26/62b87ab34403f.png, https://bu.dusays.com/2022/06/26/62b87ab34403f.png 1.5x, https://bu.dusays.com/2022/06/26/62b87ab34403f.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87ab34403f.png></a><figcaption class=image-caption>BM-坏字符原则一</figcaption></figure></p><ol start=3><li>从右向左, 主串&rsquo;c&rsquo;与模式串&rsquo;f&rsquo;不匹配, 则在模式串中从右向左找到下一个与主串&rsquo;c&rsquo;匹配的字符;</li><li>将模式串的下一个与主串&rsquo;c&rsquo;匹配的字符对齐;</li></ol><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87ab57f112.png title=&amp;ldquo;BM-坏字符原则二&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87ab57f112.png data-sub-html="<h2>BM-坏字符原则二</h2><p>&amp;ldquo;BM-坏字符原则二&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87ab57f112.png data-srcset="https://bu.dusays.com/2022/06/26/62b87ab57f112.png, https://bu.dusays.com/2022/06/26/62b87ab57f112.png 1.5x, https://bu.dusays.com/2022/06/26/62b87ab57f112.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87ab57f112.png></a><figcaption class=image-caption>BM-坏字符原则二</figcaption></figure></p><ol><li>模式串匹配成功.</li></ol><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87ab7984bb.png title=&amp;ldquo;BM-坏字符原则三&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87ab7984bb.png data-sub-html="<h2>BM-坏字符原则三</h2><p>&amp;ldquo;BM-坏字符原则三&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87ab7984bb.png data-srcset="https://bu.dusays.com/2022/06/26/62b87ab7984bb.png, https://bu.dusays.com/2022/06/26/62b87ab7984bb.png 1.5x, https://bu.dusays.com/2022/06/26/62b87ab7984bb.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87ab7984bb.png></a><figcaption class=image-caption>BM-坏字符原则三</figcaption></figure></p><p>对BF中匹配的例子来说, 使用BM的坏字符原则, 可以减少匹配次数:</p><ol><li>从右向左, 主串&rsquo;d&rsquo;与模式串&rsquo;f&rsquo;不匹配, 则在模式串中从右向左找到下一个与主串&rsquo;d&rsquo;匹配的字符;</li><li>将模式串的下一个与主串&rsquo;d&rsquo;匹配的字符对齐;</li><li>从右向左, 主串&rsquo;c&rsquo;与模式串&rsquo;f&rsquo;不匹配, 则在模式串中从右向左找到下一个与主串&rsquo;c&rsquo;匹配的字符;</li><li>将模式串的下一个与主串&rsquo;c&rsquo;匹配的字符对齐;</li><li>从右向左, 主串&rsquo;c&rsquo;与模式串&rsquo;f&rsquo;不匹配, 则在模式串中从右向左找到下一个与主串&rsquo;c&rsquo;匹配的字符;</li><li>将模式串的下一个与主串&rsquo;c&rsquo;匹配的字符对齐;</li><li>模式串匹配成功.</li></ol><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87ab9a2a72.png title=&amp;ldquo;BM与BF比较&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87ab9a2a72.png data-sub-html="<h2>BM与BF比较</h2><p>&amp;ldquo;BM与BF比较&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87ab9a2a72.png data-srcset="https://bu.dusays.com/2022/06/26/62b87ab9a2a72.png, https://bu.dusays.com/2022/06/26/62b87ab9a2a72.png 1.5x, https://bu.dusays.com/2022/06/26/62b87ab9a2a72.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87ab9a2a72.png></a><figcaption class=image-caption>BM与BF比较</figcaption></figure></p><p>再看一个特殊的例子:</p><p>首先, 按照坏字符原则, 从右向左, 主串&rsquo;d&rsquo;与模式串&rsquo;c&rsquo;不匹配, 则在模式串中从右向左找到下一个与主串&rsquo;d&rsquo;匹配的字符, 没有找到则将模式串移动到主串&rsquo;d&rsquo;后面:<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87abbb3824.png title=&amp;ldquo;BM-坏字符原则三&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87abbb3824.png data-sub-html="<h2>BM-坏字符原则三</h2><p>&amp;ldquo;BM-坏字符原则三&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87abbb3824.png data-srcset="https://bu.dusays.com/2022/06/26/62b87abbb3824.png, https://bu.dusays.com/2022/06/26/62b87abbb3824.png 1.5x, https://bu.dusays.com/2022/06/26/62b87abbb3824.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87abbb3824.png></a><figcaption class=image-caption>BM-坏字符原则三</figcaption></figure>接下来主串&rsquo;c&rsquo;与模式串&rsquo;c&rsquo;匹配, 但是主串&rsquo;d&rsquo;与模式串&rsquo;f&rsquo;不匹配, 且在子串中找不到下一个&rsquo;d&rsquo;, 这时候我们依然可以按照坏字符原则移动模式串, 但是主串&rsquo;c&rsquo;与模式串&rsquo;c&rsquo;匹配这条信息却没有用上.</p><p>有没有办法用上已经匹配的子串信息呢? 这就是BM算法的好前缀原则.</p><h3 id=好前缀原则>好前缀原则</h3><p>先看一个例子, 匹配以下字符串:<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87abeb92e7.png title=&amp;ldquo;BM-好前缀原则一&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87abeb92e7.png data-sub-html="<h2>BM-好前缀原则一</h2><p>&amp;ldquo;BM-好前缀原则一&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87abeb92e7.png data-srcset="https://bu.dusays.com/2022/06/26/62b87abeb92e7.png, https://bu.dusays.com/2022/06/26/62b87abeb92e7.png 1.5x, https://bu.dusays.com/2022/06/26/62b87abeb92e7.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87abeb92e7.png></a><figcaption class=image-caption>BM-好前缀原则一</figcaption></figure>首先我们可以按照坏后缀原则匹配, 移动模式串后, 发现已经有一段子串是匹配好的, 这时候可以触发好前缀原则.</p><p>如下, 模式串的"cd"和主串的"cd"匹配, 但是主串&rsquo;d&rsquo;与模式串&rsquo;f&rsquo;不匹配, 这时候在模式串中从右向左查找下一个"cd"子串, 如果查找到, 则将模式串的下一个"cd"子串与主串"cd"子串对齐.<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87aefdb817.png title=&amp;ldquo;BM-好前缀原则二&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87aefdb817.png data-sub-html="<h2>BM-好前缀原则二</h2><p>&amp;ldquo;BM-好前缀原则二&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87aefdb817.png data-srcset="https://bu.dusays.com/2022/06/26/62b87aefdb817.png, https://bu.dusays.com/2022/06/26/62b87aefdb817.png 1.5x, https://bu.dusays.com/2022/06/26/62b87aefdb817.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87aefdb817.png></a><figcaption class=image-caption>BM-好前缀原则二</figcaption></figure></p><p>现在匹配成功了.<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87af20ffce.png title=&amp;ldquo;BM-好前缀原则三&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87af20ffce.png data-sub-html="<h2>BM-好前缀原则三</h2><p>&amp;ldquo;BM-好前缀原则三&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87af20ffce.png data-srcset="https://bu.dusays.com/2022/06/26/62b87af20ffce.png, https://bu.dusays.com/2022/06/26/62b87af20ffce.png 1.5x, https://bu.dusays.com/2022/06/26/62b87af20ffce.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87af20ffce.png></a><figcaption class=image-caption>BM-好前缀原则三</figcaption></figure></p><p>如果模式串中没有查找到下一个与"cd"匹配的子串呢? 这时候需要分两种情况考虑:</p><ol><li>模式串头有子串的子串, 则将模式串头子串的<strong>最大子串</strong>与主串的子串对齐;</li><li>模式串头没有子串的子串, 则将模式串移动到主串的子串的后面.</li></ol><p>如下例子:</p><ol><li><p>主串&rsquo;d&rsquo;与模式串&rsquo;d&rsquo;匹配, 主串&rsquo;a&rsquo;与模式串&rsquo;c&rsquo;不匹配, 则在模式串中查找下一个与"d"匹配的子串, 并与主串对齐:<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87af42bfa5.png title=&amp;ldquo;BM-好前缀原则四&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87af42bfa5.png data-sub-html="<h2>BM-好前缀原则四</h2><p>&amp;ldquo;BM-好前缀原则四&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87af42bfa5.png data-srcset="https://bu.dusays.com/2022/06/26/62b87af42bfa5.png, https://bu.dusays.com/2022/06/26/62b87af42bfa5.png 1.5x, https://bu.dusays.com/2022/06/26/62b87af42bfa5.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87af42bfa5.png></a><figcaption class=image-caption>BM-好前缀原则四</figcaption></figure></p></li><li><p>主串&rsquo;dcd&rsquo;与模式串&rsquo;dcd&rsquo;匹配, 主串&rsquo;a&rsquo;与模式串&rsquo;f&rsquo;不匹配, 模式串中没有查找到下一个与"dcd"匹配的子串, 但是模式串头的"d"是子串"dcd"的子串, 所以将"d"对齐:<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87af68383f.png title=&amp;ldquo;BM-好前缀原则五&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87af68383f.png data-sub-html="<h2>BM-好前缀原则五</h2><p>&amp;ldquo;BM-好前缀原则五&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87af68383f.png data-srcset="https://bu.dusays.com/2022/06/26/62b87af68383f.png, https://bu.dusays.com/2022/06/26/62b87af68383f.png 1.5x, https://bu.dusays.com/2022/06/26/62b87af68383f.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87af68383f.png></a><figcaption class=image-caption>BM-好前缀原则五</figcaption></figure></p></li></ol><p><strong>问题</strong>: 为什么与末尾的"d"对齐而不是与第一个"d"对齐呢?</p><blockquote><p>如果与第一个"d"对齐, 模式串中势必没有第二个"dcd"子串, 所以一定是不匹配的, 直接与末尾"d"对齐就可以了.</p></blockquote><h3 id=对bm两条原则的思考>对BM两条原则的思考</h3><ul><li>问题一: 为什么是从右往左匹配?</li></ul><p>对坏字符或者好前缀原则, 从右往左匹配可以让我们移动最少的距离, 防止错过一些匹配.</p><ul><li>问题二: 为什么坏字符原则可以工作?</li></ul><p>如果坏字符所在子串可能和模式串匹配, 则模式串中一定有一个和坏字符匹配的字符. 所以坏字符原则只是尝试以下这种可能.</p><ul><li>问题三: 为什么好前缀原则可以工作?</li></ul><p>同问题二, 如果好前缀是可能的匹配, 则模式串中一定有另一个匹配的后缀或者后缀子串.</p><ul><li>问题四: 什么时候坏字符什么时候好前缀?</li></ul><p>按照问题一的解释, 则两个原则都是在保证有一定匹配串的情况下, 移动尽量小的距离, 单独使用某一种原则再加上一些边界处理条件也可能完成匹配过程, 为了算法加速, 则可以使用坏字符和好前缀中移动距离最长的结果.</p><ul><li>问题五: 怎么单独使用坏字符原则?</li></ul><p>如果遇到坏字符, 并且找到了与坏字符匹配的其他字符的情况下, 是可以正常使用坏字符原则的. 如果没有找到呢? 不管有没有好前缀, 将模式串移动到坏字符后面重新尝试匹配就可以了.</p><ul><li>问题六: 怎么单独使用好前缀原则?</li></ul><p>同坏字符原则, 如果有匹配则正常匹配, 如果没有匹配则将匹配串移动到好后缀后面即可.</p><h3 id=bm代码实现>BM代码实现</h3><h4 id=坏字符的代码实现>坏字符的代码实现</h4><p>坏字符原则的朴素实现比较简单, 每次遇到坏字符, 对模式串从右向左找到下一个与坏字符匹配的字符即可. 但是这样的操作效率十分低下. 因为是在模式串中查找一个字符, 我们可以考虑用一个map记录字符在模式串中最后的位置:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>void</span> <span class=nf>badChar</span><span class=p>(</span><span class=n>unordered_map</span><span class=o>&lt;</span><span class=kt>char</span><span class=p>,</span> <span class=kt>int</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=n>badmps</span><span class=p>,</span> <span class=k>const</span> <span class=n>string</span> <span class=o>&amp;</span><span class=n>pstr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>size</span> <span class=o>=</span> <span class=n>pstr</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>size</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>//badmps代表的是模式串的字符的最右位置
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>badmps</span><span class=p>[</span><span class=n>pstr</span><span class=p>[</span><span class=n>i</span><span class=p>]]</span> <span class=o>=</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>再提供一个函数计算移动距离:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>badMove</span><span class=p>(</span><span class=n>unordered_map</span><span class=o>&lt;</span><span class=kt>char</span><span class=p>,</span> <span class=kt>int</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=n>badmps</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span> <span class=o>&amp;</span><span class=n>badc</span><span class=p>,</span> <span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span><span class=n>pos</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//尽管可能是负数, 但是我们并不是很当心
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>//1. 负数可以用右移一位代替
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>//2. 增加复杂度, 不匹配模式串最右匹配, 而是匹配模式串以坏字符为界的右子串的最右匹配
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>return</span> <span class=n>badmps</span><span class=p>.</span><span class=n>find</span><span class=p>(</span><span class=n>badc</span><span class=p>)</span> <span class=o>!=</span> <span class=n>badmps</span><span class=p>.</span><span class=n>end</span><span class=p>()</span> <span class=o>?</span> <span class=n>pos</span> <span class=o>-</span> <span class=n>badmps</span><span class=p>[</span><span class=n>badc</span><span class=p>]</span> <span class=o>:</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=好前缀的代码实现>好前缀的代码实现</h4><p>好前缀原则我们需要实现两个地方:</p><ol><li>最右的与好前缀完全匹配的子串;</li><li>如果没有完全匹配的子串, 则找到头部的部分匹配的子串.</li></ol><p>参考一般解法, 可以实现如下的代码:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>void</span> <span class=nf>goodMatch</span><span class=p>(</span><span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=n>sufix</span><span class=p>,</span> <span class=n>vector</span><span class=o>&lt;</span><span class=kt>bool</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=n>prefix</span><span class=p>,</span> <span class=k>const</span> <span class=n>string</span> <span class=o>&amp;</span><span class=n>pstr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>size</span> <span class=o>=</span> <span class=n>pstr</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>sufix</span><span class=p>.</span><span class=n>reserve</span><span class=p>(</span><span class=n>size</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>prefix</span><span class=p>.</span><span class=n>reserve</span><span class=p>(</span><span class=n>size</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>size</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>//sufix[i]表示长度为i的子串的位置, 需要注意, 长度为i的子串是唯一的.
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=c1>//-1则时不存在这个子串
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>sufix</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=c1>//prefix[i]表示这个子串是不是在头部
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>prefix</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=nb>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>pstr_max_index</span> <span class=o>=</span> <span class=n>size</span> <span class=o>-</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//不需要遍历整个模式串, 因为长度满的时候, 必定没有其他子串
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>pstr_max_index</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>//是遍历的初始位置, 从右向左
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=c1>//k用来记录子串的长度
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=kt>int</span> <span class=n>k</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>//这样我们拿到的sufix总是最右的
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=k>while</span> <span class=p>((</span><span class=n>j</span> <span class=o>&gt;=</span> <span class=mi>0</span><span class=p>)</span> <span class=o>&amp;&amp;</span> <span class=p>(</span><span class=n>pstr</span><span class=p>[</span><span class=n>j</span><span class=p>]</span> <span class=o>==</span> <span class=n>pstr</span><span class=p>[</span><span class=n>pstr_max_index</span> <span class=o>-</span> <span class=n>k</span><span class=p>]))</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>sufix</span><span class=p>[</span><span class=o>++</span><span class=n>k</span><span class=p>]</span> <span class=o>=</span> <span class=n>j</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>j</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>prefix</span><span class=p>[</span><span class=n>k</span><span class=p>]</span> <span class=o>=</span> <span class=nb>true</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>为什么这么做?</p><p>因为待匹配的子串是已知的, 就是模式串的子串, 所以在预处理的时候获得这些一直子串的位置就可以在处理的时候减少一些计算, 降低时间复杂度.</p><p>做完预处理之后, 还需要一个函数计算偏移量:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>goodMove</span><span class=p>(</span><span class=k>const</span> <span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=n>sufix</span><span class=p>,</span> <span class=k>const</span> <span class=n>vector</span><span class=o>&lt;</span><span class=kt>bool</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=n>prefix</span><span class=p>,</span> <span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span><span class=n>mlen</span><span class=p>,</span> <span class=k>const</span> <span class=kt>int</span> <span class=o>&amp;</span><span class=n>pos</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>mlen</span> <span class=o>&lt;</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>move_len</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>size</span> <span class=o>=</span> <span class=n>sufix</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>move_len</span> <span class=o>=</span> <span class=n>sufix</span><span class=p>[</span><span class=n>mlen</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>move_len</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=n>mlen</span> <span class=o>-</span> <span class=mi>1</span><span class=p>;</span> <span class=n>i</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>--</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>prefix</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>==</span> <span class=nb>true</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>move_len</span> <span class=o>=</span> <span class=n>sufix</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>                <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>pos</span> <span class=o>-</span> <span class=n>move_len</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=bm完整代码>BM完整代码</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>strStr</span><span class=p>(</span><span class=n>string</span> <span class=n>haystack</span><span class=p>,</span> <span class=n>string</span> <span class=n>needle</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//边界条件比较少, 先处理一下
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>needle</span><span class=p>.</span><span class=n>empty</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>sh</span> <span class=o>=</span> <span class=n>haystack</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>sn</span> <span class=o>=</span> <span class=n>needle</span><span class=p>.</span><span class=n>size</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>sh</span> <span class=o>&lt;</span> <span class=n>sn</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>//预处理
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>unordered_map</span><span class=o>&lt;</span><span class=kt>char</span><span class=p>,</span> <span class=kt>int</span><span class=o>&gt;</span> <span class=n>badmps</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>badChar</span><span class=p>(</span><span class=n>badmps</span><span class=p>,</span> <span class=n>needle</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>vector</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span> <span class=n>sufix</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>vector</span><span class=o>&lt;</span><span class=kt>bool</span><span class=o>&gt;</span> <span class=n>prefix</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>goodMatch</span><span class=p>(</span><span class=n>sufix</span><span class=p>,</span> <span class=n>prefix</span><span class=p>,</span> <span class=n>needle</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span><span class=n>i</span> <span class=o>&lt;=</span> <span class=p>(</span><span class=n>sh</span> <span class=o>-</span> <span class=n>sn</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>j</span> <span class=o>=</span> <span class=n>sn</span> <span class=o>-</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>mlen</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kt>char</span> <span class=n>bad_char</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>while</span> <span class=p>(</span><span class=n>j</span> <span class=o>&gt;=</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>haystack</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=n>j</span><span class=p>]</span> <span class=o>!=</span> <span class=n>needle</span><span class=p>[</span><span class=n>j</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=n>bad_char</span> <span class=o>=</span> <span class=n>haystack</span><span class=p>[</span><span class=n>i</span> <span class=o>+</span> <span class=n>j</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>                <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=n>mlen</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>j</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>mlen</span> <span class=o>&gt;=</span> <span class=n>sn</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>//拿到不匹配字符的位置
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=kt>int</span> <span class=n>pos</span> <span class=o>=</span> <span class=n>sn</span> <span class=o>-</span> <span class=n>mlen</span> <span class=o>-</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>bad_step</span> <span class=o>=</span> <span class=n>badMove</span><span class=p>(</span><span class=n>badmps</span><span class=p>,</span> <span class=n>bad_char</span><span class=p>,</span> <span class=n>pos</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>good_step</span> <span class=o>=</span> <span class=n>goodMove</span><span class=p>(</span><span class=n>sufix</span><span class=p>,</span> <span class=n>prefix</span><span class=p>,</span> <span class=n>mlen</span><span class=p>,</span> <span class=n>pos</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>step</span> <span class=o>=</span> <span class=n>max</span><span class=p>(</span><span class=n>bad_step</span><span class=p>,</span> <span class=n>good_step</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>step</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=n>step</span> <span class=o>=</span> <span class=n>sn</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>i</span> <span class=o>+=</span> <span class=p>(</span><span class=n>step</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=o>?</span> <span class=nl>step</span> <span class=p>:</span> <span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-04-07</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/>数据结构与算法</a>,&nbsp;<a href=/categories/cpp/>Cpp</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/>字符串</a>,&nbsp;<a href=/tags/bf/>BF</a>,&nbsp;<a href=/tags/bm/>BM</a>,&nbsp;<a href=/tags/cpp/>Cpp</a></section></div><div class=post-nav><a href=/202103/c-strcut-bits/ class=prev rel=prev title=struct位域><i class="fas fa-angle-left fa-fw"></i>struct位域</a>
+<a href=/202104/pandt-what/ class=next rel=next title=进程、线程和协程概念>进程、线程和协程概念<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

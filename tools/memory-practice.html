@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记忆训练</title>
+</head>
+
+<style>
+    html {
+        font-family: "Microsoft soft";
+    }
+
+    #settings {
+        text-align: center;
+        font-size: 1.5rem;
+    }
+
+    #settings input,
+    #settings select,
+    #settings select option,
+    #settings button,
+    .input_number button {
+        outline-style: none;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        padding: 0.5rem;
+        font-size: 1.5rem;
+    }
+
+    #settings button {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    #settings input {
+        width: 10ex;
+    }
+
+    #settings input:focus,
+    #settings select:focus,
+    #settings select option:focus,
+    #settings button:hover,
+    .input_number button:hover,
+    .input_number button:active,
+    .input_number button.keydown {
+        border-color: #66afe9;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+
+    .display_countdown,
+    .display_number,
+    .input_number {
+        text-align: center;
+        margin-top: 2rem;
+        font-size: 5rem;
+    }
+
+    .display_number {
+        font-size: 10rem;
+    }
+
+    .input_number button {
+        padding: 1rem;
+        margin: 1rem;
+        font-size: 4rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+
+    .input_number button:active,
+    .input_number button.keydown {
+        opacity: 0.5;
+    }
+</style>
+
+<body>
+    <div id="settings">
+        类型:
+        <select id="mem-type">
+            <option value="number">数字</option>
+        </select>
+        &nbsp;|&nbsp;&nbsp;间隔: <input type="number" min="0.1" step="0.1" value="0.5" name="interval" id="interval"> 秒
+        &nbsp;|&nbsp;&nbsp;长度: <input type="number" min="1" value="10" name="length" id="length">
+        &nbsp;|&nbsp;&nbsp;<button onclick="start()">开始</button>
+    </div>
+    <div id="display">
+    </div>
+    <div id="input">
+    </div>
+</body>
+<script>
+    function set_display_class(name) {
+        let display = document.querySelector('#display');
+        display.className = name;
+    }
+
+    function set_input_class(name) {
+        let input = document.querySelector('#input');
+        input.className = name;
+    }
+
+    function set_display_content(content) {
+        let display = document.querySelector('#display');
+        display.innerHTML = content;
+    }
+
+    function clear_display() {
+        let display = document.querySelector('#display');
+        display.innerHTML = '';
+        display.className = '';
+    }
+
+    function clear_input() {
+        let input = document.querySelector('#input');
+        input.innerHTML = '';
+        input.className = '';
+        window.onkeydown = null;
+        window.onkeyup = null;
+    }
+
+    function createWorker(f) {
+        var blob = new Blob(['(' + f.toString() + ')()']);
+        var url = window.URL.createObjectURL(blob);
+        var worker = new Worker(url);
+        return worker;
+    }
+
+    var pollingWorker = createWorker(function (e) {
+        var delay = 0;
+        var min_interval = 100;
+        var start = new Date();
+        var stop = true;
+        self.addEventListener('message', function (e) {
+            delay = e.data;
+            start = new Date();
+        }, false);
+        setInterval(function () {
+            let cur = new Date();
+            if (cur.getTime() - start.getTime() >= delay * 0.95) {
+                start = new Date();
+                if (delay >= min_interval) postMessage(null);
+            }
+        }, min_interval)
+    });
+
+    var pollingTask = null;
+    pollingWorker.onmessage = function () {
+        let cur = new Date();
+        if (pollingTask) pollingTask();
+    }
+
+    function interval_display(delay, loops, content, initialize, uninitialize) {
+        if (initialize) initialize();
+
+        pollingWorker.postMessage(delay);
+        pollingTask = function () {
+            if (loops-- <= 0) {
+                clear_display();
+                pollingWorker.postMessage(-1);
+                if (uninitialize) uninitialize();
+                return;
+            }
+            set_display_content(content());
+        }
+    }
+
+    function start() {
+        clear_display();
+        clear_input();
+
+        var content_list = ['倒计时 2 秒', '倒计时 1 秒', '开始!'];
+        var content_index = 0;
+
+        function start_display() {
+            let type = document.querySelector('#mem-type').value;
+            switch (type) {
+                case 'number': mem_number(); break;
+            }
+        };
+        interval_display(1000,
+            content_list.length,
+            function () {
+                return content_list[content_index++];
+            },
+            function () {
+                set_display_class('display_countdown');
+                set_display_content('倒计时 3 秒');
+            },
+            start_display);
+    }
+
+    function mem_number() {
+        var number_list = new Array();
+        var interval = parseFloat(document.querySelector('#interval').value);
+        if (interval < 0.001) interval = 0.1;
+        var length = parseInt(document.querySelector('#length').value);
+
+        function check(number) {
+            function check_number(number) {
+                { {/*  if (number_list.length <= 0) return -1;  */ } }
+                if (number_list.length <= 0) return 0;
+                if (number != number_list[0]) return -2;
+                number_list.shift();
+                if (number_list.length == 0) return 0;
+                return 1;
+            }
+            let check_ret = check_number(number);
+            switch (check_ret) {
+                case -1:
+                    set_display_content("数字溢出");
+                    clear_input();
+                    break;
+                case -2:
+                    set_display_content((length - number_list.length) + "/" + length);
+                    clear_input();
+                    break;
+                case 0:
+                    set_display_content((length - number_list.length) + "/" + length);
+                    clear_input();
+                    break;
+            }
+        }
+
+        interval_display(interval * 1000,
+            length,
+            function () {
+                let number = parseInt(Math.random() * 10, 10);
+                number_list.push(number);
+                return number;
+            },
+            function () {
+                clear_display();
+                clear_input();
+                set_display_class('display_number');
+            },
+            function () {
+                set_display_class('display_number');
+                set_display_content('-');
+                set_input_class('input_number');
+                let input = document.querySelector('#input');
+                for (let i = 1; i <= 10; i++) {
+                    let number_box = document.createElement('button');
+                    number_box.value = i % 10;
+                    number_box.textContent = number_box.value;
+                    number_box.onclick = function () {
+                        set_display_content(number_box.value);
+                        check(number_box.value);
+                    };
+                    input.append(number_box);
+                }
+                function get_input_button_by_index(number) {
+                    return document.querySelector('#input').querySelectorAll('button')[number];
+                }
+                function get_input_button_by_keyevent(e) {
+                    e = e || window.event;
+                    let key = e.keyCode;
+                    if (57 >= key && key >= 48) {
+                        return get_input_button_by_index((key - 39) % 10);
+                    }
+                    return null;
+                }
+                window.onkeydown = function (e) {
+                    let button = get_input_button_by_keyevent(e);
+                    if (!button) return;
+                    button.className = 'keydown';
+                    button.click();
+                }
+                window.onkeyup = function (e) {
+                    let button = get_input_button_by_keyevent(e);
+                    if (!button) return;
+                    button.className = '';
+                }
+            });
+    }
+</script>
+
+</html>

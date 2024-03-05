@@ -1,0 +1,9 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>constexpr - 标签 - Bing's Blog</title><link>https://imcbc.cn/tags/constexpr/</link><description>constexpr - 标签 - Bing's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>jack_cbc@163.com (bing)</managingEditor><webMaster>jack_cbc@163.com (bing)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 11 Mar 2021 17:06:07 +0800</lastBuildDate><atom:link href="https://imcbc.cn/tags/constexpr/" rel="self" type="application/rss+xml"/><item><title>const和constexpr</title><link>https://imcbc.cn/202103/cpp-const-adconsexpr/</link><pubDate>Thu, 11 Mar 2021 17:06:07 +0800</pubDate><author>作者</author><guid>https://imcbc.cn/202103/cpp-const-adconsexpr/</guid><description><![CDATA[<blockquote>
+<p><code>const</code>用来修饰只读.</p>
+<p><code>constexpr</code>用来修饰编译期可以确定的值.(编译期常量)</p>
+</blockquote>]]></description></item><item><title>为什么推荐加const或constexpr修饰常量</title><link>https://imcbc.cn/202103/cpp-addconst/</link><pubDate>Tue, 02 Mar 2021 15:00:17 +0800</pubDate><author>作者</author><guid>https://imcbc.cn/202103/cpp-addconst/</guid><description><![CDATA[<blockquote>
+<p>用<a href="/202103/cpp-const-adconsexpr/" rel="">const/constexpr</a>修饰常量可以减少内存占用和拷贝操作.</p>
+</blockquote>
+<p>这是我们在很多书上可以看到的结论, 但是为什么用<a href="/202103/cpp-const-adconsexpr/" rel="">const/constexpr</a>修饰常量可以减少内存占用和拷贝操作呢?</p>]]></description></item><item><title>C++闭包</title><link>https://imcbc.cn/202102/cpp-closure/</link><pubDate>Tue, 23 Feb 2021 10:00:57 +0800</pubDate><author>作者</author><guid>https://imcbc.cn/202102/cpp-closure/</guid><description><![CDATA[<h2 id="c闭包">C++闭包</h2>
+<p>在一些现代对高级语言, 比如Python或者JavaScript中, 经常会提到闭包的概念, 但是在C++里面很少会听说闭包的概念.</p>
+<p>C++可以实现闭包吗? 可以.</p>]]></description></item></channel></rss>

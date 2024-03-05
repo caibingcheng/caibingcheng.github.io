@@ -1,0 +1,280 @@
+<head>
+    <title>股票计算器</title>
+
+    <link rel="stylesheet" href="./statics/mdl/material.min.css">
+    <script src="./statics/mdl/material.min.js"></script>
+
+    <style>
+        body {
+            padding: 1rem 1rem;
+        }
+
+        main {
+            width: fit-content;
+            height: fit-content;
+            margin: auto;
+        }
+        
+        #deals, #deal {
+            width: fit-content;
+        }
+
+        .mdl-switch {
+            display: inline;
+        }
+
+        #result {
+            width: fit-content;
+            height: fit-content;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main>
+        <div id="result">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+                <thead>
+                    <tr>
+                        <th class="mdl-data-table__cell--non-numeric"></th>
+                        <th>价格</th>
+                        <th>股数</th>
+                        <th>总价</th>
+                        <th>盈亏</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">原始</td>
+                        <td id="origin-price"></td>
+                        <td id="origin-number"></td>
+                        <td id="origin-all"></td>
+                        <td id="origin-win"></td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">当前</td>
+                        <td id="dealed-price"></td>
+                        <td id="dealed-number"></td>
+                        <td id="dealed-all"></td>
+                        <td id="dealed-win"></td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">税费(卖出不计)</td>
+                        <td id="tax"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <div id="deals">
+            <form class="deal">
+
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <input class="mdl-textfield__input" type="text" pattern="[0-9]*(\.[0-9]*)?" id="mgr-tax">
+                    <label class="mdl-textfield__label" for="mgr-tax">交易费率</label>
+                    <span class="mdl-textfield__error">请输入费率!</span>
+                </div>
+
+
+                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="free5">
+                    <input type="checkbox" id="free5" class="mdl-switch__input">
+                </label>
+                <div id="free5-container" class="mdl-js-snackbar mdl-snackbar">
+                    <div class="mdl-snackbar__text"></div>
+                    <button class="mdl-snackbar__action" type="button"></button>
+                </div>
+
+                <br />
+
+
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <input class="mdl-textfield__input" type="text" pattern="[0-9]*(\.[0-9]*)?" id="current-price">
+                    <label class="mdl-textfield__label" for="current-price">当前单价</label>
+                    <span class="mdl-textfield__error">请输入价格!</span>
+                </div>
+
+                <br />
+
+
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <input class="mdl-textfield__input" type="text" pattern="[0-9]*(\.[0-9]*)?" id="hold-price">
+                    <label class="mdl-textfield__label" for="hold-price">持有单价</label>
+                    <span class="mdl-textfield__error">请输入价格!</span>
+                </div>
+
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <input class="mdl-textfield__input" type="text" pattern="[0-9]*" id="hold-number">
+                    <label class="mdl-textfield__label" for="hold-number">持有股数</label>
+                    <span class="mdl-textfield__error">股数应为正整数!</span>
+                </div>
+
+                <br />
+
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <input class="mdl-textfield__input" type="text" pattern="[0-9]*(\.[0-9]*)?" id="price">
+                    <label class="mdl-textfield__label" for="price">交易单价</label>
+                    <span class="mdl-textfield__error">请输入价格!</span>
+                </div>
+
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*" id="number">
+                    <label class="mdl-textfield__label" for="number">交易股数（正数买入，负数卖出）</label>
+                    <span class="mdl-textfield__error">股数应为整数!</span>
+                </div>
+            </form>
+        </div>
+    </main>
+
+</body>
+
+<script>
+    var free5Bnt = document.querySelector('#free5');
+    var free5Container = document.querySelector('#free5-container');
+    free5Bnt.addEventListener('click', function () {
+        var data = {
+            message: this.checked ? '打开免五' : '关闭免五',
+            timeout: 1000,
+        };
+        free5Container.MaterialSnackbar.showSnackbar(data);
+    });
+
+    function safeParseFloat(str) {
+        if (str == '')
+            return 0;
+        return parseFloat(str);
+    }
+    
+    function stock() {
+        self.price = 0.0;
+        self.number = 0;
+        self.total = self.price * self.number;
+        self.deals = []
+
+        self.mgr_tax = 0.00025; //0.025%
+        self.free5 = false;
+        self.money_tax = 0.001; //0.1%;
+        self.deal_tax = 0.00002; //0.002%
+        self.tax = 0.0; //all tax with all deals
+    }
+
+    stock.prototype.get = function () {
+        return {
+            'price': self.price,
+            'number': self.number,
+            'total': self.total,
+            'tax': self.tax,
+            'mgr_tax': self.mgr_tax,
+            'free5': self.free5,
+            'money_tax': self.money_tax,
+            'deal_tax': self.deal_tax,
+        };
+    }
+
+    stock.prototype.init = function (price, number) {
+        self.price = price;
+        self.number = number;
+        self.total = self.price * self.number;
+    }
+
+    stock.prototype.cal = function () {
+        for (i = 0; i < self.deals.length; i++) {
+            let price = self.deals[i]['price'];
+            let number = self.deals[i]['number'];
+            let total = price * number;
+            let tax = function (upper) {
+                if (number <= 0)
+                    return 0;
+                if (upper.mgr_tax <= 0)
+                    return 0;
+
+                _tax = total * upper.mgr_tax;
+                if (upper.free5)
+                    return _tax;
+
+                return 5 > _tax ? 5 : _tax;
+            }(self);
+            total -= tax;
+
+            self.total = self.total + total;
+            self.number = self.number + number;
+            self.price = self.total / self.number;
+            self.tax += tax;
+        }
+    }
+
+    stock.prototype.deal = function (price, number) {
+        if (price == 0 || number == 0)
+            return;
+
+        self.deals.push({
+            'price': price,
+            'number': number,
+        });
+    }
+
+    stock.prototype.tax = function (mgr_tax, free5, money_tax, deal_tax) {
+        self.mgr_tax = mgr_tax > 0 ? mgr_tax : self.mgr_tax; //0.025%
+        self.free5 = free5;
+        self.money_tax = money_tax > 0 ? money_tax : self.money_tax; //0.1%;
+        self.deal_tax = deal_tax > 0 ? deal_tax : self.deal_tax; //0.002%
+    }
+    
+    function deal() {
+        var s = new stock();
+        
+        var mgr_tax_value = safeParseFloat(document.querySelector('#mgr-tax').value);
+        if (mgr_tax_value == 0)
+        {
+            document.querySelector('#mgr-tax').value = s.get()['mgr_tax'];
+        }
+        var free5_value = document.querySelector('#free5').checked;
+        var current_price_value = safeParseFloat(document.querySelector('#current-price').value);
+        var hold_price_value = safeParseFloat(document.querySelector('#hold-price').value);
+        var hold_number_value = safeParseFloat(document.querySelector('#hold-number').value);
+        var price_value = safeParseFloat(document.querySelector('#price').value);
+        var number_value = safeParseFloat(document.querySelector('#number').value);
+
+        var orgin_price_box = document.querySelector('#origin-price');
+        var orgin_number_box = document.querySelector('#origin-number');
+        var orgin_all_box = document.querySelector('#origin-all');
+        var orgin_win_box = document.querySelector('#origin-win');
+        var current_price_box = document.querySelector('#dealed-price');
+        var current_number_box = document.querySelector('#dealed-number');
+        var current_all_box = document.querySelector('#dealed-all');
+        var current_win_box = document.querySelector('#dealed-win');
+        var tax_box = document.querySelector('#tax');
+
+        s.tax(mgr_tax_value, free5_value, 0, 0);
+        s.init(hold_price_value, hold_number_value);
+        s.deal(price_value, number_value);
+        s.cal();
+        var result = s.get();
+
+        console.log(mgr_tax_value, free5_value, current_price_value, hold_price_value, hold_number_value, price_value, number_value);
+        console.log(result)
+
+        orgin_price_box.innerHTML = hold_price_value.toFixed(3);
+        orgin_number_box.innerHTML = hold_number_value;
+        orgin_all_box.innerHTML = (hold_price_value * hold_number_value).toFixed(3);
+        orgin_win_box.innerHTML = ((current_price_value - hold_price_value) / hold_price_value * 100).toFixed(3) + '%';
+
+        current_price_box.innerHTML = result['price'].toFixed(3);
+        current_number_box.innerHTML = result['number'];
+        current_all_box.innerHTML = result['total'].toFixed(3);
+        current_win_box.innerHTML = ((current_price_value - result['price']) / result['price'] * 100).toFixed(3) + '%';
+
+        tax_box.innerHTML = result['tax'].toFixed(3);
+    }
+    deal();
+
+    document.querySelectorAll('input').forEach(item => {
+        item.addEventListener('input', deal);
+    });
+
+</script>

@@ -1,0 +1,549 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>STL-any源码阅读 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="STL-any源码阅读"><meta property="og:description" content="std::any是C++17定义的支持任意可拷贝类型的标准容器. 描述如下:
+
+The class any describes a type-safe container for single values of any copy constructible type.
+"><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202207/cpp-stl-any/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-07-06T17:10:51+08:00"><meta property="article:modified_time" content="2022-07-06T17:10:51+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="STL-any源码阅读"><meta name=twitter:description content="std::any是C++17定义的支持任意可拷贝类型的标准容器. 描述如下:
+
+The class any describes a type-safe container for single values of any copy constructible type.
+"><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202207/cpp-stl-any/><link rel=prev href=https://imcbc.cn/202206/cpp_placementnew_allocator/><link rel=next href=https://imcbc.cn/202207/cpp-stl-tuple/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"STL-any源码阅读","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202207\/cpp-stl-any\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Cpp, any","wordcount":3300,"url":"https:\/\/imcbc.cn\/202207\/cpp-stl-any\/","datePublished":"2022-07-06T17:10:51+08:00","dateModified":"2022-07-06T17:10:51+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>STL-any源码阅读<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2022-07-06>2022-07-06</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3300 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 7 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#实现tinyany>实现TinyAny</a></li><li><a href=#stdany源码>std::any源码</a><ul><li><a href=#_storage>_Storage</a></li><li><a href=#_manager>_Manager</a></li><li><a href=#构造>构造</a></li><li><a href=#_s_manage>_S_manage</a></li><li><a href=#温故知新-type_info>温故知新 type_info</a></li><li><a href=#any_cast>any_cast</a></li></ul></li></ul></nav></div></div><div class=content id=content><p><code>std::any</code>是C++17定义的支持任意可拷贝类型的标准容器. 描述如下:</p><blockquote><p>The class any describes a type-safe container for single values of any copy constructible type.</p></blockquote><p>用法如下, 当然也支持复制, 拷贝构造一类:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>any</span> <span class=n>var</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>var</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>var</span> <span class=o>=</span> <span class=s>&#34;1&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>var</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=实现tinyany>实现TinyAny</h2><p>按照基本功能, <code>std::any</code>可以支持存放任意类型, 我们可以先尝试实现一个简单版本的<code>TinyAny</code>, 看看如果要写一个<code>any</code>类型, 应该怎么写. 简化起见, 就不需要考虑类型安全, 也不关注<code>copy constructible</code>, 实现如下(实际上是看完<code>std::any</code>才想到这种实现的, 核心在<code>AnyData</code>):</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;type_traits&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;utility&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>TinyAny</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>    ** AnyData 类保存了输入数据的类型
+</span></span></span><span class=line><span class=cl><span class=cm>    **/</span>
+</span></span><span class=line><span class=cl>    <span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>class</span> <span class=nc>AnyData</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>static</span> <span class=kt>void</span> <span class=n>create</span><span class=p>(</span><span class=kt>void</span> <span class=o>**</span><span class=n>data</span><span class=p>,</span> <span class=n>Tp</span> <span class=o>&amp;&amp;</span> <span class=n>val</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=o>*</span><span class=n>data</span> <span class=o>=</span> <span class=k>new</span> <span class=n>Tp</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>Tp</span><span class=o>&gt;</span><span class=p>(</span><span class=n>val</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>static</span> <span class=kt>void</span> <span class=nf>deleter</span><span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=n>data</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>auto</span> <span class=n>ptr</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=n>Tp</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>data</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>delete</span> <span class=n>ptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>    ** std::decay_t&lt;Tp__&gt; 用于将const/reference等描述退化, 因为保存类型是不需要这些特性的
+</span></span></span><span class=line><span class=cl><span class=cm>    ** deleter 指向AnyData&lt;Tp&gt;::deleter, 这样就保存了输入数据的类型了
+</span></span></span><span class=line><span class=cl><span class=cm>    **/</span>
+</span></span><span class=line><span class=cl>    <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>Tp__</span><span class=p>,</span> <span class=k>typename</span> <span class=n>Tp</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>decay_t</span><span class=o>&lt;</span><span class=n>Tp__</span><span class=o>&gt;&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=n>TinyAny</span><span class=p>(</span><span class=n>Tp__</span><span class=o>&amp;&amp;</span> <span class=n>val</span><span class=p>)</span> <span class=o>:</span> <span class=n>deleter</span><span class=p>(</span><span class=n>AnyData</span><span class=o>&lt;</span><span class=n>Tp</span><span class=o>&gt;::</span><span class=n>deleter</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>AnyData</span><span class=o>&lt;</span><span class=n>Tp</span><span class=o>&gt;::</span><span class=n>create</span><span class=p>(</span><span class=o>&amp;</span><span class=n>data</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>Tp</span><span class=o>&gt;</span><span class=p>(</span><span class=n>val</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>    ** deleter的时候就可以调用对应类型的析构函数
+</span></span></span><span class=line><span class=cl><span class=cm>    **/</span>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>TinyAny</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>deleter</span><span class=p>(</span><span class=n>data</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>data</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 采用swap copy
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=n>TinyAny</span> <span class=o>&amp;</span><span class=k>operator</span> <span class=o>=</span> <span class=p>(</span><span class=n>Tp</span><span class=o>&amp;&amp;</span> <span class=n>val</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>TinyAny</span> <span class=n>temp</span><span class=p>{</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>Tp</span><span class=o>&gt;</span><span class=p>(</span><span class=n>val</span><span class=p>)};</span>
+</span></span><span class=line><span class=cl>        <span class=n>swap</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>temp</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>*</span><span class=k>this</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Tp</span> <span class=n>get</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>*</span><span class=k>static_cast</span><span class=o>&lt;</span><span class=n>Tp</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>data</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>TinyAny</span> <span class=o>&amp;</span><span class=n>swap</span><span class=p>(</span><span class=n>TinyAny</span> <span class=o>&amp;&amp;</span> <span class=n>another</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>swap</span><span class=p>(</span><span class=n>data</span><span class=p>,</span> <span class=n>another</span><span class=p>.</span><span class=n>data</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>std</span><span class=o>::</span><span class=n>swap</span><span class=p>(</span><span class=n>deleter</span><span class=p>,</span> <span class=n>another</span><span class=p>.</span><span class=n>deleter</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>*</span><span class=k>this</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=o>*</span><span class=n>data</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=p>(</span><span class=o>*</span> <span class=n>deleter</span><span class=p>)(</span><span class=kt>void</span> <span class=o>*</span><span class=n>data</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>那么, 可以这样使用:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>TinyAny</span> <span class=n>var</span><span class=p>{</span><span class=mi>123</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>var</span><span class=p>.</span><span class=n>get</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>var</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=p>(</span><span class=s>&#34;123&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>var</span><span class=p>.</span><span class=n>get</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>string</span><span class=o>&gt;</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>var</span> <span class=o>=</span> <span class=mf>0.123f</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>var</span><span class=p>.</span><span class=n>get</span><span class=o>&lt;</span><span class=kt>float</span><span class=o>&gt;</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>var</span> <span class=o>=</span> <span class=sc>&#39;a&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>var</span><span class=p>.</span><span class=n>get</span><span class=o>&lt;</span><span class=kt>char</span><span class=o>&gt;</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>var</span> <span class=o>=</span> <span class=s>&#34;abc&#34;</span><span class=p>;</span>    <span class=c1>// &#34;abc&#34;是const char*类型, 在TinyAny中会退化成char*, 因此, 保存的是指针
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>var</span><span class=p>.</span><span class=n>get</span><span class=o>&lt;</span><span class=k>const</span> <span class=kt>char</span> <span class=o>*&gt;</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>var</span> <span class=o>=</span> <span class=s>&#34;def&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>var</span><span class=p>.</span><span class=n>get</span><span class=o>&lt;</span><span class=k>const</span> <span class=kt>char</span> <span class=o>*&gt;</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>如开头所说, 它不是一个类型安全的容器, 所以也可能被这样误用, 编译期是不会报错的:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>var</span> <span class=o>=</span> <span class=s>&#34;defg&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>var</span><span class=p>.</span><span class=n>get</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=stdany源码>std::any源码</h2><p>下面来看标准库的实现:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>class</span> <span class=nc>any</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>首先注意到, <code>std::any</code>不是一个模板类, 应对我们的需求, 它也不能是一个模板类.</p><h3 id=_storage>_Storage</h3><p>接下来定义了一个<code>_Storage</code>联合体:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// Holds either pointer to a heap object or the contained object itself.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>union</span> <span class=nc>_Storage</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>constexpr</span> <span class=nf>_Storage</span><span class=p>()</span> <span class=o>:</span> <span class=n>_M_ptr</span><span class=p>{</span><span class=k>nullptr</span><span class=p>}</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// Prevent trivial copies of this type, buffer might hold a non-POD.
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>_Storage</span><span class=p>(</span><span class=k>const</span> <span class=n>_Storage</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>_Storage</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=k>const</span> <span class=n>_Storage</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span><span class=o>*</span> <span class=n>_M_ptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>aligned_storage</span><span class=o>&lt;</span><span class=k>sizeof</span><span class=p>(</span><span class=n>_M_ptr</span><span class=p>),</span> <span class=k>alignof</span><span class=p>(</span><span class=kt>void</span><span class=o>*</span><span class=p>)</span><span class=o>&gt;::</span><span class=n>type</span> <span class=n>_M_buffer</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>不难猜到, 其作用就是用来存放数据的, 有<code>_M_ptr</code>和<code>_M_buffer</code>两个选项, 先看看<code>aligned_storage</code>实现:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// other transformations [4.8].
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span><span class=o>&lt;</span><span class=n>std</span><span class=o>::</span><span class=n>size_t</span> <span class=n>_Len</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>size_t</span> <span class=n>_Align</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>aligned_storage</span>
+</span></span><span class=line><span class=cl><span class=p>{</span> 
+</span></span><span class=line><span class=cl>    <span class=k>union</span> <span class=nc>type</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>char</span> <span class=n>__data</span><span class=p>[</span><span class=n>_Len</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nf>__attribute__</span><span class=p>((</span><span class=n>__aligned__</span><span class=p>((</span><span class=n>_Align</span><span class=p>))))</span> <span class=p>{</span> <span class=p>}</span> <span class=n>__align</span><span class=p>;</span> 
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>以上说明, <code>_M_buffer</code>是栈上的一块内存, 大小是<code>sizeof(void*)</code>, 并且做了内存对齐(TODO: 有什么用? 哪些地方需要对齐?). 总之, 现在可以知道<code>std::any</code>的数据可能存放在栈上, 也可能存放在堆上, 对于小内存(比如<code>sizeof(void*)</code>以下), 是存在栈上的.</p><h3 id=_manager>_Manager</h3><p>接下来根据类型的size, 决定了<code>_Manager</code>的类型, 分别有<code>_Manager_internal</code>和<code>_Manager_external</code>, 一个管理小内存, 一个管理堆内存.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Safe</span> <span class=o>=</span> <span class=n>is_nothrow_move_constructible</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=kt>bool</span> <span class=n>_Fits</span> <span class=o>=</span> <span class=p>(</span><span class=k>sizeof</span><span class=p>(</span><span class=n>_Tp</span><span class=p>)</span> <span class=o>&lt;=</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>_Storage</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>            <span class=o>&amp;&amp;</span> <span class=p>(</span><span class=k>alignof</span><span class=p>(</span><span class=n>_Tp</span><span class=p>)</span> <span class=o>&lt;=</span> <span class=k>alignof</span><span class=p>(</span><span class=n>_Storage</span><span class=p>))</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>using</span> <span class=n>_Internal</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>integral_constant</span><span class=o>&lt;</span><span class=kt>bool</span><span class=p>,</span> <span class=n>_Safe</span><span class=o>::</span><span class=n>value</span> <span class=o>&amp;&amp;</span> <span class=n>_Fits</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=nc>_Manager_internal</span><span class=p>;</span> <span class=c1>// uses small-object optimization
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=nc>_Manager_external</span><span class=p>;</span> <span class=c1>// creates contained object on the heap
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>using</span> <span class=n>_Manager</span> <span class=o>=</span> <span class=n>conditional_t</span><span class=o>&lt;</span><span class=n>_Internal</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;::</span><span class=n>value</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_Manager_internal</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_Manager_external</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;&gt;</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>_Manager</code>的定义在哪? 我们往下看, 以<code>_Manager_internal</code>举例:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// Manage in-place contained object.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=nc>_Manager_internal</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>_S_manage</span><span class=p>(</span><span class=n>_Op</span> <span class=n>__which</span><span class=p>,</span> <span class=k>const</span> <span class=n>any</span><span class=o>*</span> <span class=n>__anyp</span><span class=p>,</span> <span class=n>_Arg</span><span class=o>*</span> <span class=n>__arg</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Up</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=kt>void</span>
+</span></span><span class=line><span class=cl>    <span class=n>_S_create</span><span class=p>(</span><span class=n>_Storage</span><span class=o>&amp;</span> <span class=n>__storage</span><span class=p>,</span> <span class=n>_Up</span><span class=o>&amp;&amp;</span> <span class=n>__value</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span><span class=o>*</span> <span class=n>__addr</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>__storage</span><span class=p>.</span><span class=n>_M_buffer</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=o>::</span><span class=k>new</span> <span class=p>(</span><span class=n>__addr</span><span class=p>)</span> <span class=n>_Tp</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>_Up</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__value</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span><span class=p>...</span> <span class=n>_Args</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=kt>void</span>
+</span></span><span class=line><span class=cl>    <span class=n>_S_create</span><span class=p>(</span><span class=n>_Storage</span><span class=o>&amp;</span> <span class=n>__storage</span><span class=p>,</span> <span class=n>_Args</span><span class=o>&amp;&amp;</span><span class=p>...</span> <span class=n>__args</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span><span class=o>*</span> <span class=n>__addr</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>__storage</span><span class=p>.</span><span class=n>_M_buffer</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=o>::</span><span class=k>new</span> <span class=p>(</span><span class=n>__addr</span><span class=p>)</span> <span class=n>_Tp</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>_Args</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__args</span><span class=p>)...);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>我认为<code>_Manager</code>的实现是很有意思的, 只包含了静态成员函数, 但是因为是模板类, 因此匹配之后是可以包含类型信息的, 又因为是静态成员函数, 就可以用函数指针指向这些静态成员函数, 从而又可以隐藏类型信息, 以上<code>TinyAny</code>实现的主要参考点即在这里.</p><p>因为<code>_Manager_internal</code>指向的是小内存, 因此这里使用的是<a href=https://www.bbing.com.cn/202206/cpp_placementnew_allocator/#placement-new target=_blank rel="noopener noreffer">placement new</a>, 直接在给定的内存上构造, 在前面的文章中, 已经介绍过其用法了(TODO: 原理还不知道), 此处不再叙述.</p><p><code>_Manager_external</code>同理, 只不过是在堆上分配内存和构造的:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// Manage external contained object.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=nc>_Manager_external</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>_S_manage</span><span class=p>(</span><span class=n>_Op</span> <span class=n>__which</span><span class=p>,</span> <span class=k>const</span> <span class=n>any</span><span class=o>*</span> <span class=n>__anyp</span><span class=p>,</span> <span class=n>_Arg</span><span class=o>*</span> <span class=n>__arg</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Up</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=kt>void</span>
+</span></span><span class=line><span class=cl>    <span class=n>_S_create</span><span class=p>(</span><span class=n>_Storage</span><span class=o>&amp;</span> <span class=n>__storage</span><span class=p>,</span> <span class=n>_Up</span><span class=o>&amp;&amp;</span> <span class=n>__value</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>__storage</span><span class=p>.</span><span class=n>_M_ptr</span> <span class=o>=</span> <span class=k>new</span> <span class=n>_Tp</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>_Up</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__value</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span><span class=p>...</span> <span class=n>_Args</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>static</span> <span class=kt>void</span>
+</span></span><span class=line><span class=cl>    <span class=n>_S_create</span><span class=p>(</span><span class=n>_Storage</span><span class=o>&amp;</span> <span class=n>__storage</span><span class=p>,</span> <span class=n>_Args</span><span class=o>&amp;&amp;</span><span class=p>...</span> <span class=n>__args</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>__storage</span><span class=p>.</span><span class=n>_M_ptr</span> <span class=o>=</span> <span class=k>new</span> <span class=n>_Tp</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>_Args</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__args</span><span class=p>)...);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=构造>构造</h3><p>以下<code>_Decay</code>的定义也是实现<code>any</code>的核心, 通过<code>decay</code>, 可以将一些复杂属性退化, 比如<code>const</code>/<code>&</code>等等, 这将帮助我们使用<code>_Manager</code>保存基本的数据类型:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Decayed</span> <span class=o>=</span> <span class=n>decay_t</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>using</span> <span class=n>_Decay</span> <span class=o>=</span> <span class=n>enable_if_t</span><span class=o>&lt;!</span><span class=n>is_same</span><span class=o>&lt;</span><span class=n>_Decayed</span><span class=p>,</span> <span class=n>any</span><span class=o>&gt;::</span><span class=n>value</span><span class=p>,</span> <span class=n>_Decayed</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>以其中一构造举例:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>/// Construct with a copy of @p __value as the contained object.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>_ValueType</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Tp</span> <span class=o>=</span> <span class=n>_Decay</span><span class=o>&lt;</span><span class=n>_ValueType</span><span class=o>&gt;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=k>typename</span> <span class=n>_Mgr</span> <span class=o>=</span> <span class=n>_Manager</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=n>__any_constructible_t</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=p>,</span> <span class=n>_ValueType</span><span class=o>&amp;&amp;&gt;</span> <span class=o>=</span> <span class=nb>true</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>enable_if_t</span><span class=o>&lt;!</span><span class=n>__is_in_place_type</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;::</span><span class=n>value</span><span class=p>,</span> <span class=kt>bool</span><span class=o>&gt;</span> <span class=o>=</span> <span class=nb>true</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=n>any</span><span class=p>(</span><span class=n>_ValueType</span><span class=o>&amp;&amp;</span> <span class=n>__value</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=o>:</span> <span class=n>_M_manager</span><span class=p>(</span><span class=o>&amp;</span><span class=n>_Mgr</span><span class=o>::</span><span class=n>_S_manage</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>_Mgr</span><span class=o>::</span><span class=n>_S_create</span><span class=p>(</span><span class=n>_M_storage</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>_ValueType</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__value</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>首先拿到了输入数据的退化类型<code>typename _Tp = _Decay&lt;_ValueType></code>, 然后根据其类型size选择了对应的<code>_Manager</code>, 再接下来判断其数据类型是否可拷贝构造或者赋值<code>__any_constructible_t&lt;_Tp, _ValueType&&> = true</code>, <code>__any_constructible_t</code>定义如下, 是一个借助<code>enable_if</code>实现的SFINAE.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Res</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Tp</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Args</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=n>__any_constructible</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>    <span class=n>enable_if</span><span class=o>&lt;</span><span class=n>__and_</span><span class=o>&lt;</span><span class=n>is_copy_constructible</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=n>is_constructible</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=p>,</span> <span class=n>_Args</span><span class=p>...</span><span class=o>&gt;&gt;::</span><span class=n>value</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>_Res</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Args</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=n>__any_constructible_t</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>    <span class=k>typename</span> <span class=n>__any_constructible</span><span class=o>&lt;</span><span class=kt>bool</span><span class=p>,</span> <span class=n>_Tp</span><span class=p>,</span> <span class=n>_Args</span><span class=p>...</span><span class=o>&gt;::</span><span class=n>type</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>__is_in_place_type</code>先不关注了, 这是用来解决一些类型匹配问题的模板, 在C++17标准中, 模板是可以作为函数参数的. 匹配通过后, 在构造函数中初始化了<code>_M_manager(&_Mgr::_S_manage)</code>和构造了数据的值(是拷贝的).</p><p>其他各种构造函数则是通过不同的可拷贝性或者<code>in_place_type_t</code>指定, 执行不同的实现.</p><h3 id=_s_manage>_S_manage</h3><p>在构造函数中, 我们看到初始化了一个<code>_M_manager</code>, 这是一个用来数据访问的接口, 实现如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl>  <span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span>
+</span></span><span class=line><span class=cl>    <span class=n>any</span><span class=o>::</span><span class=n>_Manager_external</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;::</span>
+</span></span><span class=line><span class=cl>    <span class=n>_S_manage</span><span class=p>(</span><span class=n>_Op</span> <span class=n>__which</span><span class=p>,</span> <span class=k>const</span> <span class=n>any</span><span class=o>*</span> <span class=n>__any</span><span class=p>,</span> <span class=n>_Arg</span><span class=o>*</span> <span class=n>__arg</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=c1>// The contained object is *_M_storage._M_ptr
+</span></span></span><span class=line><span class=cl><span class=c1></span>      <span class=k>auto</span> <span class=n>__ptr</span> <span class=o>=</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=k>const</span> <span class=n>_Tp</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>__any</span><span class=o>-&gt;</span><span class=n>_M_storage</span><span class=p>.</span><span class=n>_M_ptr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=k>switch</span> <span class=p>(</span><span class=n>__which</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>case</span> <span class=nl>_Op_access</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>	<span class=n>__arg</span><span class=o>-&gt;</span><span class=n>_M_obj</span> <span class=o>=</span> <span class=k>const_cast</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>__ptr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=k>case</span> <span class=nl>_Op_get_type_info</span><span class=p>:</span>
+</span></span><span class=line><span class=cl><span class=cp>#if __cpp_rtti
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>__arg</span><span class=o>-&gt;</span><span class=n>_M_typeinfo</span> <span class=o>=</span> <span class=o>&amp;</span><span class=k>typeid</span><span class=p>(</span><span class=n>_Tp</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=k>case</span> <span class=nl>_Op_clone</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>	<span class=n>__arg</span><span class=o>-&gt;</span><span class=n>_M_any</span><span class=o>-&gt;</span><span class=n>_M_storage</span><span class=p>.</span><span class=n>_M_ptr</span> <span class=o>=</span> <span class=k>new</span> <span class=n>_Tp</span><span class=p>(</span><span class=o>*</span><span class=n>__ptr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=n>__arg</span><span class=o>-&gt;</span><span class=n>_M_any</span><span class=o>-&gt;</span><span class=n>_M_manager</span> <span class=o>=</span> <span class=n>__any</span><span class=o>-&gt;</span><span class=n>_M_manager</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=k>case</span> <span class=nl>_Op_destroy</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>	<span class=k>delete</span> <span class=n>__ptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=k>case</span> <span class=nl>_Op_xfer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>	<span class=n>__arg</span><span class=o>-&gt;</span><span class=n>_M_any</span><span class=o>-&gt;</span><span class=n>_M_storage</span><span class=p>.</span><span class=n>_M_ptr</span> <span class=o>=</span> <span class=n>__any</span><span class=o>-&gt;</span><span class=n>_M_storage</span><span class=p>.</span><span class=n>_M_ptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>__arg</span><span class=o>-&gt;</span><span class=n>_M_any</span><span class=o>-&gt;</span><span class=n>_M_manager</span> <span class=o>=</span> <span class=n>__any</span><span class=o>-&gt;</span><span class=n>_M_manager</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>const_cast</span><span class=o>&lt;</span><span class=n>any</span><span class=o>*&gt;</span><span class=p>(</span><span class=n>__any</span><span class=p>)</span><span class=o>-&gt;</span><span class=n>_M_manager</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>_Arg</code>是一个联合体, 无需过多关注. 根据不同的需求, <code>_S_manage</code>可以执行获取\拷贝\删除等操作. 我们需要关注函数头部的<code>static_cast&lt;const _Tp*></code>, <code>_Tp</code>就是<code>_Manager_external</code>模板类保存的类型参数, 但是又通过<code>_S_manage</code>这个函数指针, 隐藏了这个类型参数. 在<code>delete</code>的时候, 因为已经转换为了对应类型, 因此可以执行对应的析构函数.</p><p>再关注<code>__arg->_M_typeinfo = &typeid(_Tp);</code>, 该方法可以获取参数的运行时类型, 我认为这是<code>any</code>类型安全的运行时保证, 有了该方法, 就可以在get的时候做类型判断, 以保证安全.</p><h3 id=温故知新-type_info>温故知新 type_info</h3><p><code>typeid</code>怎么实现的? 在前面的文章中, <a href=https://www.bbing.com.cn/202107/cpp-class-mem2 target=_blank rel="noopener noreffer">C++类的内存分布(二)</a>有提到, 类头部再倒退几个byte就是<code>type_info</code>结构体, 如下. 但是对于普通类型, 是怎么在运行时获取类型的呢?</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b877fdc28e0.png title=&amp;ldquo;类的type_info的位置&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b877fdc28e0.png data-sub-html="<h2>类的type_info的位置</h2><p>&amp;ldquo;类的type_info的位置&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b877fdc28e0.png data-srcset="https://bu.dusays.com/2022/06/26/62b877fdc28e0.png, https://bu.dusays.com/2022/06/26/62b877fdc28e0.png 1.5x, https://bu.dusays.com/2022/06/26/62b877fdc28e0.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b877fdc28e0.png></a><figcaption class=image-caption>类的type_info的位置</figcaption></figure></p><p><code>typeid</code>可以先参考这篇<a href=https://hellozhaozheng.github.io/z_post/Cpp-typeid%E8%BF%90%E7%AE%97%E7%AC%A6/ target=_blank rel="noopener noreffer">C++中typeid实现原理和使用方法</a>, 主要思路是, C++标准没有规定如何实现, 一般情况编译器在编译时就可以确定, 针对多态情况, 就依赖<code>vtable</code>头部负偏移的<code>type_info</code>结构体.</p><h3 id=any_cast>any_cast</h3><p>对于<code>any</code>类型, 我们需要通过<code>any_cast</code>方法来获取其值, 现在来看看<code>any_cast</code>的基本实现, 主要关注<code>__any_caster</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=kt>void</span><span class=o>*</span> <span class=n>__any_caster</span><span class=p>(</span><span class=k>const</span> <span class=n>any</span><span class=o>*</span> <span class=n>__any</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// any_cast&lt;T&gt; returns non-null if __any-&gt;type() == typeid(T) and
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// typeid(T) ignores cv-qualifiers so remove them:
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>using</span> <span class=n>_Up</span> <span class=o>=</span> <span class=n>remove_cv_t</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// The contained value has a decayed type, so if decay_t&lt;U&gt; is not U,
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// then it&#39;s not possible to have a contained value of type U:
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=nf>constexpr</span> <span class=p>(</span><span class=o>!</span><span class=n>is_same_v</span><span class=o>&lt;</span><span class=n>decay_t</span><span class=o>&lt;</span><span class=n>_Up</span><span class=o>&gt;</span><span class=p>,</span> <span class=n>_Up</span><span class=o>&gt;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>return</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Only copy constructible types can be used for contained values:
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>else</span> <span class=k>if</span> <span class=nf>constexpr</span> <span class=p>(</span><span class=o>!</span><span class=n>is_copy_constructible_v</span><span class=o>&lt;</span><span class=n>_Up</span><span class=o>&gt;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>return</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// First try comparing function addresses, which works without RTTI
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>else</span> <span class=nf>if</span> <span class=p>(</span><span class=n>__any</span><span class=o>-&gt;</span><span class=n>_M_manager</span> <span class=o>==</span> <span class=o>&amp;</span><span class=n>any</span><span class=o>::</span><span class=n>_Manager</span><span class=o>&lt;</span><span class=n>_Up</span><span class=o>&gt;::</span><span class=n>_S_manage</span>
+</span></span><span class=line><span class=cl><span class=cp>#if __cpp_rtti
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=o>||</span> <span class=n>__any</span><span class=o>-&gt;</span><span class=n>type</span><span class=p>()</span> <span class=o>==</span> <span class=k>typeid</span><span class=p>(</span><span class=n>_Tp</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>any</span><span class=o>::</span><span class=n>_Arg</span> <span class=n>__arg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>__any</span><span class=o>-&gt;</span><span class=n>_M_manager</span><span class=p>(</span><span class=n>any</span><span class=o>::</span><span class=n>_Op_access</span><span class=p>,</span> <span class=n>__any</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>__arg</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>__arg</span><span class=p>.</span><span class=n>_M_obj</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>首先是移除目标类型的<code>const</code>等描述, 然后判断<code>decay</code>之后的类型和原来的类型是否相等, 这里意味着不能对目标类型添加过多的修饰, 最好是只使用退化后的类型. 然后再判断可拷贝性等, 最后通过<code>__any->_M_manager == &any::_Manager&lt;_Up>::_S_manage</code>判断数据类型是否相等, 如果数据类型相等, 就会匹配同一个模板类, 从而有相同的函数地址, 对于支持RTTI的环境, 也可能通过<code>type_info</code>判断类型是否相同.</p></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-07-06</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/stl/>STL</a>,&nbsp;<a href=/categories/cpp/>Cpp</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/cpp/>Cpp</a>,&nbsp;<a href=/tags/any/>any</a></section></div><div class=post-nav><a href=/202206/cpp_placementnew_allocator/ class=prev rel=prev title=C++在给定内存上构造><i class="fas fa-angle-left fa-fw"></i>C++在给定内存上构造</a>
+<a href=/202207/cpp-stl-tuple/ class=next rel=next title=STL-tuple源码阅读>STL-tuple源码阅读<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

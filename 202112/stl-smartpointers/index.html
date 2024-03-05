@@ -1,0 +1,631 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>STL-智能指针三剑客源码阅读 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="STL-智能指针三剑客源码阅读"><meta property="og:description" content="智能指针出现很多, 但是自己用得很少. 本文从源码层面来学习智能指针, 学习是怎么实现的, 以及如此实现可以实现如何的功能."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202112/stl-smartpointers/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-12-29T15:43:03+08:00"><meta property="article:modified_time" content="2021-12-29T15:43:03+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="STL-智能指针三剑客源码阅读"><meta name=twitter:description content="智能指针出现很多, 但是自己用得很少. 本文从源码层面来学习智能指针, 学习是怎么实现的, 以及如此实现可以实现如何的功能."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202112/stl-smartpointers/><link rel=prev href=https://imcbc.cn/202112/cpp-explicit/><link rel=next href=https://imcbc.cn/202201/fund-sim/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"STL-智能指针三剑客源码阅读","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202112\/stl-smartpointers\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"内存, Cpp, 指针","wordcount":3965,"url":"https:\/\/imcbc.cn\/202112\/stl-smartpointers\/","datePublished":"2021-12-29T15:43:03+08:00","dateModified":"2021-12-29T15:43:03+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>STL-智能指针三剑客源码阅读<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-12-29>2021-12-29</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3965 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#unique_ptr>unique_ptr</a></li><li><a href=#shared_ptr>shared_ptr</a><ul><li><a href=#计数器的使用>计数器的使用</a></li><li><a href=#计数器的实现>计数器的实现</a></li><li><a href=#什么时候删除>什么时候删除</a></li><li><a href=#循环引用>循环引用</a></li></ul></li><li><a href=#weak_ptr>weak_ptr</a></li><li><a href=#总结>总结</a></li></ul></nav></div></div><div class=content id=content><p>智能指针出现很多, 但是自己用得很少. 本文从源码层面来学习智能指针, 学习是怎么实现的, 以及如此实现可以实现如何的功能.</p><h2 id=unique_ptr>unique_ptr</h2><p>我认为<code>unique_ptr</code>是编译器强制人类某些行为的例子, 只允许人类这样做而不允许人类那样做. 可以参考<a href=/202112/cpp-explicit/ rel>explicit说明符</a>的一些想法.</p><p>源码在<a href=https://code.woboq.org/gcc/libstdc++-v3/include/bits/unique_ptr.h.html#std::unique_ptr target=_blank rel="noopener noreffer">这里</a>.</p><p>其析构函数会释放内存资源:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=o>~</span><span class=n>unique_ptr</span><span class=p>()</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>auto</span><span class=o>&amp;</span> <span class=n>__ptr</span> <span class=o>=</span> <span class=n>_M_t</span><span class=p>.</span><span class=n>_M_ptr</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>__ptr</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>get_deleter</span><span class=p>()(</span><span class=n>__ptr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>__ptr</span> <span class=o>=</span> <span class=n>pointer</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>为了保证这一点, <code>unique_ptr</code>就不允许用户将一块内容"多人"使用, 所以需要限制用户的拷贝和赋值行为:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// Disable copy from lvalue.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>unique_ptr</span><span class=p>(</span><span class=k>const</span> <span class=n>unique_ptr</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>unique_ptr</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=k>const</span> <span class=n>unique_ptr</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>禁用了左值拷贝构造和赋值, 这样可以保证只有一个<code>unique_ptr</code>指向一块内存, 不会有多个<code>unique_ptr</code>指向一块内存. 但是允许了右值拷贝构造和赋值:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>unique_ptr</span><span class=p>(</span><span class=n>unique_ptr</span><span class=o>&amp;&amp;</span> <span class=n>__u</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=n>_M_t</span><span class=p>(</span><span class=n>__u</span><span class=p>.</span><span class=n>release</span><span class=p>(),</span> <span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>deleter_type</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__u</span><span class=p>.</span><span class=n>get_deleter</span><span class=p>()))</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>unique_ptr</span><span class=o>&amp;</span>
+</span></span><span class=line><span class=cl><span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=n>unique_ptr</span><span class=o>&amp;&amp;</span> <span class=n>__u</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>reset</span><span class=p>(</span><span class=n>__u</span><span class=p>.</span><span class=n>release</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>    <span class=n>get_deleter</span><span class=p>()</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>deleter_type</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__u</span><span class=p>.</span><span class=n>get_deleter</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>*</span><span class=k>this</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>右值在构造结束后就会被销毁, 所以此处的右值构造可以保证只有一个<code>unique_ptr</code>指向一块内存. 在内存转移的时候使用的是<code>release</code>接口(和<code>reset(__u._M_t)</code>是有区别的), 因为内存转移时候需要保证原<code>unique_ptr</code>的数据指针为空, 不能指向需要转移的内存, 不然在临时变量析构的时候会释放这块内存. 所以<code>release</code>接口的作用就是提取数据内存的指针, 将本来数据指针置空, 返回数据内存指针:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>pointer</span>
+</span></span><span class=line><span class=cl><span class=nf>release</span><span class=p>()</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>pointer</span> <span class=n>__p</span> <span class=o>=</span> <span class=n>get</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>_M_t</span><span class=p>.</span><span class=n>_M_ptr</span><span class=p>()</span> <span class=o>=</span> <span class=n>pointer</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>__p</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>unique_ptr</code>有太多行为限制, 除了行为限制, 比较容易想到的是使用计数器形式实现RAII.</p><h2 id=shared_ptr>shared_ptr</h2><p><code>shared_ptr</code>是基于计数器的智能指针, 继承自<code>__shared_ptr</code>, 自身没有实现任何引用计数的功能. <a href=https://code.woboq.org/gcc/libstdc++-v3/include/bits/shared_ptr.h.html target=_blank rel="noopener noreffer"><code>shared_ptr</code>源码</a></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>class</span> <span class=nc>shared_ptr</span> <span class=o>:</span> <span class=k>public</span> <span class=n>__shared_ptr</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>__shared_ptr</code> 继承自 <code>__shared_ptr_access</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=p>,</span> <span class=n>_Lock_policy</span> <span class=n>_Lp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl>    <span class=k>class</span> <span class=nc>__shared_ptr</span>
+</span></span><span class=line><span class=cl>    <span class=o>:</span> <span class=k>public</span> <span class=n>__shared_ptr_access</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=p>,</span> <span class=n>_Lp</span><span class=o>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>__shared_ptr</code>本身维护两个变量, 内容指针和引用计数器.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>element_type</span><span class=o>*</span>           <span class=n>_M_ptr</span><span class=p>;</span>         <span class=c1>// Contained pointer.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>__shared_count</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;</span>     <span class=n>_M_refcount</span><span class=p>;</span>    <span class=c1>// Reference counter.
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=计数器的使用>计数器的使用</h3><p>以下看看<code>__shared_ptr</code>实现了哪些需要借助引用计数的方法:</p><ol><li>拷贝构造</li></ol><p>拷贝构造数据和计数器, 而计数器的拷贝构造会使得计数器的值+1.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__shared_ptr</span><span class=p>(</span><span class=k>const</span> <span class=n>__shared_ptr</span><span class=o>&amp;</span><span class=p>)</span> <span class=k>noexcept</span> <span class=o>=</span> <span class=k>default</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>右值构造, 相当于右值的数据和计数器给了左值, 右值获得了空的数据和0计数器. 因为右值本身就只有一个引用, 所以交换是可以的.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__shared_ptr</span><span class=p>(</span><span class=n>__shared_ptr</span><span class=o>&amp;&amp;</span> <span class=n>__r</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=n>_M_ptr</span><span class=p>(</span><span class=n>__r</span><span class=p>.</span><span class=n>_M_ptr</span><span class=p>),</span> <span class=n>_M_refcount</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=n>_M_refcount</span><span class=p>.</span><span class=n>_M_swap</span><span class=p>(</span><span class=n>__r</span><span class=p>.</span><span class=n>_M_refcount</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>__r</span><span class=p>.</span><span class=n>_M_ptr</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><ol start=2><li>复制操作</li></ol><p>左值复制使用默认函数, 所以涉及到计数器的复制, 计数器复制操作也会设计+1操作.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__shared_ptr</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=k>const</span> <span class=n>__shared_ptr</span><span class=o>&amp;</span><span class=p>)</span> <span class=k>noexcept</span> <span class=o>=</span> <span class=k>default</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>右值复制同右值构造, 使用<code>swap</code>交换.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__shared_ptr</span><span class=o>&amp;</span>
+</span></span><span class=line><span class=cl><span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=n>__shared_ptr</span><span class=o>&amp;&amp;</span> <span class=n>__r</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>__shared_ptr</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>__r</span><span class=p>)).</span><span class=n>swap</span><span class=p>(</span><span class=o>*</span><span class=k>this</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>*</span><span class=k>this</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>以上, 可以知道<code>shared_ptr</code>在左值构造和左值复制操作时会涉及计数器+1的操作.</p><h3 id=计数器的实现>计数器的实现</h3><p>重点关注引用计数器的实现:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>_Lock_policy</span> <span class=n>_Lp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>__shared_count</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>constexpr</span> <span class=n>__shared_count</span><span class=p>()</span> <span class=k>noexcept</span> <span class=o>:</span> <span class=n>_M_pi</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>__shared_count</span><span class=p>(</span><span class=k>const</span> <span class=n>__shared_count</span><span class=o>&amp;</span> <span class=n>__r</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl>    <span class=o>:</span> <span class=n>_M_pi</span><span class=p>(</span><span class=n>__r</span><span class=p>.</span><span class=n>_M_pi</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>_M_pi</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>_M_pi</span><span class=o>-&gt;</span><span class=n>_M_add_ref_copy</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>__shared_count</span><span class=o>&amp;</span>
+</span></span><span class=line><span class=cl>    <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=k>const</span> <span class=n>__shared_count</span><span class=o>&amp;</span> <span class=n>__r</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>_Sp_counted_base</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;*</span> <span class=n>__tmp</span> <span class=o>=</span> <span class=n>__r</span><span class=p>.</span><span class=n>_M_pi</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>__tmp</span> <span class=o>!=</span> <span class=n>_M_pi</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>__tmp</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=n>__tmp</span><span class=o>-&gt;</span><span class=n>_M_add_ref_copy</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>_M_pi</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=n>_M_pi</span><span class=o>-&gt;</span><span class=n>_M_release</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>                <span class=n>_M_pi</span> <span class=o>=</span> <span class=n>__tmp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=o>*</span><span class=k>this</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span>
+</span></span><span class=line><span class=cl>    <span class=nf>_M_swap</span><span class=p>(</span><span class=n>__shared_count</span><span class=o>&amp;</span> <span class=n>__r</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>_Sp_counted_base</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;*</span> <span class=n>__tmp</span> <span class=o>=</span> <span class=n>__r</span><span class=p>.</span><span class=n>_M_pi</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>__r</span><span class=p>.</span><span class=n>_M_pi</span> <span class=o>=</span> <span class=n>_M_pi</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>_M_pi</span> <span class=o>=</span> <span class=n>__tmp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>friend</span> <span class=k>class</span> <span class=nc>__weak_count</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>_Sp_counted_base</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;*</span>  <span class=n>_M_pi</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>引用计数器的拷贝构造和复制操作都涉及到了计数器的加减, 拷贝构造时计数器会默认+1, 而复制操作时可能会将=右边的计数器释放.</p><p>这里有个疑问, 为什么拷贝构造和复制操作的行为不一样呢?</p><p>因为拷贝构造时说明原本还没有构造计数器, 对应的就是<code>shared_ptr</code>的拷贝构造, 比如<code>shared_ptr&lt;int> p2(p1)</code>, 这时候<code>p1</code>和<code>p2</code>都没有被释放, 是能够正常使用的, 所以拷贝构造时只需要计数器+1就行了. 复制操作需要释放是因为原本指向一个数据的指针会指向另外一个数据, 比如<code>p2 = p1</code>, <code>p2</code>原本可能指向<code>p</code>, 这时候变成了指向<code>p1</code>, 所以原来<code>p</code>的计数器需要-1, <code>p1</code>的计数器就需要+1.</p><p>以上计数器操作来自于<code>_Sp_counted_base</code>, 那么<code>_Sp_counted_base</code>是怎么实现的? <a href=https://code.woboq.org/gcc/libstdc++-v3/include/bits/shared_ptr_base.h.html#std::_Sp_counted_base::_M_use_count target=_blank rel="noopener noreffer">源码</a></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>_Lock_policy</span> <span class=n>_Lp</span> <span class=o>=</span> <span class=n>__default_lock_policy</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>_Sp_counted_base</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=k>public</span> <span class=n>_Mutex_base</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>_Sp_counted_base</span><span class=p>()</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl>        <span class=k>virtual</span>
+</span></span><span class=line><span class=cl>        <span class=o>~</span><span class=n>_Sp_counted_base</span><span class=p>()</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=o>:</span> <span class=n>_M_use_count</span><span class=p>(</span><span class=mi>1</span><span class=p>),</span> <span class=n>_M_weak_count</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span> <span class=p>{</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>void</span>
+</span></span><span class=line><span class=cl>        <span class=nf>_M_add_ref_copy</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span> <span class=n>__gnu_cxx</span><span class=o>::</span><span class=n>__atomic_add_dispatch</span><span class=p>(</span><span class=o>&amp;</span><span class=n>_M_use_count</span><span class=p>,</span> <span class=mi>1</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>    <span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>_Sp_counted_base</span><span class=p>(</span><span class=n>_Sp_counted_base</span> <span class=k>const</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>_Sp_counted_base</span><span class=o>&amp;</span> <span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=n>_Sp_counted_base</span> <span class=k>const</span><span class=o>&amp;</span><span class=p>)</span> <span class=o>=</span> <span class=k>delete</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>_Atomic_word</span>  <span class=n>_M_use_count</span><span class=p>;</span>     <span class=c1>// #shared
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>_Atomic_word</span>  <span class=n>_M_weak_count</span><span class=p>;</span>    <span class=c1>// #weak + (#shared != 0)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>_Sp_counted_base</code>维护了两个计数器, 一个用于<code>shared</code>一个用于<code>weak</code>, 并且两个都是原子变量, 如果关注源码, 还可以发现<code>add</code>或者<code>release</code>操作也是原子的, 并且<code>release</code>操作时会涉及内存屏障(TODO:内存屏障还不太了解).</p><p>同时,<code>_Sp_counted_base</code>的析构函数什么都没有做, 所以如果需要析构release计数器, 就依赖于上层函数的接口, 对应的就是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__shared_count</span><span class=o>::~</span><span class=n>__shared_count</span><span class=p>()</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>_M_pi</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>_M_pi</span><span class=o>-&gt;</span><span class=n>_M_release</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=什么时候删除>什么时候删除</h3><p>一般猜测是析构函数的时候会<code>delete</code>数据, 但是并没有很容易地找到对应的代码, 所以这部分会介绍数据的<code>delete</code>到底是在哪里.</p><p><code>__shared_ptr</code>的构造函数令人怀疑, 因为<code>_M_refcount</code>会需求一个<code>__p</code>参数来构造, 而<code>__p</code>代表了源数据.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Yp</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Deleter</span><span class=p>,</span> <span class=k>typename</span> <span class=o>=</span> <span class=n>_SafeConv</span><span class=o>&lt;</span><span class=n>_Yp</span><span class=o>&gt;&gt;</span>
+</span></span><span class=line><span class=cl><span class=n>__shared_ptr</span><span class=p>(</span><span class=n>_Yp</span><span class=o>*</span> <span class=n>__p</span><span class=p>,</span> <span class=n>_Deleter</span> <span class=n>__d</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=n>_M_ptr</span><span class=p>(</span><span class=n>__p</span><span class=p>),</span> <span class=n>_M_refcount</span><span class=p>(</span><span class=n>__p</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>__d</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>__is_invocable</span><span class=o>&lt;</span><span class=n>_Deleter</span><span class=o>&amp;</span><span class=p>,</span> <span class=n>_Yp</span><span class=o>*&amp;&gt;::</span><span class=n>value</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s>&#34;deleter expression d(p) is well-formed&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>_M_enable_shared_from_this_with</span><span class=p>(</span><span class=n>__p</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>接下来看看<code>__shared_count</code>的构造函数, 一般会调用下面这个构造函数, 不一般的情况就不分析了&mldr;</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Ptr</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Deleter</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Alloc</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=n>__shared_count</span><span class=p>(</span><span class=n>_Ptr</span> <span class=n>__p</span><span class=p>,</span> <span class=n>_Deleter</span> <span class=n>__d</span><span class=p>,</span> <span class=n>_Alloc</span> <span class=n>__a</span><span class=p>)</span> <span class=o>:</span> <span class=n>_M_pi</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>typedef</span> <span class=n>_Sp_counted_deleter</span><span class=o>&lt;</span><span class=n>_Ptr</span><span class=p>,</span> <span class=n>_Deleter</span><span class=p>,</span> <span class=n>_Alloc</span><span class=p>,</span> <span class=n>_Lp</span><span class=o>&gt;</span> <span class=n>_Sp_cd_type</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kr>__try</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>typename</span> <span class=n>_Sp_cd_type</span><span class=o>::</span><span class=n>__allocator_type</span> <span class=n>__a2</span><span class=p>(</span><span class=n>__a</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>auto</span> <span class=n>__guard</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>__allocate_guarded</span><span class=p>(</span><span class=n>__a2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>_Sp_cd_type</span><span class=o>*</span> <span class=n>__mem</span> <span class=o>=</span> <span class=n>__guard</span><span class=p>.</span><span class=n>get</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=o>::</span><span class=k>new</span> <span class=p>(</span><span class=n>__mem</span><span class=p>)</span> <span class=n>_Sp_cd_type</span><span class=p>(</span><span class=n>__p</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>__d</span><span class=p>),</span> <span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>__a</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=n>_M_pi</span> <span class=o>=</span> <span class=n>__mem</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>__guard</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=n>__catch</span><span class=p>(...)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>__d</span><span class=p>(</span><span class=n>__p</span><span class=p>);</span> <span class=c1>// Call _Deleter on __p.
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=n>__throw_exception_again</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这部分构造函数中包含了数据指针:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=o>::</span><span class=k>new</span> <span class=p>(</span><span class=n>__mem</span><span class=p>)</span> <span class=n>_Sp_cd_type</span><span class=p>(</span><span class=n>__p</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>__d</span><span class=p>),</span> <span class=n>std</span><span class=o>::</span><span class=n>move</span><span class=p>(</span><span class=n>__a</span><span class=p>));</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>_Sp_cd_type</code>对应的<code>_Sp_counted_deleter</code>比较令我注意, 它继承自<code>_Sp_counted_base</code>, 并且会将<code>_Sp_counted_deleter</code>类型的数据赋值给<code>_M_pi</code>.</p><p><code>_Sp_counted_deleter</code>的定义如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// Support for custom deleter and/or allocator
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Ptr</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Deleter</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Alloc</span><span class=p>,</span> <span class=n>_Lock_policy</span> <span class=n>_Lp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>_Sp_counted_deleter</span> <span class=k>final</span> <span class=o>:</span> <span class=k>public</span> <span class=n>_Sp_counted_base</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>注意到, <code>_M_pi</code>对应的是如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>_Sp_counted_base</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;*</span>  <span class=n>_M_pi</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>在此之前我们分析了<code>_Sp_counted_base</code>的析构函数什么也没有做, 依赖于<code>__shared_count</code>的析构, 而<code>__shared_count</code>的析构会调用<code>_M_release</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>_M_release</span><span class=p>()</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Be race-detector-friendly.  For more info see bits/c++config.
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>_GLIBCXX_SYNCHRONIZATION_HAPPENS_BEFORE</span><span class=p>(</span><span class=o>&amp;</span><span class=n>_M_use_count</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>__gnu_cxx</span><span class=o>::</span><span class=n>__exchange_and_add_dispatch</span><span class=p>(</span><span class=o>&amp;</span><span class=n>_M_use_count</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span> <span class=o>==</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>_GLIBCXX_SYNCHRONIZATION_HAPPENS_AFTER</span><span class=p>(</span><span class=o>&amp;</span><span class=n>_M_use_count</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>_M_dispose</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// There must be a memory barrier between dispose() and destroy()
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// to ensure that the effects of dispose() are observed in the
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// thread that runs destroy().
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// See http://gcc.gnu.org/ml/libstdc++/2005-11/msg00136.html
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>_Mutex_base</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;::</span><span class=n>_S_need_barriers</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>__atomic_thread_fence</span> <span class=p>(</span><span class=n>__ATOMIC_ACQ_REL</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Be race-detector-friendly.  For more info see bits/c++config.
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>_GLIBCXX_SYNCHRONIZATION_HAPPENS_BEFORE</span><span class=p>(</span><span class=o>&amp;</span><span class=n>_M_weak_count</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>__gnu_cxx</span><span class=o>::</span><span class=n>__exchange_and_add_dispatch</span><span class=p>(</span><span class=o>&amp;</span><span class=n>_M_weak_count</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=o>-</span><span class=mi>1</span><span class=p>)</span> <span class=o>==</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>_GLIBCXX_SYNCHRONIZATION_HAPPENS_AFTER</span><span class=p>(</span><span class=o>&amp;</span><span class=n>_M_weak_count</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>_M_destroy</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>我们只看<code>shared</code>引用部分, 计数器减少到0后会调用到<code>_M_dispose</code>, 这是一个虚函数, 所以会调用到子类的<code>_M_dispose</code>. 对应的则是<code>_Sp_counted_deleter</code>的<code>_M_dispose</code>. 其内容为:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>virtual</span> <span class=kt>void</span>
+</span></span><span class=line><span class=cl><span class=nf>_M_dispose</span><span class=p>()</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span> <span class=n>_M_impl</span><span class=p>.</span><span class=n>_M_del</span><span class=p>()(</span><span class=n>_M_impl</span><span class=p>.</span><span class=n>_M_ptr</span><span class=p>);</span> <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>原来是在这里<code>delete</code>源数据的! 比较令我困惑的是, 删除数据的操作是在计数器对象里面的进行的.</p><h3 id=循环引用>循环引用</h3><p>这是<code>shared_ptr</code>中谈论比较多的问题, 比如:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;memory&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Father</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Son</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Father</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>Son</span><span class=o>&gt;</span> <span class=n>m_son</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Father</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>__func__</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>Father</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>__func__</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Son</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>Father</span><span class=o>&gt;</span> <span class=n>m_father</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Son</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>__func__</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>Son</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>__func__</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>    <span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>Father</span><span class=o>&gt;</span> <span class=n>father</span><span class=p>(</span><span class=k>new</span> <span class=n>Father</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>Son</span><span class=o>&gt;</span> <span class=n>son</span><span class=p>(</span><span class=k>new</span> <span class=n>Son</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>father</span><span class=o>-&gt;</span><span class=n>m_son</span> <span class=o>=</span> <span class=n>son</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>son</span><span class=o>-&gt;</span><span class=n>m_father</span> <span class=o>=</span> <span class=n>father</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;father count &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>father</span><span class=p>.</span><span class=n>use_count</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;son count &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>son</span><span class=p>.</span><span class=n>use_count</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>输出是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>Father
+</span></span><span class=line><span class=cl>Son
+</span></span><span class=line><span class=cl>father count 2
+</span></span><span class=line><span class=cl>son count 2
+</span></span></code></pre></td></tr></table></div></div><p>只有构造没有析构, 因为在函数退出时引用计数器时2, 这时候就需要我们手动<code>release</code>一遍, 但是这明显不符合<code>RAII</code>的原则, 会导致<code>shared_ptr</code>四不象. 为应对这个问题, 设计了<code>weak_ptr</code>类.</p><h2 id=weak_ptr>weak_ptr</h2><p>同<code>shared_ptr</code>, <code>weak_ptr</code>的主要实现在<code>__weak_ptr</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=p>,</span> <span class=n>_Lock_policy</span> <span class=n>_Lp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>__weak_ptr</span>
+</span></span></code></pre></td></tr></table></div></div><p>没有发现<code>__weak_ptr</code>有任何基类. 关注<code>__weak_ptr</code>的构造可以发现, 是没有普通指针的构造接口的, 但是可以从<code>weak_ptr</code>或者<code>shared_ptr</code>构造.</p><p>这里关注两个常用的方法:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__shared_ptr</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=p>,</span> <span class=n>_Lp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=n>lock</span><span class=p>()</span> <span class=k>const</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span> <span class=k>return</span> <span class=n>__shared_ptr</span><span class=o>&lt;</span><span class=n>element_type</span><span class=p>,</span> <span class=n>_Lp</span><span class=o>&gt;</span><span class=p>(</span><span class=o>*</span><span class=k>this</span><span class=p>,</span> <span class=n>std</span><span class=o>::</span><span class=n>nothrow</span><span class=p>);</span> <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>lock</code>方法会将<code>weak</code>指针转换为<code>shared</code>指针, 从而可以访问数据内存, 并且<code>weak</code>指针是不提供方法直接访问数据内存的.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>long</span>
+</span></span><span class=line><span class=cl><span class=nf>use_count</span><span class=p>()</span> <span class=k>const</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span> <span class=k>return</span> <span class=n>_M_refcount</span><span class=p>.</span><span class=n>_M_get_use_count</span><span class=p>();</span> <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>use_count</code>方法返回数据内存的引用计数, <code>_M_get_use_count</code>实际返回的是<code>shared</code>计数, 而不是<code>weak</code>计数.</p><p>再来关注<code>class __weak_count</code>, 类似的, 在构造的时候会增加计数器:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>__weak_count</span><span class=p>(</span><span class=k>const</span> <span class=n>__shared_count</span><span class=o>&lt;</span><span class=n>_Lp</span><span class=o>&gt;&amp;</span> <span class=n>__r</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=n>_M_pi</span><span class=p>(</span><span class=n>__r</span><span class=p>.</span><span class=n>_M_pi</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>_M_pi</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>_M_pi</span><span class=o>-&gt;</span><span class=n>_M_weak_add_ref</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>析构的时候会减少计数器:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=o>~</span><span class=n>__weak_count</span><span class=p>()</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>_M_pi</span> <span class=o>!=</span> <span class=k>nullptr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>_M_pi</span><span class=o>-&gt;</span><span class=n>_M_weak_release</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>但是, 区别于<code>shared</code>指针的计数器, <code>weak</code>指针使用的是<code>weak</code>计数器, 目前来看<code>weak</code>计数器似乎没有用到, 仅在<code>weak</code>计数器为0的时候会释放<code>weak_count</code>自身.</p><p>以上, <code>weak_ptr</code>不会增加<code>shared</code>计数器, 会增加<code>weak</code>计数器, 不能直接访问<code>weak_ptr</code>指向的数据, 需要转换为<code>share_ptr</code>才能访问.</p><p><code>weak_ptr</code>的构造决定了它一般是和<code>shared_ptr</code>配合使用的, 更像是担任数据缓存的角色(或者说数据快照), 它自身不维护数据的生命周期, 如果源数据被释放无法访问了, 那<code>weak_ptr</code>也将无法访问源数据, 比如<code>shared_ptr</code>循环引用问题, 可以这样改写:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;memory&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Father</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Son</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Father</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>weak_ptr</span><span class=o>&lt;</span><span class=n>Son</span><span class=o>&gt;</span> <span class=n>m_son</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Father</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>__func__</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>Father</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>__func__</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Son</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>weak_ptr</span><span class=o>&lt;</span><span class=n>Father</span><span class=o>&gt;</span> <span class=n>m_father</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Son</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>__func__</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=o>~</span><span class=n>Son</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>__func__</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>    <span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>Father</span><span class=o>&gt;</span> <span class=n>father</span><span class=p>(</span><span class=k>new</span> <span class=n>Father</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>Son</span><span class=o>&gt;</span> <span class=n>son</span><span class=p>(</span><span class=k>new</span> <span class=n>Son</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>father</span><span class=o>-&gt;</span><span class=n>m_son</span> <span class=o>=</span> <span class=n>son</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>son</span><span class=o>-&gt;</span><span class=n>m_father</span> <span class=o>=</span> <span class=n>father</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;father count &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>father</span><span class=p>.</span><span class=n>use_count</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;son count &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>son</span><span class=p>.</span><span class=n>use_count</span><span class=p>()</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>输出是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>Father
+</span></span><span class=line><span class=cl>Son
+</span></span><span class=line><span class=cl>father count 1
+</span></span><span class=line><span class=cl>son count 1
+</span></span><span class=line><span class=cl>~Son
+</span></span><span class=line><span class=cl>~Father
+</span></span></code></pre></td></tr></table></div></div><h2 id=总结>总结</h2><ol><li><code>unique_ptr</code>通过限制用户行为实现了内存的RAII;</li><li><code>shared_ptr</code>通过引用计数实现了内存的RAII, 但是存在循环引用问题;</li><li><code>shared_ptr</code>通过扩展<code>weak_ptr</code>解决了循环引用的问题, 将<code>weak_ptr</code>当做是内存的缓存/快照.</li></ol><p>还能总结一些方法:</p><ol><li>设计一个工具类的时候, 不仅仅可以考虑其方法函数, 也可以在构造函数上做文章;</li><li>资源可以有访问接口和管理接口, 类比<code>shared_ptr</code>的资源, 资源会给<code>_M_ptr</code>用于访问, 也会给<code>_M_refcount</code>用于管理, 是分开的;</li></ol></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-12-29</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/cpp/>Cpp</a>,&nbsp;<a href=/categories/stl/>STL</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/%E5%86%85%E5%AD%98/>内存</a>,&nbsp;<a href=/tags/cpp/>Cpp</a>,&nbsp;<a href=/tags/%E6%8C%87%E9%92%88/>指针</a></section></div><div class=post-nav><a href=/202112/cpp-explicit/ class=prev rel=prev title=explicit说明符><i class="fas fa-angle-left fa-fw"></i>explicit说明符</a>
+<a href=/202201/fund-sim/ class=next rel=next title=几种定投策略的仿真比较>几种定投策略的仿真比较<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

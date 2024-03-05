@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII亮度</title>
+</head>
+
+<style>
+    html,
+    body,
+    #settings {
+        margin: 0px 0px;
+        padding: 0px 0px;
+        width: 100%;
+    }
+
+    #settings textarea {
+        outline-style: none;
+        padding: 0px;
+        font-size: 1.5rem;
+        height: 100%;
+        width: 50%;
+    }
+
+    #settings button {
+        width: 50%;
+        height: 2rem;
+        font-size: 1.5ex;
+    }
+</style>
+
+<body>
+    <div id="settings">
+        <textarea name="ascii-char" id="ascii-char" ></textarea>
+        <br />
+        <button onclick="encrypt()"> 提交 </button>
+    </div>
+</body>
+
+<script>
+    function createWorker(f) {
+        var blob = new Blob(['(' + f.toString() + ')()']);
+        var url = window.URL.createObjectURL(blob);
+        var worker = new Worker(url);
+        return worker;
+    }
+
+    var pollingWorker = createWorker(function (e) {
+        var delay = 0;
+        var min_interval = 10;
+        var start = new Date();
+        var stop = true;
+        self.addEventListener('message', function (e) {
+            delay = e.data;
+            start = new Date();
+        }, false);
+        setInterval(function () {
+            let cur = new Date();
+            if (cur.getTime() - start.getTime() >= delay * 0.95) {
+                start = new Date();
+                if (delay >= min_interval) postMessage(null);
+            }
+        }, min_interval)
+    });
+
+    var magicNum = '0101010100001111';
+    var bits = "";
+    var index = 0;
+    function bodyBG(color) {
+        document.body.style.backgroundColor = color;
+    }
+    pollingWorker.onmessage = function () {
+        if (index >= bits.length) {
+            bits = "";
+            index = 0;
+            document.body.style.backgroundColor = 'white';
+            document.querySelector('#settings').style.display = 'block';
+            pollingWorker.postMessage(-1);
+            return;
+        }
+        let bit = bits[index];
+        index++;
+
+        if (bit == '0') document.body.style.backgroundColor = 'black';
+        else document.body.style.backgroundColor = 'blue';
+
+        console.log(bit);
+    }
+
+    function postInit(string) {
+        document.querySelector('#settings').style.display = 'none';
+        pollingWorker.postMessage(-1);
+        bits = magicNum + string;
+        index = 0;
+        bodyBG = 'color: white';
+        pollingWorker.postMessage(60);
+    }
+
+    function strToBinary(str) {
+        let list = str.split('');
+        return list.map(item => {
+            let pattern = '00000000' + item.charCodeAt().toString(2);
+            return pattern.slice(pattern.length - 8, pattern.length);
+        }).join('');
+    }
+    function encrypt() {
+        let string = document.querySelector('#ascii-char').value;
+        let bits = strToBinary(string);
+        postInit(bits);
+    }
+</script>
+
+</html>

@@ -1,0 +1,195 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>NAS-OMV容器配置 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="NAS-OMV容器配置"><meta property="og:description" content="在《闲置笔记本改NAS-omv踩坑记录》简单介绍了我为什么要把废旧笔记本改NAS以及大致操作。但是最近给比较本换固态重新装系统的时候，发现之前的文章没法拿来就用，因此需要详细记录。本文主要内容是docker容器的配置工作，OMV基础配置并不涉及。"><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202209/nas-omv-reprocesss/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-09-21T08:17:06+08:00"><meta property="article:modified_time" content="2022-09-22T08:17:06+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="NAS-OMV容器配置"><meta name=twitter:description content="在《闲置笔记本改NAS-omv踩坑记录》简单介绍了我为什么要把废旧笔记本改NAS以及大致操作。但是最近给比较本换固态重新装系统的时候，发现之前的文章没法拿来就用，因此需要详细记录。本文主要内容是docker容器的配置工作，OMV基础配置并不涉及。"><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202209/nas-omv-reprocesss/><link rel=prev href=https://imcbc.cn/202209/2019-2022-work-summary/><link rel=next href=https://imcbc.cn/202209/cpp_hopl4_reading/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"NAS-OMV容器配置","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202209\/nas-omv-reprocesss\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"nas, docker, omv","wordcount":2640,"url":"https:\/\/imcbc.cn\/202209\/nas-omv-reprocesss\/","datePublished":"2022-09-21T08:17:06+08:00","dateModified":"2022-09-22T08:17:06+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>NAS-OMV容器配置<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2022-09-21>2022-09-21</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2640 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><ul><li><a href=#升级>升级</a></li><li><a href=#docker-compose>docker compose</a><ul><li><a href=#jellyfin>jellyfin</a></li><li><a href=#transmission>transmission</a></li><li><a href=#nextcloud>nextcloud</a></li></ul></li></ul></li></ul></nav></div></div><div class=content id=content><p>在<a href=/202204/laptopnas-omv/ rel>《闲置笔记本改NAS-omv踩坑记录》</a>简单介绍了我为什么要把废旧笔记本改NAS以及大致操作。但是最近给比较本换固态重新装系统的时候，发现之前的文章没法拿来就用，因此需要详细记录。本文主要内容是docker容器的配置工作，OMV基础配置并不涉及。</p><h3 id=升级>升级</h3><p>我使用作为NAS的机器是七年前的笔记本（Acer E5-572GMX），CPU是<a href=https://www.intel.cn/content/www/cn/zh/products/sku/81012/intel-core-i54210m-processor-3m-cache-up-to-3-20-ghz/specifications.html target=_blank rel="noopener noreffer">i5-4210M</a>，TDP大概在37 W。</p><p>只给笔记本换了一下系统硬盘，原来的系统盘是500G的机械硬盘，已经有七年的历史了，所以给换成了250G的固态硬盘。前文中已经提到过，如果使用OMV直接刷系统（不是通过先Debian再OMV），那么系统盘是无法直接作为存储盘的，因此不需要很大，只需要满足一些docker过kvm的空间即可。</p><p>因为将系统盘换成了固态盘，最明显的区别是，OMV反应速度变快了。在上面安装插件、安装docker的速度以及部分视频播放的流畅度有明显改善。</p><p>不过，笔记本是通过WiFi和家庭网络连接的，传输速度并不是很快，而且是14年产的笔记本，使用的是2.5G的WiFi，日常传输速度只有大概10MB/s。（很慢很慢了&mldr;）</p><p>因为网络速度瓶颈，目前也就刚刚够用的状态，大部分还是只能满足备份的需求。我测试过将游戏安装在上面（打开SMB），并不能正常游玩，会卡死。所以，下一步的硬件升级计划是提高网速。</p><p>至于为什么不用有线连接，一是因为记得购买的时候有说明有线网卡的速度是100Mbps，现在不方便升级，无线网卡更容易升级；二是因为现在租的房子有线网络有问题，家里所有设备现在都是使用无线网络连接的。</p><p>至于换什么网卡，还在考虑中，现在家里的路由器是WDR7650，目标是能跑满。如果未来速度满足需求的话，很多免装软件就可以直接放在远程硬盘上了。</p><p>再下一步是要升级（扩容）硬盘，但是我并不考虑raid阵列，使用硬盘柜扩充即可，目前还在调查中。</p><h3 id=docker-compose>docker compose</h3><p>docker安装的几个服务主要是jellyfin、transmission、nextcloud，目前就这些，未来可能考虑openwrt，但是因为网络环境不太好，网速提不上去之前是不会考虑的。再下一个计划就是装上code server，这样在台式机或者笔记本上都可以写博客并且在线预览。（现在使用的是小书匠写，虽然体验很好，但是有在线预览需求，小书匠的预览效果和我的博客主题并不一样。）</p><p>公网IP暂时不考虑，内网穿透在计划中，但是不一定实施。</p><p>因为网上教程太杂，不容易成功，以下主要介绍几个docker compose的配置，是参考docker hub的配置的，基本只是修改了值。</p><h4 id=jellyfin>jellyfin</h4><p>jellyfin主要作为媒体库，体验过本地安装jellyfin和emby，实际感觉差不多，没有很明显的区别，因此还是使用docker安装。（而且docker也是号称不吃资源。）</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-docker data-lang=docker><span class=line><span class=cl>---<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>version: <span class=s2>&#34;2.1&#34;</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>services:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>  jellyfin:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    image: lscr.io/linuxserver/jellyfin:latest<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    container_name: jellyfin<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    environment:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>PUID</span><span class=o>=</span><span class=m>1000</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>PGID</span><span class=o>=</span><span class=m>1000</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>TZ</span><span class=o>=</span>Asia/Shanghai<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    volumes:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - /srv/xxxxxxxxxxx/Medias/config:/config<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - /srv/xxxxxxxxxxx/Medias/movies:/data/movies<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - /srv/xxxxxxxxxxx/Medias/musics:/data/musics<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - /srv/xxxxxxxxxxx/Medias/pictures:/data/pictures<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    ports:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - 8096:8096<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - 8920:8920 <span class=c1>#optional</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - 7359:7359/udp <span class=c1>#optional</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - 1900:1900/udp <span class=c1>#optional</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    restart: unless-stopped<span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><p>推荐<code>image</code>加上<code>latest</code>标签，这样下次更新的时候方便，我在电视上安装jellyfin的时候，就遇到过服务器版本太老导致电视jellyfin无法登陆的问题，因此将服务器版本保持最新也是有用的。</p><p><code>PUID</code>、<code>PGID</code>两项主要是配置用户权限的，通过<code>id [user]</code>查看user的id和所属group id，主要是涉及对jellyfin目录的读写权限，或者是对驱动的读写权限，推荐权限不要给太高，满足即可。当然，只在家庭网络环境使用的话，问题也不是很大，但是也是可以学习学习权限配置的，控制好权限也没有那么简单。</p><p><code>volumes</code>做目录影射，不细表，只有<code>/config</code>项是必须项，其他按照需求填写即可。</p><p>端口按照需求配置即可。</p><h4 id=transmission>transmission</h4><p>transmission主要用来当做下载器，可以下载bt种子和做种，挂着24h下就行了。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-docker data-lang=docker><span class=line><span class=cl>---<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>version: <span class=s2>&#34;2.1&#34;</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>services:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>  transmission:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    image: lscr.io/linuxserver/transmission:latest<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    container_name: transmission<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    environment:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>PUID</span><span class=o>=</span><span class=m>1000</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>PGID</span><span class=o>=</span><span class=m>1000</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>TZ</span><span class=o>=</span>Asia/Shanghai<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>TRANSMISSION_WEB_HOME</span><span class=o>=</span>/transmissionic/ <span class=c1>#optional</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>USER</span><span class=o>=</span>********* <span class=c1>#optional</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - <span class=nv>PASS</span><span class=o>=</span>********* <span class=c1>#optional</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    volumes:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - /srv/xxxxxxxxxxx/Medias/config:/config<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - /srv/xxxxxxxxxxx/Medias/downloads:/downloads<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - /srv/xxxxxxxxxxx/Medias/downloads/transmission_watch:/watch<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    ports:<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - 9091:9091<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - 51413:51413<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>      - 51413:51413/udp<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err></span>    restart: unless-stopped<span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><p><code>TRANSMISSION_WEB_HOME</code>是用来配置主题的，我还是推荐<code>transmissionic</code>，挺漂亮的。</p><p><code>USER</code>和<code>PASS</code>是用来设置登陆账户的，如果不设置该项，则使用transmission就不需要登陆。</p><p><code>volumes</code>的<code>/watch</code>可以用来自动下载，将下载好的种子，放在<code>/watch</code>对应的目录下，即可实现自动下载。</p><h4 id=nextcloud>nextcloud</h4><p>我有纠结过nextcloud和SMB的区别是什么，其实功能上nextcloud就可以等同于onedrive。</p><p>以照片同步来说，如果使用SMB备份照片，则是将照片拖动到SMB映射的硬盘，然后等待复制进度条走完，如果复制失败了，则可能一张照片都没有备份过去。如果是nextcould，则是照片拖动过去，然后nextcloud自己负责一张一张地复制到“云端”，基本不会有某次失败导致全部失败的情况。</p><p>但是也有问题，比如nextcloud之类的会占用本地存储空间，需要同步完然后释放本地空间才可，而SMB移动过去之后就不会占用本地空间。另外通过SMB也可以将游戏之类的应用装在远程硬盘上，而不占用本地存储空间，使用nextcloud之类就可能很难实现该功能。使用nextcloud云盘的好处是，照片等媒体查看会比SMB协议方便和人性化很多，可以当做一个小的媒体服务器，如果是处理一些文档数据，我认为也很方便，因为可以在其他如手机、平板、Linux、Mac上处理，不会受到协议的限制。（当然，这里是不考虑三方平台的。）</p><p>所以，使用nextcloud的作用是，当做照片、文档跨平台查看和备份的工具。（今天正好在同步照片，没想到有20G，SMB可以当做冷备份。）</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>version: &#39;2&#39;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>volumes:
+</span></span><span class=line><span class=cl>  nextcloud:
+</span></span><span class=line><span class=cl>  db:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>services:
+</span></span><span class=line><span class=cl>  db:
+</span></span><span class=line><span class=cl>    image: mariadb:10.5
+</span></span><span class=line><span class=cl>    restart: always
+</span></span><span class=line><span class=cl>    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+</span></span><span class=line><span class=cl>    volumes:
+</span></span><span class=line><span class=cl>      - /srv/xxxxxxxxxxx/nextcloud/db:/var/lib/mysql
+</span></span><span class=line><span class=cl>    environment:
+</span></span><span class=line><span class=cl>      - MYSQL_ROOT_PASSWORD=*********
+</span></span><span class=line><span class=cl>      - MYSQL_PASSWORD=*********
+</span></span><span class=line><span class=cl>      - MYSQL_DATABASE=nextcloud
+</span></span><span class=line><span class=cl>      - MYSQL_USER=nextcloud
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  app:
+</span></span><span class=line><span class=cl>    image: nextcloud
+</span></span><span class=line><span class=cl>    restart: always
+</span></span><span class=line><span class=cl>    ports:
+</span></span><span class=line><span class=cl>      - 8080:80
+</span></span><span class=line><span class=cl>    links:
+</span></span><span class=line><span class=cl>      - db
+</span></span><span class=line><span class=cl>    volumes:
+</span></span><span class=line><span class=cl>      - /srv/xxxxxxxxxxx/nextcloud/nextcloud:/var/www/html
+</span></span><span class=line><span class=cl>    environment:
+</span></span><span class=line><span class=cl>      - MYSQL_PASSWORD=*********
+</span></span><span class=line><span class=cl>      - MYSQL_DATABASE=nextcloud
+</span></span><span class=line><span class=cl>      - MYSQL_USER=nextcloud
+</span></span><span class=line><span class=cl>      - MYSQL_HOST=db
+</span></span></code></pre></td></tr></table></div></div><p>我目前在试用的方案是，手机上安装nextcloud，打开自动同步手机照片。尽管目前还只支持局域网，但是每天回到家，连上wifi就会自动同步/备份照片，这也是可以接受的。</p><hr><blockquote><p>以上很多密码，我是使用keepass作为密码管理工具，已经使用了差不多大半年了，支持跨平台很方便，并且keepass开源，号称是目前无法破解，可以推荐使用。Windows上的工具叫keepass2， Andriod上是keepass2andriod，iOS上的是fantasypass（注意，iOS暂未开源）。</p></blockquote></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-09-22</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E5%B7%A5%E5%85%B7/>工具</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/nas/>nas</a>,&nbsp;<a href=/tags/docker/>docker</a>,&nbsp;<a href=/tags/omv/>omv</a></section></div><div class=post-nav><a href=/202209/2019-2022-work-summary/ class=prev rel=prev title=2019-2022·相机算法集成·总结概述><i class="fas fa-angle-left fa-fw"></i>2019-2022·相机算法集成·总结概述</a>
+<a href=/202209/cpp_hopl4_reading/ class=next rel=next title=《现代C++白皮书》一周目读后感>《现代C++白皮书》一周目读后感<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

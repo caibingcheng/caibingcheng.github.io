@@ -1,0 +1,520 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>glibc-mmap源码阅读 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="glibc-mmap源码阅读"><meta property="og:description" content="本篇通过学习mmap的实现，将帮助解答《进程控制和通信(四) · PCB介绍 》中的一些问题，以及加深对虚拟内存的理解。"><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202202/glibc-mmap/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-02-28T10:54:03+08:00"><meta property="article:modified_time" content="2022-02-28T10:54:03+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="glibc-mmap源码阅读"><meta name=twitter:description content="本篇通过学习mmap的实现，将帮助解答《进程控制和通信(四) · PCB介绍 》中的一些问题，以及加深对虚拟内存的理解。"><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202202/glibc-mmap/><link rel=prev href=https://imcbc.cn/202202/fopen-sys-open/><link rel=next href=https://imcbc.cn/202203/null-nullptr-problem/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"glibc-mmap源码阅读","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202202\/glibc-mmap\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Linux, glibc","wordcount":4373,"url":"https:\/\/imcbc.cn\/202202\/glibc-mmap\/","datePublished":"2022-02-28T10:54:03+08:00","dateModified":"2022-02-28T10:54:03+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>glibc-mmap源码阅读<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2022-02-28>2022-02-28</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4373 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#入口mmap>入口mmap</a></li><li><a href=#系统调用>系统调用</a><ul><li><a href=#do_mmap2>do_mmap2</a></li><li><a href=#ksys_mmap_pgoff>ksys_mmap_pgoff</a></li><li><a href=#vm_mmap_pgoff>vm_mmap_pgoff</a></li><li><a href=#do_mmap>do_mmap</a></li></ul></li><li><a href=#遗留问题>遗留问题</a></li><li><a href=#番外>番外</a></li><li><a href=#总结>总结</a></li></ul></nav></div></div><div class=content id=content><p>本篇通过学习<code>mmap</code>的实现，将帮助解答<a href=/202105/process-ctracon4#%e5%86%85%e5%ad%98%e7%ae%a1%e7%90%86 rel>《进程控制和通信(四) · PCB介绍 》</a>中的一些问题，以及加深对虚拟内存的理解。</p><h2 id=入口mmap>入口mmap</h2><p>先看<code>mmap</code>的入口，首先是检查一个<code>PAGE</code>的大小以及偏移<code>offset</code>是不是满足要求，然后再系统调用<code>mmap(2)</code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>void</span> <span class=o>*</span>
+</span></span><span class=line><span class=cl><span class=nf>__mmap</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=n>addr</span><span class=p>,</span> <span class=n>size_t</span> <span class=n>len</span><span class=p>,</span> <span class=kt>int</span> <span class=n>prot</span><span class=p>,</span> <span class=kt>int</span> <span class=n>flags</span><span class=p>,</span> <span class=kt>int</span> <span class=n>fd</span><span class=p>,</span> <span class=n>off_t</span> <span class=n>offset</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>MMAP_CHECK_PAGE_UNIT</span> <span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>offset</span> <span class=o>&amp;</span> <span class=n>MMAP_OFF_LOW_MASK</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=p>)</span> <span class=n>INLINE_SYSCALL_ERROR_RETURN_VALUE</span> <span class=p>(</span><span class=n>EINVAL</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef __NR_mmap2
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=k>return</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=p>)</span> <span class=n>MMAP_CALL</span> <span class=p>(</span><span class=n>mmap2</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span> <span class=n>fd</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                             <span class=n>offset</span> <span class=o>/</span> <span class=p>(</span><span class=kt>uint32_t</span><span class=p>)</span> <span class=n>MMAP2_PAGE_UNIT</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=k>return</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=p>)</span> <span class=n>MMAP_CALL</span> <span class=p>(</span><span class=n>mmap</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span> <span class=n>fd</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                             <span class=n>MMAP_ADJUST_OFFSET</span> <span class=p>(</span><span class=n>offset</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>weak_alias</span> <span class=p>(</span><span class=n>__mmap</span><span class=p>,</span> <span class=n>mmap</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>libc_hidden_def</span> <span class=p>(</span><span class=n>__mmap</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>首先关注<code>PAGE</code>和<code>offset</code>的检查部分：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>MMAP_CHECK_PAGE_UNIT</span> <span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>offset</span> <span class=o>&amp;</span> <span class=n>MMAP_OFF_LOW_MASK</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=p>)</span> <span class=n>INLINE_SYSCALL_ERROR_RETURN_VALUE</span> <span class=p>(</span><span class=n>EINVAL</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>对应的宏如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* This is the minimum mmap2 unit size accept by the kernel.  An architecture
+</span></span></span><span class=line><span class=cl><span class=cm>   with multiple minimum page sizes (such as m68k) might define it as -1 and
+</span></span></span><span class=line><span class=cl><span class=cm>   thus it will queried at runtime.  */</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifndef MMAP2_PAGE_UNIT
+</span></span></span><span class=line><span class=cl><span class=cp># define MMAP2_PAGE_UNIT 4096ULL
+</span></span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#if MMAP2_PAGE_UNIT == -1
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=k>static</span> <span class=kt>uint64_t</span> <span class=n>page_unit</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp># define MMAP_CHECK_PAGE_UNIT()                      \
+</span></span></span><span class=line><span class=cl><span class=cp>  if (page_unit == 0)                                \
+</span></span></span><span class=line><span class=cl><span class=cp>    page_unit = __getpagesize ();
+</span></span></span><span class=line><span class=cl><span class=cp># undef MMAP2_PAGE_UNIT
+</span></span></span><span class=line><span class=cl><span class=cp># define MMAP2_PAGE_UNIT page_unit
+</span></span></span><span class=line><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=cl><span class=cp># define MMAP_CHECK_PAGE_UNIT()
+</span></span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></td></tr></table></div></div><p>一般设置一个<code>PAGE</code>的大小是<code>4096</code>，但是也支持动态获取，通过<code>__getpagesize</code>可以实时地动态获取<code>PAGE</code>大小。</p><p><code>MMAP_OFF_LOW_MASK</code>表示<code>PAGE</code>的大小减一，例如<code>PAGE</code>大小是<code>4096</code>，那么对应的<code>MMAP2_PAGE_UNIT</code>就是<code>4095</code>，转换成二进制就是(<code>011111111111</code>)。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Do not accept offset not multiple of page size.  */</span>
+</span></span><span class=line><span class=cl><span class=cp>#define MMAP_OFF_LOW_MASK  (MMAP2_PAGE_UNIT - 1)
+</span></span></span></code></pre></td></tr></table></div></div><p>为什么<code>MMAP_OFF_LOW_MASK</code>要表示为<code>MMAP2_PAGE_UNIT - 1</code>？ 如果<code>PAGE</code>一定是<code>2^n</code>大小，那么<code>MMAP2_PAGE_UNIT</code>的表示一定是后缀若干个<code>1</code>。用<code>offset & MMAP_OFF_LOW_MASK</code>判断，如果表达式为<code>true</code>，则表示<code>offset</code>末尾有<code>1</code>，那么它一定不是<code>PAGE</code>的整数倍；如果<code>offset</code>不是<code>PAGE</code>的整数倍，那么<code>offset & MMAP_OFF_LOW_MASK</code>一定为<code>true</code>吗？（是不是充要条件？）如果前提是，<code>PAGE</code>的大小一定是<code>2^n</code>，那么上述表述成立。可以大概证明一下：</p><p>如果<code>offset</code>不是<code>PAGE</code>的整数倍，假设<code>offset</code>的值是<code>n × PAGE + m</code>，<code>n</code>和<code>m</code>都是整数，且<code>m &lt; PAGE</code>。因为<code>PAGE</code>是<code>2^n</code>，二进制表示的首个数位是<code>1</code>, 末尾有若刚个连续的<code>0</code>，例如<code>100000000000</code>，所以<code>n × PAGE</code>末尾连续<code>0</code>的个数大于或等于<code>PAGE</code>末尾连续<code>0</code>的个数。又因为<code>m &lt; PAGE</code>，所以<code>m</code>的二进制数位长度小于<code>PAGE</code>末尾连续<code>0</code>的长度，这就会导致<code>n × PAGE + m</code>末尾连续<code>0</code>的个数小于<code>PAGE</code>末尾连续<code>0</code>的个数，因此<code>offset & MMAP_OFF_LOW_MASK</code>为<code>true</code>。</p><h2 id=系统调用>系统调用</h2><h3 id=do_mmap2>do_mmap2</h3><p>以下是<code>mmap(2)</code>系统调用，都指向了<code>do_mmap2</code>这个函数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#define PAGE_SHIFT 12
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=n>SYSCALL_DEFINE6</span><span class=p>(</span><span class=n>mmap2</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>size_t</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>fd</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>do_mmap2</span><span class=p>(</span><span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span> <span class=n>fd</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>,</span> <span class=n>PAGE_SHIFT</span><span class=o>-</span><span class=mi>12</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>SYSCALL_DEFINE6</span><span class=p>(</span><span class=n>mmap</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>size_t</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>unsigned</span> <span class=kt>long</span><span class=p>,</span> <span class=n>fd</span><span class=p>,</span> <span class=n>off_t</span><span class=p>,</span> <span class=n>offset</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>do_mmap2</span><span class=p>(</span><span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span> <span class=n>fd</span><span class=p>,</span> <span class=n>offset</span><span class=p>,</span> <span class=n>PAGE_SHIFT</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>do_mmap2</code>如下，也会检查<code>offset</code>对齐之类，主要关注<code>ksys_mmap_pgoff</code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>static</span> <span class=kr>inline</span> <span class=kt>long</span> <span class=nf>do_mmap2</span><span class=p>(</span><span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>addr</span><span class=p>,</span> <span class=n>size_t</span> <span class=n>len</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>prot</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>flags</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>fd</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>off</span><span class=p>,</span> <span class=kt>int</span> <span class=n>shift</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kt>long</span> <span class=n>ret</span> <span class=o>=</span> <span class=o>-</span><span class=n>EINVAL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>arch_validate_prot</span><span class=p>(</span><span class=n>prot</span><span class=p>,</span> <span class=n>addr</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>		<span class=k>goto</span> <span class=n>out</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>shift</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>off</span> <span class=o>&amp;</span> <span class=p>((</span><span class=mi>1</span> <span class=o>&lt;&lt;</span> <span class=n>shift</span><span class=p>)</span> <span class=o>-</span> <span class=mi>1</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>			<span class=k>goto</span> <span class=n>out</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=n>off</span> <span class=o>&gt;&gt;=</span> <span class=n>shift</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=n>ret</span> <span class=o>=</span> <span class=n>ksys_mmap_pgoff</span><span class=p>(</span><span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span> <span class=n>fd</span><span class=p>,</span> <span class=n>off</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nl>out</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>ret</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=ksys_mmap_pgoff>ksys_mmap_pgoff</h3><p><code>ksys_mmap_pgoff</code>如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span> <span class=nf>ksys_mmap_pgoff</span><span class=p>(</span><span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>addr</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>len</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			      <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>prot</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>flags</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			      <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>fd</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>pgoff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>file</span> <span class=o>*</span><span class=n>file</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=p>(</span><span class=n>flags</span> <span class=o>&amp;</span> <span class=n>MAP_ANONYMOUS</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=n>audit_mmap_fd</span><span class=p>(</span><span class=n>fd</span><span class=p>,</span> <span class=n>flags</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=n>file</span> <span class=o>=</span> <span class=n>fget</span><span class=p>(</span><span class=n>fd</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>file</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>			<span class=k>return</span> <span class=o>-</span><span class=n>EBADF</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>is_file_hugepages</span><span class=p>(</span><span class=n>file</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>			<span class=n>len</span> <span class=o>=</span> <span class=n>ALIGN</span><span class=p>(</span><span class=n>len</span><span class=p>,</span> <span class=n>huge_page_size</span><span class=p>(</span><span class=n>hstate_file</span><span class=p>(</span><span class=n>file</span><span class=p>)));</span>
+</span></span><span class=line><span class=cl>		<span class=n>retval</span> <span class=o>=</span> <span class=o>-</span><span class=n>EINVAL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>unlikely</span><span class=p>(</span><span class=n>flags</span> <span class=o>&amp;</span> <span class=n>MAP_HUGETLB</span> <span class=o>&amp;&amp;</span> <span class=o>!</span><span class=n>is_file_hugepages</span><span class=p>(</span><span class=n>file</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl>			<span class=k>goto</span> <span class=n>out_fput</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>flags</span> <span class=o>&amp;</span> <span class=n>MAP_HUGETLB</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>struct</span> <span class=n>user_struct</span> <span class=o>*</span><span class=n>user</span> <span class=o>=</span> <span class=nb>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=k>struct</span> <span class=n>hstate</span> <span class=o>*</span><span class=n>hs</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=n>hs</span> <span class=o>=</span> <span class=n>hstate_sizelog</span><span class=p>((</span><span class=n>flags</span> <span class=o>&gt;&gt;</span> <span class=n>MAP_HUGE_SHIFT</span><span class=p>)</span> <span class=o>&amp;</span> <span class=n>MAP_HUGE_MASK</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>hs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>			<span class=k>return</span> <span class=o>-</span><span class=n>EINVAL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=n>len</span> <span class=o>=</span> <span class=n>ALIGN</span><span class=p>(</span><span class=n>len</span><span class=p>,</span> <span class=n>huge_page_size</span><span class=p>(</span><span class=n>hs</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>		<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>		 * VM_NORESERVE is used because the reservations will be
+</span></span></span><span class=line><span class=cl><span class=cm>		 * taken when vm_ops-&gt;mmap() is called
+</span></span></span><span class=line><span class=cl><span class=cm>		 * A dummy user value is used because we are not locking
+</span></span></span><span class=line><span class=cl><span class=cm>		 * memory so no accounting is necessary
+</span></span></span><span class=line><span class=cl><span class=cm>		 */</span>
+</span></span><span class=line><span class=cl>		<span class=n>file</span> <span class=o>=</span> <span class=n>hugetlb_file_setup</span><span class=p>(</span><span class=n>HUGETLB_ANON_FILE</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>				<span class=n>VM_NORESERVE</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>				<span class=o>&amp;</span><span class=n>user</span><span class=p>,</span> <span class=n>HUGETLB_ANONHUGE_INODE</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>				<span class=p>(</span><span class=n>flags</span> <span class=o>&gt;&gt;</span> <span class=n>MAP_HUGE_SHIFT</span><span class=p>)</span> <span class=o>&amp;</span> <span class=n>MAP_HUGE_MASK</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>IS_ERR</span><span class=p>(</span><span class=n>file</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>			<span class=k>return</span> <span class=n>PTR_ERR</span><span class=p>(</span><span class=n>file</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=n>retval</span> <span class=o>=</span> <span class=n>vm_mmap_pgoff</span><span class=p>(</span><span class=n>file</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>大致三个过程：</p><ol><li>检查和设置<code>flag</code></li><li>内存对齐</li><li>执行<code>vm_mmap_pgoff</code></li></ol><p>检查和设置<code>flag</code>阶段，我比较关注<code>MAP_HUGETLB</code>，这是Linux提供的大<code>PAGE</code>支持，在<a href=https://man7.org/linux/man-pages/man2/mmap.2.html target=_blank rel="noopener noreffer">man7</a>中可以找到大概的介绍，在<code>HUGE PAGE</code>模式下，可以支持<code>2MB</code>甚至<code>1GB</code>大小的<code>PAGE</code>！大<code>PAGE</code>可以减少IO访问的次数，同时也会带来大量的内存碎片。在<a href=https://draveness.me/whys-the-design-linux-default-page/ target=_blank rel="noopener noreffer">《为什么 Linux 默认页大小是 4KB》</a>中，作者有介绍<code>PAGE</code>不同大小的影响。</p><h3 id=vm_mmap_pgoff>vm_mmap_pgoff</h3><p>下面是<code>vm_mmap_pgoff</code>，这里比较接近<code>mmap</code>的本质了，<code>current->mm</code>拿到了当前进程的内存映射结构：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span> <span class=nf>vm_mmap_pgoff</span><span class=p>(</span><span class=k>struct</span> <span class=n>file</span> <span class=o>*</span><span class=n>file</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>addr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>len</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>prot</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>flag</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>pgoff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>ret</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mm_struct</span> <span class=o>*</span><span class=n>mm</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>mm</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>populate</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>LIST_HEAD</span><span class=p>(</span><span class=n>uf</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=n>ret</span> <span class=o>=</span> <span class=n>security_mmap_file</span><span class=p>(</span><span class=n>file</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flag</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>ret</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>down_write_killable</span><span class=p>(</span><span class=o>&amp;</span><span class=n>mm</span><span class=o>-&gt;</span><span class=n>mmap_sem</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>			<span class=k>return</span> <span class=o>-</span><span class=n>EINTR</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=n>ret</span> <span class=o>=</span> <span class=n>do_mmap_pgoff</span><span class=p>(</span><span class=n>file</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flag</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>				    <span class=o>&amp;</span><span class=n>populate</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>uf</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=n>up_write</span><span class=p>(</span><span class=o>&amp;</span><span class=n>mm</span><span class=o>-&gt;</span><span class=n>mmap_sem</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=n>userfaultfd_unmap_complete</span><span class=p>(</span><span class=n>mm</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>uf</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>populate</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>			<span class=n>mm_populate</span><span class=p>(</span><span class=n>ret</span><span class=p>,</span> <span class=n>populate</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>ret</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>大概分作以下几步：</p><ol><li>检查文件安全性</li><li><code>mmap</code>加锁</li><li><code>mmap</code>映射</li><li><code>mmap</code>解锁
+（还有<code>populate</code>等步骤，不太明白，但是不影响对<code>mmap</code>的基本了解，所以本文不过分追究。不过，有机会我还是得去了解了解的～～～基础不太行，先把这些基本的问题搞清楚吧～）</li></ol><p><code>mmap</code>加锁和解锁逻辑不需要过分关注，只需要知道<code>rw_semaphore</code>是个读写信号量，在这里实现了类似锁的功能，应该是为了保证数据一致性。</p><h3 id=do_mmap>do_mmap</h3><p><code>mmap</code>映射步骤调用的是<code>do_mmap_pgoff</code>，如下，指向的是<code>do_mmap</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>static</span> <span class=kr>inline</span> <span class=kt>unsigned</span> <span class=kt>long</span>
+</span></span><span class=line><span class=cl><span class=nf>do_mmap_pgoff</span><span class=p>(</span><span class=k>struct</span> <span class=n>file</span> <span class=o>*</span><span class=n>file</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>addr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>len</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>prot</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>flags</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>pgoff</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=o>*</span><span class=n>populate</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span> <span class=o>*</span><span class=n>uf</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>do_mmap</span><span class=p>(</span><span class=n>file</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>prot</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>,</span> <span class=n>populate</span><span class=p>,</span> <span class=n>uf</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>do_mmap</code>如下，摘取了部分片段：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm> * The caller must hold down_write(&amp;current-&gt;mm-&gt;mmap_sem).
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span> <span class=nf>do_mmap</span><span class=p>(</span><span class=k>struct</span> <span class=n>file</span> <span class=o>*</span><span class=n>file</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>addr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>len</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>prot</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>flags</span><span class=p>,</span> <span class=n>vm_flags_t</span> <span class=n>vm_flags</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>pgoff</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=o>*</span><span class=n>populate</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>			<span class=k>struct</span> <span class=n>list_head</span> <span class=o>*</span><span class=n>uf</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mm_struct</span> <span class=o>*</span><span class=n>mm</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>mm</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>  	<span class=cm>/* Obtain the address to map to. we verify (or select) it and ensure
+</span></span></span><span class=line><span class=cl><span class=cm>	 * that it represents a valid section of the address space.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=n>addr</span> <span class=o>=</span> <span class=n>get_unmapped_area</span><span class=p>(</span><span class=n>file</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>,</span> <span class=n>flags</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>offset_in_page</span><span class=p>(</span><span class=n>addr</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>		<span class=k>return</span> <span class=n>addr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=n>addr</span> <span class=o>=</span> <span class=n>mmap_region</span><span class=p>(</span><span class=n>file</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>vm_flags</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>,</span> <span class=n>uf</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>先是检查和修改<code>prot</code>和<code>flags</code>，这里就不追究这些逻辑了。然后会做内存对齐，检查是否溢出，检查<code>mapping count</code>是不是满了（意味着<code>mapping</code>数量是有限的，为什么要有限呢？）之类的。</p><p>接着通过<code>get_unmapped_area</code>获取一个<code>unmapped</code>的地址，除了溢出检查外，<code>get_unmapped_area</code>大致流程如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>get_area</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>mm</span><span class=o>-&gt;</span><span class=n>get_unmapped_area</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>file</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>file</span><span class=o>-&gt;</span><span class=n>f_op</span><span class=o>-&gt;</span><span class=n>get_unmapped_area</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>get_area</span> <span class=o>=</span> <span class=n>file</span><span class=o>-&gt;</span><span class=n>f_op</span><span class=o>-&gt;</span><span class=n>get_unmapped_area</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=n>flags</span> <span class=o>&amp;</span> <span class=n>MAP_SHARED</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>    * mmap_region() will call shmem_zero_setup() to create a file,
+</span></span></span><span class=line><span class=cl><span class=cm>    * so use shmem&#39;s get_unmapped_area in case it can be huge.
+</span></span></span><span class=line><span class=cl><span class=cm>    * do_mmap_pgoff() will clear pgoff, so match alignment.
+</span></span></span><span class=line><span class=cl><span class=cm>    */</span>
+</span></span><span class=line><span class=cl>  <span class=n>pgoff</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>get_area</span> <span class=o>=</span> <span class=n>shmem_get_unmapped_area</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>addr</span> <span class=o>=</span> <span class=n>get_area</span><span class=p>(</span><span class=n>file</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>,</span> <span class=n>flags</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>如果传入了一个文件，那么用文件对应的<code>get_unmapped_area</code>获取地址，或者利用进程的<code>get_unmapped_area</code>或者利用<code>shmem_get_unmapped_area</code>。现在，我们的疑问是，文件或者进程等的<code>get_unmapped_area</code>是怎么<code>mapping</code>出一块地址给我们的？</p><p>找到这么一段<a href=https://code.woboq.org/linux/linux/arch/x86/kernel/sys_x86_64.c.html#arch_get_unmapped_area target=_blank rel="noopener noreffer">arch_get_unmapped_area</a>，<code>arch_get_unmapped_area</code>会被赋值给<code>current->mm->get_unmapped_area</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span>
+</span></span><span class=line><span class=cl><span class=nf>arch_get_unmapped_area</span><span class=p>(</span><span class=k>struct</span> <span class=n>file</span> <span class=o>*</span><span class=n>filp</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>addr</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>len</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>pgoff</span><span class=p>,</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>flags</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mm_struct</span> <span class=o>*</span><span class=n>mm</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>mm</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>vm_area_struct</span> <span class=o>*</span><span class=n>vma</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>vm_unmapped_area_info</span> <span class=n>info</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>begin</span><span class=p>,</span> <span class=n>end</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>addr</span> <span class=o>=</span> <span class=n>mpx_unmapped_area_check</span><span class=p>(</span><span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>flags</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>IS_ERR_VALUE</span><span class=p>(</span><span class=n>addr</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>		<span class=k>return</span> <span class=n>addr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>flags</span> <span class=o>&amp;</span> <span class=n>MAP_FIXED</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=k>return</span> <span class=n>addr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>find_start_end</span><span class=p>(</span><span class=n>addr</span><span class=p>,</span> <span class=n>flags</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>begin</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>end</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>len</span> <span class=o>&gt;</span> <span class=n>end</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=k>return</span> <span class=o>-</span><span class=n>ENOMEM</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>addr</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=n>addr</span> <span class=o>=</span> <span class=n>PAGE_ALIGN</span><span class=p>(</span><span class=n>addr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=n>vma</span> <span class=o>=</span> <span class=n>find_vma</span><span class=p>(</span><span class=n>mm</span><span class=p>,</span> <span class=n>addr</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=p>(</span><span class=n>end</span> <span class=o>-</span> <span class=n>len</span> <span class=o>&gt;=</span> <span class=n>addr</span> <span class=o>&amp;&amp;</span>
+</span></span><span class=line><span class=cl>		    <span class=p>(</span><span class=o>!</span><span class=n>vma</span> <span class=o>||</span> <span class=n>addr</span> <span class=o>+</span> <span class=n>len</span> <span class=o>&lt;=</span> <span class=n>vm_start_gap</span><span class=p>(</span><span class=n>vma</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl>			<span class=k>return</span> <span class=n>addr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=n>info</span><span class=p>.</span><span class=n>flags</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>info</span><span class=p>.</span><span class=n>length</span> <span class=o>=</span> <span class=n>len</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>info</span><span class=p>.</span><span class=n>low_limit</span> <span class=o>=</span> <span class=n>begin</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>info</span><span class=p>.</span><span class=n>high_limit</span> <span class=o>=</span> <span class=n>end</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>info</span><span class=p>.</span><span class=n>align_mask</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>info</span><span class=p>.</span><span class=n>align_offset</span> <span class=o>=</span> <span class=n>pgoff</span> <span class=o>&lt;&lt;</span> <span class=n>PAGE_SHIFT</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>filp</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=n>info</span><span class=p>.</span><span class=n>align_mask</span> <span class=o>=</span> <span class=n>get_align_mask</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>		<span class=n>info</span><span class=p>.</span><span class=n>align_offset</span> <span class=o>+=</span> <span class=n>get_align_bits</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>vm_unmapped_area</span><span class=p>(</span><span class=o>&amp;</span><span class=n>info</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>主要逻辑是<code>vm_unmapped_area</code>，在调用<code>vm_unmapped_area</code>之前，会获取虚拟内存的开始地址和结束地址，然后写入<code>vm_unmapped_area_info</code>再传入<code>vm_unmapped_area</code>。</p><p>下面是<code>vm_unmapped_area</code>的实现：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span> <span class=nf>unmapped_area</span><span class=p>(</span><span class=k>struct</span> <span class=n>vm_unmapped_area_info</span> <span class=o>*</span><span class=n>info</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=n>vma</span> <span class=o>=</span> <span class=n>rb_entry</span><span class=p>(</span><span class=n>mm</span><span class=o>-&gt;</span><span class=n>mm_rb</span><span class=p>.</span><span class=n>rb_node</span><span class=p>,</span> <span class=k>struct</span> <span class=n>vm_area_struct</span><span class=p>,</span> <span class=n>vm_rb</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>vma</span><span class=o>-&gt;</span><span class=n>rb_subtree_gap</span> <span class=o>&lt;</span> <span class=n>length</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=k>goto</span> <span class=n>check_highest</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=k>while</span> <span class=p>(</span><span class=nb>true</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=cm>/* Visit left subtree if it looks promising */</span>
+</span></span><span class=line><span class=cl>    <span class=n>gap_end</span> <span class=o>=</span> <span class=n>vm_start_gap</span><span class=p>(</span><span class=n>vma</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>gap_end</span> <span class=o>&gt;=</span> <span class=n>low_limit</span> <span class=o>&amp;&amp;</span> <span class=n>vma</span><span class=o>-&gt;</span><span class=n>vm_rb</span><span class=p>.</span><span class=n>rb_left</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>struct</span> <span class=n>vm_area_struct</span> <span class=o>*</span><span class=n>left</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>        <span class=n>rb_entry</span><span class=p>(</span><span class=n>vma</span><span class=o>-&gt;</span><span class=n>vm_rb</span><span class=p>.</span><span class=n>rb_left</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=k>struct</span> <span class=n>vm_area_struct</span><span class=p>,</span> <span class=n>vm_rb</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=n>left</span><span class=o>-&gt;</span><span class=n>rb_subtree_gap</span> <span class=o>&gt;=</span> <span class=n>length</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>vma</span> <span class=o>=</span> <span class=n>left</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nl>found</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* We found a suitable gap. Clip it with the original low_limit. */</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>gap_start</span> <span class=o>&lt;</span> <span class=n>info</span><span class=o>-&gt;</span><span class=n>low_limit</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=n>gap_start</span> <span class=o>=</span> <span class=n>info</span><span class=o>-&gt;</span><span class=n>low_limit</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Adjust gap address to the desired alignment */</span>
+</span></span><span class=line><span class=cl>	<span class=n>gap_start</span> <span class=o>+=</span> <span class=p>(</span><span class=n>info</span><span class=o>-&gt;</span><span class=n>align_offset</span> <span class=o>-</span> <span class=n>gap_start</span><span class=p>)</span> <span class=o>&amp;</span> <span class=n>info</span><span class=o>-&gt;</span><span class=n>align_mask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>VM_BUG_ON</span><span class=p>(</span><span class=n>gap_start</span> <span class=o>+</span> <span class=n>info</span><span class=o>-&gt;</span><span class=n>length</span> <span class=o>&gt;</span> <span class=n>info</span><span class=o>-&gt;</span><span class=n>high_limit</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=n>VM_BUG_ON</span><span class=p>(</span><span class=n>gap_start</span> <span class=o>+</span> <span class=n>info</span><span class=o>-&gt;</span><span class=n>length</span> <span class=o>&gt;</span> <span class=n>gap_end</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>gap_start</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里的<code>rb</code>前缀是指红黑树，使用红黑树来管理VMA（Virtual Memory Area）。</p><p>先是判断当前进程的虚拟内存块是不是有一个大于或等于<code>length</code>大小的，只有满足这个条件，才会继续向下寻找。然后在VMA红黑树的左树找到最左侧的一个满足内存块<code>gap</code>大于或等于<code>length</code>的虚拟内存块，此时可以满足这个内存块是RB树里面最小的满足大于或等于<code>length</code>大小的内存块。</p><p>这里存在一些盲区：</p><ol><li>VMA红黑树怎么构建的？什么时候构建的？</li><li>虚拟内存都是按块分配的吗？</li></ol><p>最后是<code>mmap_region</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>addr</span> <span class=o>=</span> <span class=n>mmap_region</span><span class=p>(</span><span class=n>file</span><span class=p>,</span> <span class=n>addr</span><span class=p>,</span> <span class=n>len</span><span class=p>,</span> <span class=n>vm_flags</span><span class=p>,</span> <span class=n>pgoff</span><span class=p>,</span> <span class=n>uf</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>（TODO（这个月底之前吧）：内容好多～～不知道的东西有点多，疑惑越来越大，有些问题不好假设了～～所以，<code>mmap_region</code>这一小结先不写了，得去看看虚拟内存构建等知识）。</p><p>查阅其他资料了解到的，<code>mmap_region</code>是负责创建虚拟内存区域的。会有merge vma，link vma等操作。</p><p>不过，总算可以知道，<code>mmap</code>是映射了虚拟内存上的一块内存。估计程序加载进内存的时候，也会通过这个系统调用！</p><h2 id=遗留问题>遗留问题</h2><ol><li>VMA如何构建已经构建时机</li><li>现代一般架构下（比如X86，ARM等），CPU（加上Cache）可以直接操作硬盘吗？还是必须经过RAM？<code>mmap</code>可以虚拟地址直接映射到硬盘吗？还是必须经过RAM？</li><li><code>malloc</code>等和<code>mmap</code>的关联和区别</li></ol><h2 id=番外>番外</h2><p>我最开始的疑问是，页表是如何构建以及怎么使用的？</p><p>因为我们使用的是虚拟内存，并且已经知道进程的内存在<code>mm_struct</code>管理，但是<code>mm_struct</code>也是虚拟内存上的，也就是说，如果要找到某个进程的页表，首先得找到这个进程的<code>mm_struct</code>，因为虚拟内存的映射是不定的，那么得有一个先对固定的地址，使得内核可以找到进程的页表。</p><p>在<code>mmap</code>这一篇中，没能解答这个问题，但是查阅一些资料了解到：</p><p><code>mm_struct</code>结构体中的<code>pgd_t * pgd;</code>代表的是物理地址，<code>pgd</code>指向的就是当前进程的页表，是物理内存上的。那么，只要拿到了<code>pgd</code>，就可以拿到当前进程的也表了。又因为，<code>task_struct</code>是内核管理的，内核的也表是固定的/事先知道的（这一点没有疑问，不然内核启动不了），所以每个进程的<code>task_struct</code>又是可以在物理内存上找到的，进而每个进程的<code>mm_struct</code>也是在物理内存上可以找到的（通过内核可以找到）。</p><p>所以，进程也表加载流程可以是：</p><ol><li>切换进程</li><li>找到<code>pgd</code></li><li>通过<code>pgd</code>的物理地址，在内存上找到当前进程的页表</li><li>MMU工作等</li></ol><h2 id=总结>总结</h2><p>期望本文可以加深大家对虚拟内存的理解，以上内容加上<a href=/202105/process-ctracon4#%e5%86%85%e5%ad%98%e7%ae%a1%e7%90%86 rel>《进程控制和通信(四) · PCB介绍 》</a>，我有以下结论：</p><ol><li>进程的页表储存在物理内存上，通过<code>pgd</code>代表的物理地址可以找到</li><li><code>mm_struct</code>表示的是虚拟内存的地址，比如数据段/代码段等等，再通过页表映射到物理内存上</li><li>Linux内核使用红黑树管理了内存块，<code>mmap</code>是在这些内存块上映射的</li><li><code>mmap</code>会有很多内存对齐的检查，在使用传入参数的时候，最好也要考虑对齐</li><li><code>mmap</code>是会阻塞的，会有读写信号量</li><li><code>mmap</code>分配的虚拟内存空间可能比实际需要的大</li><li><code>mmap</code>可能会失败，比如内存不足</li></ol></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-02-28</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/>操作系统</a>,&nbsp;<a href=/categories/glibc/>glibc</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/linux/>Linux</a>,&nbsp;<a href=/tags/glibc/>glibc</a></section></div><div class=post-nav><a href=/202202/fopen-sys-open/ class=prev rel=prev title=glibc-fopen源码阅读-补充篇-open系统调用><i class="fas fa-angle-left fa-fw"></i>glibc-fopen源码阅读-补充篇-open系统调用</a>
+<a href=/202203/null-nullptr-problem/ class=next rel=next title=NULL和nullptr实际问题分析>NULL和nullptr实际问题分析<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

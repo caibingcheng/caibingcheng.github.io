@@ -1,0 +1,216 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>C++类的内存分布 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="C++类的内存分布"><meta property="og:description" content="问题
+更详细的学习, 参考C++类的内存分布(二).
+使用gdb、g++工具。"><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202101/cpp-class-mem/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-01-04T11:26:45+08:00"><meta property="article:modified_time" content="2021-04-15T11:15:01+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="C++类的内存分布"><meta name=twitter:description content="问题
+更详细的学习, 参考C++类的内存分布(二).
+使用gdb、g++工具。"><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202101/cpp-class-mem/><link rel=next href=https://imcbc.cn/202101/cpp-func-bind/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"C++类的内存分布","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202101\/cpp-class-mem\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Cpp, 内存","wordcount":1558,"url":"https:\/\/imcbc.cn\/202101\/cpp-class-mem\/","datePublished":"2021-01-04T11:26:45+08:00","dateModified":"2021-04-15T11:15:01+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>C++类的内存分布<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-01-04>2021-01-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1558 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#问题>问题</a></li><li><a href=#验证>验证</a><ul><li><ul><li><a href=#编译>编译</a></li><li><a href=#派生类重写>派生类重写</a></li><li><a href=#派生类不重写>派生类不重写</a></li><li><a href=#编译器优化>编译器优化</a></li><li><a href=#内存分布>内存分布</a></li><li><a href=#怎么找到虚表>怎么找到虚表</a></li></ul></li></ul></li><li><a href=#结论>结论</a></li><li><a href=#图例>图例</a></li></ul></nav></div></div><div class=content id=content><h2 id=问题>问题</h2><p>更详细的学习, 参考<a href=/202107/cpp-class-mem2/ rel>C++类的内存分布(二)</a>.</p><p>使用gdb、g++工具。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>class</span> <span class=nc>A</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>funcA</span><span class=p>(){}</span>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=kt>int</span> <span class=nf>funcV</span><span class=p>(){}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>char</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>c</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>B</span> <span class=o>:</span> <span class=k>public</span> <span class=n>A</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>funcB</span><span class=p>(){}</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=nf>funcV</span><span class=p>(){}</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>char</span> <span class=n>d</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>A</span> <span class=o>*</span><span class=n>a</span> <span class=o>=</span> <span class=k>new</span> <span class=n>A</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>B</span> <span class=o>*</span><span class=n>b</span> <span class=o>=</span> <span class=k>new</span> <span class=n>B</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>delete</span> <span class=n>a</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>delete</span> <span class=n>b</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=验证>验证</h2><p>以下每一小节中的地址互不相关。</p><h4 id=编译>编译</h4><p>编译需要带上-g参数，这样可以在gdb调试的时候打印源码。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>g++ -g test.cpp -o test
+</span></span></code></pre></td></tr></table></div></div><h4 id=派生类重写>派生类重写</h4><p>按照上述源码来</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>gdb test
+</span></span><span class=line><span class=cl># 在main函数打断点
+</span></span><span class=line><span class=cl>(gdb) b main
+</span></span><span class=line><span class=cl>Breakpoint 1 at 0x555555554863: file test.cpp, line 23.
+</span></span><span class=line><span class=cl># 运行至断点处
+</span></span><span class=line><span class=cl>(gdb) r
+</span></span><span class=line><span class=cl># 执行next若干次
+</span></span><span class=line><span class=cl>(gdb) n
+</span></span><span class=line><span class=cl># 查看*a = new A() 的虚表
+</span></span><span class=line><span class=cl>(gdb) i vtbl a
+</span></span><span class=line><span class=cl>vtable for &#39;A&#39; @ 0x555555754d80 (subobject @ 0x555555767e70):
+</span></span><span class=line><span class=cl>[0]: 0x5555555548fe &lt;A::funcV()&gt;
+</span></span><span class=line><span class=cl># 查看*b = new B() 的虚表
+</span></span><span class=line><span class=cl>(gdb) i vtbl b
+</span></span><span class=line><span class=cl>vtable for &#39;B&#39; @ 0x555555754d68 (subobject @ 0x555555767e90):
+</span></span><span class=line><span class=cl>[0]: 0x55555555490a &lt;B::funcV()&gt;
+</span></span></code></pre></td></tr></table></div></div><p>以上，有几个类（不是实例）虚表就有几份，也就是同一个类的多个实例，也只维护一份虚表。</p><p>a的funcV和b的funcV的地址是不一样的。0x5555555548fe &lt;A::funcV()> 和 0x55555555490a &lt;B::funcV()>。</p><p>注意和以下作对比。</p><h4 id=派生类不重写>派生类不重写</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>class B : public A{
+</span></span><span class=line><span class=cl>public:
+</span></span><span class=line><span class=cl>    int funcB(){}
+</span></span><span class=line><span class=cl>public:
+</span></span><span class=line><span class=cl>    char d;
+</span></span><span class=line><span class=cl>};
+</span></span></code></pre></td></tr></table></div></div><p>则派生类的funcV指向了A的funcV，是同一个funcV，地址相同0x555555554932 &lt;A::funcV()></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>(gdb) i vtbl a
+</span></span><span class=line><span class=cl>vtable for &#39;A&#39; @ 0x555555754d80 (subobject @ 0x555555767e70):
+</span></span><span class=line><span class=cl>[0]: 0x555555554932 &lt;A::funcV()&gt;
+</span></span><span class=line><span class=cl>(gdb) i vtbl b
+</span></span><span class=line><span class=cl>vtable for &#39;B&#39; @ 0x555555754d68 (subobject @ 0x555555767eb0):
+</span></span><span class=line><span class=cl>[0]: 0x555555554932 &lt;A::funcV()&gt;         # A::funcV()
+</span></span></code></pre></td></tr></table></div></div><h4 id=编译器优化>编译器优化</h4><p>如果此时在gdb中尝试打印funcA的地址，发现找不到，我猜测的原因是编译器优化了，因为在源码中没有任何地方调用了funcA，但是为什么编译器会编译funcV呢？源码中也没任何地方调用了funcV啊？</p><h4 id=内存分布>内存分布</h4><p>现在在main函数中尝试调用funcA，让编译器编译它。</p><p>先来看一下地址：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>(gdb) p a-&gt;funcA
+</span></span><span class=line><span class=cl>$1 = {int (A * const)} 0x55555555493e &lt;A::funcA()&gt;
+</span></span><span class=line><span class=cl>(gdb) p &amp;(b-&gt;funcA)
+</span></span><span class=line><span class=cl>$12 = (int (*)(A * const)) 0x55555555493e &lt;A::funcA()&gt;
+</span></span><span class=line><span class=cl>(gdb) p a-&gt;funcV
+</span></span><span class=line><span class=cl>$2 = {int (A * const)} 0x55555555494a &lt;A::funcV()&gt;
+</span></span></code></pre></td></tr></table></div></div><p>可以看到funcA和funcV应该是在一块的，地址比较近0x55555555494a-0x55555555493e=12。</p><p>B没有重写funcA，所以b->funcA和a的funcA是指向同一个函数。</p><p>a和b的内存也在同一块，但是和func*的内存块隔得比较远。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>(gdb) p a
+</span></span><span class=line><span class=cl>$3 = (A *) 0x555555767e70
+</span></span><span class=line><span class=cl>(gdb) p b
+</span></span><span class=line><span class=cl>$4 = (B *) 0x555555767eb0
+</span></span></code></pre></td></tr></table></div></div><p>类的成员变量接在类的实例化地址之后，是在同一块内存的。</p><p>如下，尽管B继承了A，但是B从A继承过来的成员变量并不指向A的成员变量，B有自己的备份。</p><p>a->a的地址和b-a的地址并不一样。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>(gdb) p &amp;(a-&gt;a)
+</span></span><span class=line><span class=cl>$6 = (int *) 0x555555767e78
+</span></span><span class=line><span class=cl>(gdb) p &amp;(a-&gt;b)
+</span></span><span class=line><span class=cl>$7 = 0x555555767e7c &#34;&#34;
+</span></span><span class=line><span class=cl>(gdb) p &amp;(a-&gt;c)
+</span></span><span class=line><span class=cl>$8 = (double *) 0x555555767e80
+</span></span><span class=line><span class=cl>(gdb) p &amp;(b-&gt;a)
+</span></span><span class=line><span class=cl>$9 = (int *) 0x555555767eb8
+</span></span><span class=line><span class=cl>(gdb) p &amp;(b-&gt;b)
+</span></span><span class=line><span class=cl>$10 = 0x555555767ebc &#34;&#34;
+</span></span><span class=line><span class=cl>(gdb) p &amp;(b-&gt;c)
+</span></span><span class=line><span class=cl>$11 = (double *) 0x555555767ec0
+</span></span></code></pre></td></tr></table></div></div><p>每个类维护自己的虚表，虚表地址和类实例化地址也不一样. 每个类的虚表只有一份， 同一个类的所有实例共享一份。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>(gdb) i vtbl a
+</span></span><span class=line><span class=cl>vtable for &#39;A&#39; @ 0x555555754d80 (subobject @ 0x555555767e70):
+</span></span><span class=line><span class=cl>[0]: 0x55555555494a &lt;A::funcV()&gt;
+</span></span><span class=line><span class=cl>(gdb) i vtbl b
+</span></span><span class=line><span class=cl>vtable for &#39;B&#39; @ 0x555555754d68 (subobject @ 0x555555767eb0):
+</span></span><span class=line><span class=cl>[0]: 0x55555555494a &lt;A::funcV()&gt;
+</span></span></code></pre></td></tr></table></div></div><h4 id=怎么找到虚表>怎么找到虚表</h4><p>从上面的实验中可以看到, 虚表和类不在同一块内存, 一般来说, 我们会需要一个额外的指针指向这个虚表的地址, 这样才可以找到这个虚表.</p><p>实际上C++编译器也是这么做的, 在编译的时候会给类添加一个__vptr成员变量且指向虚表的地址, 这样就可以通过__vptr找到虚表了.</p><p>如果是继承自基类的虚函数, 则在虚表中指向的是同一个函数地址.</p><h2 id=结论>结论</h2><p>以上可以猜测出来的几个结论是：</p><ul><li>类成员函数只有一份，所有实例共享（成员函数地址与实例地址隔得比较远）</li><li>类的成员变量有多份，不同实例维护不同的成员变量（成员变量地址接在实例地址之后，相隔很近）</li><li>即使是继承关系，派生类的成员变量也只是基类的复制体，而不是指向同一块内存（派生类的成员变量和基类的地址不一样）</li><li>派生类会把从基类继承过来的成员变量当做自己的普通成员变量一样看待？（从成员变量的地址可以猜测这个结论）</li><li>类的虚表只有一份，所有实例共享（虚表的地址和实例化地址隔得比较远，也和成员函数的地址隔得比较远）</li><li>编译器在编译的时候, 通过给类添加__vptr指针指向虚表而得到虚表地址.</li></ul><h2 id=图例>图例</h2><p>不同的方块表示不同的内存块</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b877f6b35a5.png title=结构图 data-thumbnail=https://bu.dusays.com/2022/06/26/62b877f6b35a5.png data-sub-html="<h2>结构图</h2><p>结构图</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b877f6b35a5.png data-srcset="https://bu.dusays.com/2022/06/26/62b877f6b35a5.png, https://bu.dusays.com/2022/06/26/62b877f6b35a5.png 1.5x, https://bu.dusays.com/2022/06/26/62b877f6b35a5.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b877f6b35a5.png></a><figcaption class=image-caption>结构图</figcaption></figure></p></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-04-15</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/cpp/>Cpp</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/cpp/>Cpp</a>,&nbsp;<a href=/tags/%E5%86%85%E5%AD%98/>内存</a></section></div><div class=post-nav><a href=/202101/cpp-func-bind/ class=next rel=next title=对C++bind的理解>对C++bind的理解<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

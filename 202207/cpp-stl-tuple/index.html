@@ -1,0 +1,549 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>STL-tuple源码阅读 - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="STL-tuple源码阅读"><meta property="og:description" content="std::tuple是C++11开始支持的一个编译期确定长度的, 可支持任意参数类型的容器, 相当于是std::pair的扩展, 平常只使用过它, 却没有了解其实现原理."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202207/cpp-stl-tuple/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-07-13T19:27:34+08:00"><meta property="article:modified_time" content="2022-07-13T19:27:34+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="STL-tuple源码阅读"><meta name=twitter:description content="std::tuple是C++11开始支持的一个编译期确定长度的, 可支持任意参数类型的容器, 相当于是std::pair的扩展, 平常只使用过它, 却没有了解其实现原理."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202207/cpp-stl-tuple/><link rel=prev href=https://imcbc.cn/202207/cpp-stl-any/><link rel=next href=https://imcbc.cn/202207/sysinfo-fstats/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"STL-tuple源码阅读","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202207\/cpp-stl-tuple\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Cpp, tuple","wordcount":4557,"url":"https:\/\/imcbc.cn\/202207\/cpp-stl-tuple\/","datePublished":"2022-07-13T19:27:34+08:00","dateModified":"2022-07-13T19:27:34+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>STL-tuple源码阅读<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2022-07-13>2022-07-13</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4557 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 10 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#tinytuple>TinyTuple</a></li><li><a href=#stdtuple>std::tuple</a><ul><li><a href=#_head-和-_head_base>_Head 和 _Head_base</a></li><li><a href=#_tuple_impl>_Tuple_impl</a></li><li><a href=#tuple>tuple</a></li><li><a href=#get>get</a></li><li><a href=#tie>tie</a></li></ul></li></ul></nav></div></div><div class=content id=content><p><code>std::tuple</code>是C++11开始支持的一个编译期确定长度的, 可支持任意参数类型的容器, 相当于是<code>std::pair</code>的扩展, 平常只使用过它, 却没有了解其实现原理.</p><blockquote><p>Class template std::tuple is a fixed-size collection of heterogeneous values. It is a generalization of std::pair.</p></blockquote><h2 id=tinytuple>TinyTuple</h2><p>我们先来实现一个简易版的<code>std::tuple</code> - <code>TinyTuple</code>, 支持任意参数类型和<code>get&lt;N></code>方法(先不考虑<code>get&lt;Type></code>).</p><p>遇到的第一个问题是, 如何将任意数量的, 不同参数类型的值打包起来? 一种想法是, 用一块动态内存来存, 每输入一个参数<code>var</code>, 动态内存就扩大<code>sizeof(var)</code>, 然后记下当前位置. 在获取的时候, 根据<code>N</code>就能确定内存的位置, 不过这时候用户还需要输入数据类型才能正确获取值, get接口可能就变成了<code>get&lt;N, Type></code>, 相当于是一个array any了. 能不能省略<code>Type</code>输入呢? 参考我们上一篇<a href=https://www.bbing.com.cn/202207/cpp-stl-any/ target=_blank rel="noopener noreffer">STL-any源码阅读</a>, 是不是用一个类似<code>AnyData</code>的模板类来保存数据类型? 可能不太好使, 因为get方法不带type类型的话, <code>AnyData</code>似乎也束手无策(对应的问题是, 返回值如何统一?).</p><p><code>std::tuple</code>是借助"继承可变参模板类"来实现的, 看看简化版的<code>TinyTuple</code>如何实现:</p><p>定义如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=p>...</span><span class=n>Tps</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>TinyTuple</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>现在"偏特化"模板, 提取第一个参数的类型, 并以此递归下去:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>Tp</span><span class=p>,</span> <span class=k>typename</span> <span class=p>...</span><span class=n>Tps</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>TinyTuple</span><span class=o>&lt;</span><span class=n>Tp</span><span class=p>,</span> <span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span> <span class=o>:</span> <span class=k>public</span> <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>TinyTuple</span><span class=p>(</span><span class=k>const</span> <span class=n>Tp</span><span class=o>&amp;</span> <span class=n>val</span><span class=p>,</span> <span class=n>Tps</span><span class=o>&amp;&amp;</span> <span class=p>...</span><span class=n>params</span><span class=p>)</span> <span class=o>:</span> <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=n>Tps</span><span class=o>&gt;</span><span class=p>(</span><span class=n>params</span><span class=p>)...)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>value</span> <span class=o>=</span> <span class=n>val</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Tp</span> <span class=nf>get_value</span><span class=p>()</span> <span class=k>const</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=k>private</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>Tp</span> <span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>注意到构造函数<code>TinyTuple(Tp && val, Tps && ...params) : TinyTuple&lt;Tps...>(std::forward&lt;Tps>(params)...)</code>的原地构造是递归的, 在函数体内部才赋值当前值, 因此<code>TinyTuple</code>参数的初始化(复制)顺序是从右往左的.</p><p>参数为空就是递归的终止条件:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>TinyTuple</span> <span class=o>&lt;&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>对于一个实例<code>TinyTuple&lt;Type1, Type2, ..., TypeN> tuple(var1, var2, ..., varN)</code>可以得到其内存排列如下:</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/10/23/635554d29ba1f.png title=&amp;ldquo;TinyTuple内存排列&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/10/23/635554d29ba1f.png data-sub-html="<h2>TinyTuple内存排列</h2><p>&amp;ldquo;TinyTuple内存排列&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/10/23/635554d29ba1f.png data-srcset="https://bu.dusays.com/2022/10/23/635554d29ba1f.png, https://bu.dusays.com/2022/10/23/635554d29ba1f.png 1.5x, https://bu.dusays.com/2022/10/23/635554d29ba1f.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/10/23/635554d29ba1f.png></a><figcaption class=image-caption>TinyTuple内存排列</figcaption></figure></p><p>以上, 我们将<code>TinyTuple</code>的值和类型保存了下来, 如何获取值呢?</p><p>注意到, 我们实例化的<code>TinyTuple</code>对象, 实际上是一个子类. 如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Type1</span><span class=p>,</span> <span class=n>Type2</span><span class=p>,</span> <span class=p>...,</span> <span class=n>TypeN</span><span class=o>&gt;</span> <span class=n>tuple</span><span class=p>(</span><span class=n>var1</span><span class=p>,</span> <span class=n>var2</span><span class=p>,</span> <span class=p>...,</span> <span class=n>varN</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>其父类类型是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Type2</span><span class=p>,</span> <span class=p>...,</span> <span class=n>TypeN</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=n>TinyTuple</span><span class=o>&lt;</span><span class=p>...,</span> <span class=n>TypeN</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>TypeN</span><span class=o>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>因此, 可以向上转换成对应的父类, 该父类的<code>value</code>成员就是我们需要获取的值. 那么可以定义如下接口:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>N</span><span class=p>,</span> <span class=k>typename</span> <span class=p>...</span><span class=n>Tps</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>auto</span> <span class=n>get</span><span class=p>(</span><span class=k>const</span> <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=n>ttuple</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>using</span> <span class=n>tuple_t</span> <span class=o>=</span> <span class=n>Elements</span><span class=o>&lt;</span><span class=n>N</span><span class=p>,</span> <span class=n>Tps</span><span class=p>...</span><span class=o>&gt;::</span><span class=n>tuple_t</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=k>static_cast</span><span class=o>&lt;</span><span class=k>const</span> <span class=n>tuple_t</span> <span class=o>&amp;&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>).</span><span class=n>get_value</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>通过<code>Elements&lt;N, Tps...></code>可以获取第N阶父类的类型. 然后将tuple转换成对应父类类型访问<code>value</code>即可.</p><p><code>Elements</code>的实现方法类似<code>TinyTuple</code>, 不过是通过<code>N</code>递归来获取第N阶父类类型:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=n>size_t</span> <span class=n>N</span><span class=p>,</span> <span class=k>typename</span> <span class=p>...</span><span class=n>Tps</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Elements</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=n>size_t</span> <span class=n>N</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Elements</span><span class=o>&lt;</span><span class=n>N</span><span class=o>&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>N</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>,</span> <span class=s>&#34;Index overflow&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=n>size_t</span> <span class=n>N</span><span class=p>,</span> <span class=k>typename</span> <span class=n>Tp</span><span class=p>,</span> <span class=k>typename</span> <span class=p>...</span><span class=n>Tps</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Elements</span><span class=o>&lt;</span><span class=n>N</span><span class=p>,</span> <span class=n>Tp</span><span class=p>,</span> <span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span> <span class=o>:</span> <span class=k>public</span> <span class=n>Elements</span> <span class=o>&lt;</span><span class=n>N</span> <span class=o>-</span> <span class=mi>1</span><span class=p>,</span> <span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>Tp</span><span class=p>,</span> <span class=k>typename</span> <span class=p>...</span><span class=n>Tps</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Elements</span><span class=o>&lt;</span><span class=mi>0</span><span class=p>,</span> <span class=n>Tp</span><span class=p>,</span> <span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>using</span> <span class=n>tuple_t</span> <span class=o>=</span> <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Tp</span><span class=p>,</span> <span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>那么, 可以这样使用:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=kt>int</span><span class=p>,</span> <span class=kt>char</span><span class=p>,</span> <span class=kt>double</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span><span class=o>*&gt;</span> <span class=n>ttuple</span><span class=p>{</span><span class=mi>1</span><span class=p>,</span> <span class=sc>&#39;a&#39;</span><span class=p>,</span> <span class=mf>0.2</span><span class=p>,</span> <span class=s>&#34;abc&#34;</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=mi>0</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=mi>1</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=mi>2</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=mi>3</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>完整代码: <a href=https://gcc.godbolt.org/z/v3bYnxWrP target=_blank rel="noopener noreffer">https://gcc.godbolt.org/z/v3bYnxWrP</a></p><h2 id=stdtuple>std::tuple</h2><p><code>std::tuple</code>的实现比以上的<code>TinyTuple</code>复杂得多, 但是核心思想还是类似的, <code>std::tuple</code>的类间关系如下:</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/10/23/635554d3599b9.png title="&amp;ldquo;std::tuple 继承关系&amp;rdquo;" data-thumbnail=https://bu.dusays.com/2022/10/23/635554d3599b9.png data-sub-html="<h2>std::tuple 继承关系</h2><p>&amp;ldquo;std::tuple 继承关系&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/10/23/635554d3599b9.png data-srcset="https://bu.dusays.com/2022/10/23/635554d3599b9.png, https://bu.dusays.com/2022/10/23/635554d3599b9.png 1.5x, https://bu.dusays.com/2022/10/23/635554d3599b9.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/10/23/635554d3599b9.png></a><figcaption class=image-caption>std::tuple 继承关系</figcaption></figure></p><h3 id=_head-和-_head_base>_Head 和 _Head_base</h3><p>最底层部分是<code>_Head</code>这个"类", <code>_Head</code>是什么? 我们看下面的定义就可以知道了, <code>_Head</code>会是用户需要存储的一种类型:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Head_base</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=p>,</span> <span class=nb>true</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>比如<code>std::tuple&lt;int, double></code>, 那么<code>_Head</code>就是<code>int</code>和<code>double</code>.</p><p><code>_Head_base</code>和<code>_Head</code>的关系有两种实现方法, 一种是<code>is a</code>, 一种是<code>use a</code>, 如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>// is a
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Head_base</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=p>,</span> <span class=nb>true</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=k>public</span> <span class=n>_Head</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// use a
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Head_base</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=p>,</span> <span class=nb>true</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=na>[[__no_unique_address__]]</span> <span class=n>_Head</span> <span class=n>_M_head_impl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>以<code>use a</code>关系为例, <code>_Head_base</code>偏特化了两个实现, 如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Head_base</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=p>,</span> <span class=nb>true</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=na>[[__no_unique_address__]]</span> <span class=n>_Head</span> <span class=n>_M_head_impl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Head_base</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=p>,</span> <span class=nb>false</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=n>_Head</span> <span class=n>_M_head_impl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>以上两个模板在实现上没有任何区别, 仅成员变量<code>_M_head_impl</code>的声明不同. 那么, 现在需要关注<code>__no_unique_address__</code>属性是什么意思. <code>__no_unique_address__</code>属性如其字面意思, 描述的是它修饰的东西没有独立的地址. 比如对一个空类, 一般来说会占用1B空间, 但是经过<code>__no_unique_address__</code>修饰后, 可以不占用额外的地址空间(0B). 什么时候会选中这个属性? 这时候需要关注<code>_Head_base</code>的第三个模板参数什么时候会特化为<code>true</code>, 什么时候特化为<code>false</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>__is_empty_non_tuple</span> <span class=o>:</span> <span class=n>is_empty</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;</span> <span class=p>{</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// Using EBO for elements that are tuples causes ambiguous base errors.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_El0</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_El</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>__is_empty_non_tuple</span><span class=o>&lt;</span><span class=n>tuple</span><span class=o>&lt;</span><span class=n>_El0</span><span class=p>,</span> <span class=n>_El</span><span class=p>...</span><span class=o>&gt;&gt;</span> <span class=o>:</span> <span class=n>false_type</span> <span class=p>{</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// Use the Empty Base-class Optimization for empty, non-final types.
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=n>__empty_not_final</span>
+</span></span><span class=line><span class=cl><span class=o>=</span> <span class=n>__conditional_t</span><span class=o>&lt;</span><span class=n>__is_final</span><span class=p>(</span><span class=n>_Tp</span><span class=p>),</span> <span class=n>false_type</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=n>__is_empty_non_tuple</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=o>&gt;&gt;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=kt>bool</span> <span class=o>=</span> <span class=n>__empty_not_final</span><span class=o>&lt;</span><span class=n>_Head</span><span class=o>&gt;::</span><span class=n>value</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Head_base</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>如上, <code>_Head_base</code>的第三个模板参数特化为<code>false</code>的情况有:</p><ol><li><code>_Head</code>是用<code>final</code>修饰的类</li><li><code>_Head</code>是<code>tuple</code>类型</li><li><code>_Head</code>不是<code>empty</code>的</li></ol><p><code>_Head_base</code>的第三个模板参数特化为<code>true</code>的情况有:</p><ol><li><code>_Head</code>没有用<code>final</code>修饰并且不是<code>tuple</code>类型, 并且是<code>empty</code>的</li></ol><p><a href=https://en.cppreference.com/w/cpp/types/is_empty target=_blank rel="noopener noreffer">is_empty</a>描述如下:</p><blockquote><p>If T is an empty type (that is, a non-union class type with no non-static data members other than bit-fields of size 0, no virtual functions, no virtual base classes, and no non-empty base classes), provides the member constant value equal to true. For any other type, value is false.</p></blockquote><p>以上, 我认为偏特化两种<code>_Head_base</code>的作用是为了将少无用内存的消耗.</p><h3 id=_tuple_impl>_Tuple_impl</h3><p><code>_Tuple_impl</code>是做可变参模板递归的类, 其实现类似于<code>TinyTuple</code>, 定义如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Elements</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Tuple_impl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>偏特化为两个实现, 一个是通俗的递归过程:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Tail</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Tuple_impl</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=p>,</span> <span class=n>_Tail</span><span class=p>...</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=k>public</span> <span class=n>_Tuple_impl</span><span class=o>&lt;</span><span class=n>_Idx</span> <span class=o>+</span> <span class=mi>1</span><span class=p>,</span> <span class=n>_Tail</span><span class=p>...</span><span class=o>&gt;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>private</span> <span class=n>_Head_base</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>一个是递归终止过程:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>_Idx</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>_Tuple_impl</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=k>private</span> <span class=n>_Head_base</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=o>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>递归的<code>_Tuple_impl</code>如何实现的? 先来关注其构造函数:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>typedef</span> <span class=n>_Tuple_impl</span><span class=o>&lt;</span><span class=n>_Idx</span> <span class=o>+</span> <span class=mi>1</span><span class=p>,</span> <span class=n>_Tail</span><span class=p>...</span><span class=o>&gt;</span> <span class=n>_Inherited</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>typedef</span> <span class=n>_Head_base</span><span class=o>&lt;</span><span class=n>_Idx</span><span class=p>,</span> <span class=n>_Head</span><span class=o>&gt;</span> <span class=n>_Base</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=k>explicit</span> <span class=k>constexpr</span>
+</span></span><span class=line><span class=cl><span class=nf>_Tuple_impl</span><span class=p>(</span><span class=k>const</span> <span class=n>_Head</span><span class=o>&amp;</span> <span class=n>__head</span><span class=p>,</span> <span class=k>const</span> <span class=n>_Tail</span><span class=o>&amp;</span><span class=p>...</span> <span class=n>__tail</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=o>:</span> <span class=n>_Inherited</span><span class=p>(</span><span class=n>__tail</span><span class=p>...),</span> <span class=n>_Base</span><span class=p>(</span><span class=n>__head</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span> <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>同<code>TinyTuple</code>的内存排列, <code>_Tuple_impl</code>的排列也是从右往左的元素按照地址从高到低排列.</p><p>如何获取元素呢? <code>_Tuple_impl</code>充分借用了父子类的特性, 很值得学习和实践:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>static</span> <span class=k>constexpr</span> <span class=k>const</span> <span class=n>_Head</span><span class=o>&amp;</span>
+</span></span><span class=line><span class=cl><span class=n>_M_head</span><span class=p>(</span><span class=k>const</span> <span class=n>_Tuple_impl</span><span class=o>&amp;</span> <span class=n>__t</span><span class=p>)</span> <span class=k>noexcept</span> <span class=p>{</span> <span class=k>return</span> <span class=n>_Base</span><span class=o>::</span><span class=n>_M_head</span><span class=p>(</span><span class=n>__t</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=k>constexpr</span> <span class=k>const</span> <span class=n>_Inherited</span><span class=o>&amp;</span>
+</span></span><span class=line><span class=cl><span class=n>_M_tail</span><span class=p>(</span><span class=k>const</span> <span class=n>_Tuple_impl</span><span class=o>&amp;</span> <span class=n>__t</span><span class=p>)</span> <span class=k>noexcept</span> <span class=p>{</span> <span class=k>return</span> <span class=n>__t</span><span class=p>;</span> <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>_M_head</code>可以获取<code>tuple</code>元素的值, <code>_M_tail</code>可以获取余下的"队列".</p><p>怎么做到的? 因为<code>_Base::_M_head</code>会将<code>_Tuple_impl</code>向上转换为<code>_Head_base</code>类, 这也是<code>_Tuple_impl</code>的父类. <code>_M_tail</code>则是通过返回值的类型, 将<code>_Tuple_impl</code>转换为<code>_Inherited</code>这个父类, 因此可以拿到余下的元素类. 递归终止类的实现类似, 此处就不继续看了.</p><p>这里涉及到多继承向上转换的隐式过程, 如下demo来验证:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>B1</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>val1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>B2</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>val2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>D</span> <span class=o>:</span> <span class=k>public</span> <span class=n>B1</span><span class=p>,</span> <span class=k>public</span> <span class=n>B2</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>D</span> <span class=n>d</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>B1</span> <span class=o>&amp;</span><span class=n>b1</span> <span class=o>=</span> <span class=n>d</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>B2</span> <span class=o>&amp;</span><span class=n>b2</span> <span class=o>=</span> <span class=n>d</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=o>&amp;</span><span class=n>b1</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;  &#34;</span> <span class=o>&lt;&lt;</span> <span class=o>&amp;</span><span class=n>b2</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>输出是<code>0x7fff2ac0bf38 0x7fff2ac0bf3c</code>, <code>b1</code>和<code>b2</code>是不同的内存区域, 差值是<code>4B</code>, <code>b2</code>在高地址, <code>b1</code>在低地址, 实际上在编译期就已经计算好两个<code>base</code>的偏移了, 他们的内存布局就对应着相应的Base类的内存布局.</p><h3 id=tuple>tuple</h3><p>以上我们学习了三个数据类型, 最基础的是<code>Head</code>, 它表示的是用户需要的元素的类型, 比如<code>int</code>, <code>double</code>一类；然后是<code>Head_base</code>, 相当于是<code>Head</code>的封装, 与<code>Head</code>一般是<code>use</code>的关系. 再是<code>_Tuple_impl</code>, 这是一个变参模板递归的类, 采用双继承的结构, 一个父类是自身的递归类, 一个是 <code>Head_base</code>类. 接下来就看看<code>tuple</code>类型, <code>tuple</code>有几种特化类型, 如下:</p><p>基础类型:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span><span class=p>...</span> <span class=n>_Elements</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>tuple</span> <span class=o>:</span> <span class=k>public</span> <span class=n>_Tuple_impl</span><span class=o>&lt;</span><span class=mi>0</span><span class=p>,</span> <span class=n>_Elements</span><span class=p>...</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//...
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>空数据:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>tuple</span><span class=o>&lt;&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>2个元素的<code>tuple</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_T1</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_T2</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>tuple</span><span class=o>&lt;</span><span class=n>_T1</span><span class=p>,</span> <span class=n>_T2</span><span class=o>&gt;</span> <span class=o>:</span> <span class=k>public</span> <span class=n>_Tuple_impl</span><span class=o>&lt;</span><span class=mi>0</span><span class=p>,</span> <span class=n>_T1</span><span class=p>,</span> <span class=n>_T2</span><span class=o>&gt;</span>
+</span></span></code></pre></td></tr></table></div></div><p>因为有<code>_Tuple_impl</code>的辅助, <code>tuple</code>的实现就不需要关系数据如何保存了, <code>tuple</code>类更多的是关心如何构造, 如何复制之类, 暂时就不展开看了.</p><h3 id=get>get</h3><p>访问<code>tuple</code>元素的方法之一是通过<code>get</code>方法, 一般接口如下, 我们需要关注两个实现<code>__tuple_element_t</code>和<code>__get_helper</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>__i</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Elements</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>constexpr</span> <span class=k>const</span> <span class=n>__tuple_element_t</span><span class=o>&lt;</span><span class=n>__i</span><span class=p>,</span> <span class=n>tuple</span><span class=o>&lt;</span><span class=n>_Elements</span><span class=p>...</span><span class=o>&gt;&gt;&amp;</span>
+</span></span><span class=line><span class=cl><span class=n>get</span><span class=p>(</span><span class=k>const</span> <span class=n>tuple</span><span class=o>&lt;</span><span class=n>_Elements</span><span class=p>...</span><span class=o>&gt;&amp;</span> <span class=n>__t</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span> <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>__get_helper</span><span class=o>&lt;</span><span class=n>__i</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__t</span><span class=p>);</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>__i</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Elements</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>constexpr</span> <span class=k>const</span> <span class=n>__tuple_element_t</span><span class=o>&lt;</span><span class=n>__i</span><span class=p>,</span> <span class=n>tuple</span><span class=o>&lt;</span><span class=n>_Elements</span><span class=p>...</span><span class=o>&gt;&gt;&amp;&amp;</span>
+</span></span><span class=line><span class=cl><span class=n>get</span><span class=p>(</span><span class=k>const</span> <span class=n>tuple</span><span class=o>&lt;</span><span class=n>_Elements</span><span class=p>...</span><span class=o>&gt;&amp;&amp;</span> <span class=n>__t</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>typedef</span> <span class=n>__tuple_element_t</span><span class=o>&lt;</span><span class=n>__i</span><span class=p>,</span> <span class=n>tuple</span><span class=o>&lt;</span><span class=n>_Elements</span><span class=p>...</span><span class=o>&gt;&gt;</span> <span class=n>__element_type</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>forward</span><span class=o>&lt;</span><span class=k>const</span> <span class=n>__element_type</span><span class=o>&gt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>__get_helper</span><span class=o>&lt;</span><span class=n>__i</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__t</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>__tuple_element_t</code>的实现见<a href=https://en.cppreference.com/w/cpp/utility/tuple/tuple_element target=_blank rel="noopener noreffer">cppreference-tuple_element</a>, 和<code>TinyTuple</code>中<code>Elements</code>的实现基本一致, 这里也不展开了. 最终是通过<code>__get_helper</code>获取元素的, 实现如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=n>size_t</span> <span class=n>__i</span><span class=p>,</span> <span class=k>typename</span> <span class=n>_Head</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Tail</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>constexpr</span> <span class=k>const</span> <span class=n>_Head</span><span class=o>&amp;</span>
+</span></span><span class=line><span class=cl><span class=n>__get_helper</span><span class=p>(</span><span class=k>const</span> <span class=n>_Tuple_impl</span><span class=o>&lt;</span><span class=n>__i</span><span class=p>,</span> <span class=n>_Head</span><span class=p>,</span> <span class=n>_Tail</span><span class=p>...</span><span class=o>&gt;&amp;</span> <span class=n>__t</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span> <span class=k>return</span> <span class=n>_Tuple_impl</span><span class=o>&lt;</span><span class=n>__i</span><span class=p>,</span> <span class=n>_Head</span><span class=p>,</span> <span class=n>_Tail</span><span class=p>...</span><span class=o>&gt;::</span><span class=n>_M_head</span><span class=p>(</span><span class=n>__t</span><span class=p>);</span> <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里的trick也比较有意思, 虽然<code> std::__get_helper&lt;__i>(__t)</code>传入的参数是"最"子类<code>tuple</code>, 但是<code>__get_helper</code>接收的是某个父类<code>_Tuple_impl</code>作为形参, 这时候<code>size_t __i</code>这个模板参数就起到作用了, 因为<code>__get_helper&lt;__i></code>可以直接匹配对应的<code>_Tuple_impl</code>类型, <code>tuple</code>作为<code>__get_helper</code>的参数入参后, 就会匹配并转换成<code>_Tuple_impl&lt;__i, _Head, _Tail...></code>父类, 然后通过<code>_M_head</code>接口获取元素的值即可.</p><p>在C++14后, <code>get</code>还支持将类型作为模板参数, 比如<code>get&lt;int>(tuple)</code>, 可以想想怎么实现. 比如参考<code>Elements</code>的做法, 将<code>tuple</code>的类型列表展开后, 匹配到对应的类型就返回对应的<code>index</code>, 一种实现如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=n>size_t</span> <span class=n>N</span><span class=p>,</span> <span class=k>typename</span> <span class=n>Tp</span><span class=p>,</span> <span class=k>typename</span> <span class=n>Head</span><span class=p>,</span> <span class=k>typename</span> <span class=p>...</span><span class=n>Tps</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>constexpr</span> <span class=n>size_t</span> <span class=n>ElementsIndex</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nf>constexpr</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>is_same</span><span class=o>&lt;</span><span class=n>Tp</span><span class=p>,</span> <span class=n>Head</span><span class=o>&gt;::</span><span class=n>value</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>N</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>ElementsIndex</span><span class=o>&lt;</span><span class=n>N</span> <span class=o>+</span> <span class=mi>1</span><span class=p>,</span> <span class=n>Tp</span><span class=p>,</span> <span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=n>size_t</span> <span class=n>N</span><span class=p>,</span> <span class=k>typename</span> <span class=n>Tp</span><span class=p>,</span> <span class=k>typename</span> <span class=n>Head</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>constexpr</span> <span class=n>size_t</span> <span class=n>ElementsIndex</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nf>constexpr</span> <span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>is_same</span><span class=o>&lt;</span><span class=n>Tp</span><span class=p>,</span> <span class=n>Head</span><span class=o>&gt;::</span><span class=n>value</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>N</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>is_same</span><span class=o>&lt;</span><span class=n>Tp</span><span class=p>,</span> <span class=n>Head</span><span class=o>&gt;::</span><span class=n>value</span><span class=p>,</span> <span class=s>&#34;No Matched Type&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>将这个更新加在<code>TinyTuple</code>可以扩展<code>get</code>方法, 如下使用:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=mi>0</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=mi>1</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=mi>2</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=mi>3</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=kt>char</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>get</span><span class=o>&lt;</span><span class=kt>double</span><span class=o>&gt;</span><span class=p>(</span><span class=n>ttuple</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>在gcc是这样实现的:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Types</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>constexpr</span> <span class=k>const</span> <span class=n>_Tp</span><span class=o>&amp;</span>
+</span></span><span class=line><span class=cl><span class=n>get</span><span class=p>(</span><span class=k>const</span> <span class=n>tuple</span><span class=o>&lt;</span><span class=n>_Types</span><span class=p>...</span><span class=o>&gt;&amp;</span> <span class=n>__t</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>constexpr</span> <span class=n>size_t</span> <span class=n>__idx</span> <span class=o>=</span> <span class=n>__find_uniq_type_in_pack</span><span class=o>&lt;</span><span class=n>_Tp</span><span class=p>,</span> <span class=n>_Types</span><span class=p>...</span><span class=o>&gt;</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>static_assert</span><span class=p>(</span><span class=n>__idx</span> <span class=o>&lt;</span> <span class=k>sizeof</span><span class=p>...(</span><span class=n>_Types</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=s>&#34;the type T in std::get&lt;T&gt; must occur exactly once in the tuple&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>std</span><span class=o>::</span><span class=n>__get_helper</span><span class=o>&lt;</span><span class=n>__idx</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__t</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>关注<code>__find_uniq_type_in_pack</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=n>_Tp</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>_Types</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>constexpr</span> <span class=n>size_t</span>
+</span></span><span class=line><span class=cl><span class=n>__find_uniq_type_in_pack</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>constexpr</span> <span class=n>size_t</span> <span class=n>__sz</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>...(</span><span class=n>_Types</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>constexpr</span> <span class=kt>bool</span> <span class=n>__found</span><span class=p>[</span><span class=n>__sz</span><span class=p>]</span> <span class=o>=</span> <span class=p>{</span> <span class=n>__is_same</span><span class=p>(</span><span class=n>_Tp</span><span class=p>,</span> <span class=n>_Types</span><span class=p>)</span> <span class=p>...</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>    <span class=n>size_t</span> <span class=n>__n</span> <span class=o>=</span> <span class=n>__sz</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>__i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>__i</span> <span class=o>&lt;</span> <span class=n>__sz</span><span class=p>;</span> <span class=o>++</span><span class=n>__i</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>__found</span><span class=p>[</span><span class=n>__i</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>__n</span> <span class=o>&lt;</span> <span class=n>__sz</span><span class=p>)</span> <span class=c1>// more than one _Tp found
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>return</span> <span class=n>__sz</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>__n</span> <span class=o>=</span> <span class=n>__i</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>__n</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>此处对变参模板使用得很灵活, <code>__is_same(_Tp, _Types) ...</code>用法值得学习(相当于一个参数固定, 另一个参数是可变参).</p><h3 id=tie>tie</h3><p><code>tuple</code>的另一个功能是支持解包, 通过<code>tie</code>实现. <code>tie</code>怎么做的? 先看看源码:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span><span class=p>...</span> <span class=n>_Elements</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=k>constexpr</span> <span class=n>tuple</span><span class=o>&lt;</span><span class=n>_Elements</span><span class=o>&amp;</span><span class=p>...</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=n>tie</span><span class=p>(</span><span class=n>_Elements</span><span class=o>&amp;</span><span class=p>...</span> <span class=n>__args</span><span class=p>)</span> <span class=k>noexcept</span>
+</span></span><span class=line><span class=cl><span class=p>{</span> <span class=k>return</span> <span class=n>tuple</span><span class=o>&lt;</span><span class=n>_Elements</span><span class=o>&amp;</span><span class=p>...</span><span class=o>&gt;</span><span class=p>(</span><span class=n>__args</span><span class=p>...);</span> <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>相当于是返回了一个类型是引用类型的<code>tuple</code>, 那么我们可以给<code>TinyTuple</code>加上类似的功能, 其中的<code>tie</code>实现如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span> <span class=p>...</span><span class=n>Tps</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Tps</span> <span class=o>&amp;</span><span class=p>...</span><span class=o>&gt;</span> <span class=n>tie</span><span class=p>(</span><span class=n>Tps</span> <span class=o>&amp;</span><span class=p>...</span><span class=n>args</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Tps</span> <span class=o>&amp;</span><span class=p>...</span><span class=o>&gt;</span><span class=p>(</span><span class=n>args</span><span class=p>...);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>需要再实现<code>TinyTuple</code>的赋值操作:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>template</span><span class=o>&lt;</span><span class=k>typename</span><span class=p>...</span><span class=o>&gt;</span> <span class=k>friend</span> <span class=k>class</span> <span class=nc>TinyTuple</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>Head</span><span class=p>,</span> <span class=k>typename</span> <span class=p>...</span><span class=n>Args</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Tp</span><span class=p>,</span> <span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=k>operator</span><span class=o>=</span><span class=p>(</span><span class=k>const</span> <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Head</span><span class=p>,</span> <span class=n>Args</span><span class=p>...</span><span class=o>&gt;</span> <span class=o>&amp;</span><span class=n>t</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>this</span><span class=o>-&gt;</span><span class=n>value</span> <span class=o>=</span> <span class=n>t</span><span class=p>.</span><span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Tps</span><span class=p>...</span><span class=o>&gt;</span><span class=p>(</span><span class=o>*</span><span class=k>this</span><span class=p>)</span> <span class=o>=</span> <span class=n>TinyTuple</span><span class=o>&lt;</span><span class=n>Args</span><span class=p>...</span><span class=o>&gt;</span><span class=p>(</span><span class=n>t</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>*</span><span class=k>this</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>此处的<code>TinyTuple&lt;Tps...>(*this) = TinyTuple&lt;Args...>(t);</code>不需要递归终止条件, 因为最终的<code>TinyTuple&lt;Tps...></code>会退化为<code>TinyTuple&lt;></code>. 那么, 在<code>TinyTuple</code>里面可以这样使用<code>tie</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>int</span> <span class=n>p1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>char</span> <span class=n>p2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>double</span> <span class=n>p3</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>const</span> <span class=kt>char</span><span class=o>*</span> <span class=n>p4</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>tie</span><span class=p>(</span><span class=n>p1</span><span class=p>,</span> <span class=n>p2</span><span class=p>,</span> <span class=n>p3</span><span class=p>,</span> <span class=n>p4</span><span class=p>)</span> <span class=o>=</span> <span class=n>ttuple</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>p1</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>p2</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>p3</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>std</span><span class=o>::</span><span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=n>p4</span> <span class=o>&lt;&lt;</span> <span class=n>std</span><span class=o>::</span><span class=n>endl</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-07-13</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/stl/>STL</a>,&nbsp;<a href=/categories/cpp/>Cpp</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/cpp/>Cpp</a>,&nbsp;<a href=/tags/tuple/>tuple</a></section></div><div class=post-nav><a href=/202207/cpp-stl-any/ class=prev rel=prev title=STL-any源码阅读><i class="fas fa-angle-left fa-fw"></i>STL-any源码阅读</a>
+<a href=/202207/sysinfo-fstats/ class=next rel=next title=系统信息悬浮窗-fstats>系统信息悬浮窗-fstats<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

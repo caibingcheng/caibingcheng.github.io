@@ -1,0 +1,700 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>进程控制和通信(四) - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="进程控制和通信(四)"><meta property="og:description" content="在前面的文章中, 我们学习了进程通信的几种方式, 并且也接触到了内核控制进程的结构块task_struct, task_struct的内容主要会分为以下几个部分, 通过这一篇文章可以学习这些部分的大体内容."><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202105/process-ctracon4/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-05-19T20:41:03+08:00"><meta property="article:modified_time" content="2021-09-26T15:35:02+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="进程控制和通信(四)"><meta name=twitter:description content="在前面的文章中, 我们学习了进程通信的几种方式, 并且也接触到了内核控制进程的结构块task_struct, task_struct的内容主要会分为以下几个部分, 通过这一篇文章可以学习这些部分的大体内容."><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202105/process-ctracon4/><link rel=prev href=https://imcbc.cn/202105/priavte-bypointer/><link rel=next href=https://imcbc.cn/202105/blog-orlike/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"进程控制和通信(四)","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202105\/process-ctracon4\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"进程, 进程资源, task_struct, PCB","wordcount":8465,"url":"https:\/\/imcbc.cn\/202105\/process-ctracon4\/","datePublished":"2021-05-19T20:41:03+08:00","dateModified":"2021-09-26T15:35:02+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>进程控制和通信(四)<span class=single-title> · PCB介绍</span><sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-05-19>2021-05-19</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 8465 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 17 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#task_struct>task_struct</a></li><li><a href=#任务id>任务ID</a></li><li><a href=#亲缘关系>亲缘关系</a></li><li><a href=#任务状态>任务状态</a></li><li><a href=#权限>权限</a></li><li><a href=#运行统计>运行统计</a></li><li><a href=#调度相关>调度相关</a></li><li><a href=#信号处理>信号处理</a></li><li><a href=#内存管理>内存管理</a></li><li><a href=#文件与文件系统>文件与文件系统</a></li><li><a href=#内核栈>内核栈</a></li></ul></nav></div></div><div class=content id=content><p>在前面的文章中, 我们学习了进程通信的几种方式, 并且也接触到了内核控制进程的结构块<code>task_struct</code>, <code>task_struct</code>的内容主要会分为以下几个部分, 通过这一篇文章可以学习这些部分的大体内容.</p><h2 id=task_struct>task_struct</h2><p><figure><a class=lightgallery href="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==,size_16,color_FFFFFF,t_70" title=&amp;ldquo;task_struct&amp;rdquo; data-thumbnail="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==,size_16,color_FFFFFF,t_70" data-sub-html="<h2>task_struct</h2><p>&amp;ldquo;task_struct&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==,size_16,color_FFFFFF,t_70" data-srcset="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark%2ctype_ZmFuZ3poZW5naGVpdGk%2cshadow_10%2ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==%2csize_16%2ccolor_FFFFFF%2ct_70, https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark%2ctype_ZmFuZ3poZW5naGVpdGk%2cshadow_10%2ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==%2csize_16%2ccolor_FFFFFF%2ct_70 1.5x, https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark%2ctype_ZmFuZ3poZW5naGVpdGk%2cshadow_10%2ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==%2csize_16%2ccolor_FFFFFF%2ct_70 2x" data-sizes=auto alt="https://img-blog.csdnimg.cn/20200520105420402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MDk5NDU1Mg==,size_16,color_FFFFFF,t_70"></a><figcaption class=image-caption>task_struct</figcaption></figure></p><ul><li>任务ID: 用于区分进程, 是进程的身份证, 比如pid就属于任务ID</li><li>亲缘关系: 包含兄弟进程, 父子进程的信息</li><li>任务状态: 用于标识当前进程的运行状态, 比如running, runable, stop, wait等;</li><li>权限: 进程权限信息, 包括本进程对外以及外对本进程的权限</li><li>运行统计: 包括启动时间, cpu占用时间等信息</li><li>调度相关: 包含进程优先级, 调度策略等信息</li><li>信号处理: 阻塞/等待等信息, 以及信号处理函数(见<a href=/202105/process-ctracon3 rel>进程控制和进程通信三</a>)</li><li>内存管理: 进程虚拟内存空间</li><li>文件与文件系统: 进程文件</li><li>内核栈: 内核栈地址</li></ul><h2 id=任务id>任务ID</h2><p>和任务ID相关的成员大概有以下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>pid_t</span>				<span class=n>pid</span><span class=p>;</span>                            <span class=c1>// 进程id
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>pid_t</span>				<span class=n>tgid</span><span class=p>;</span>                           <span class=c1>// 线程group id
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>struct</span> <span class=n>task_struct</span>		<span class=o>*</span><span class=n>group_leader</span><span class=p>;</span>              <span class=c1>// 线程group leader
+</span></span></span></code></pre></td></tr></table></div></div><p><code>group_leader</code>是指向线程group第一个task的指针. 比如在<code>setpgid</code>函数中会用到.</p><p>Linux将<code>current</code>包装为了一个宏, 用来获取在当前CPU上运行的<code>task_struct</code>地址.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>DECLARE_PER_CPU</span><span class=p>(</span><span class=k>struct</span> <span class=n>task_struct</span> <span class=o>*</span><span class=p>,</span> <span class=n>current_task</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=n>__always_inline</span> <span class=k>struct</span> <span class=n>task_struct</span> <span class=o>*</span><span class=nf>get_current</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>this_cpu_read_stable</span><span class=p>(</span><span class=n>current_task</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#define current get_current()
+</span></span></span></code></pre></td></tr></table></div></div><p>一般, 我们可以调用<code>getpid</code>获取进程的进程id, 实际上<code>getpid</code>返回的是<code>task_struct</code>的<code>tgid</code>. (当然这个函数的调用栈不是这么简单的, 还涉及到了Linux的namespace概念, 这里就先简单处理了, 以下的接口同样简单处理)</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>SYSCALL_DEFINE0</span><span class=p>(</span><span class=n>getpid</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>task_tgid_vnr</span><span class=p>(</span><span class=n>current</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>同样, 我们也可以用<code>gettid</code>获取当前线程的线程id, 实际上<code>gettid</code>返回的是<code>task_struct</code>的<code>pid</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>SYSCALL_DEFINE0</span><span class=p>(</span><span class=n>gettid</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>task_pid_vnr</span><span class=p>(</span><span class=n>current</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>另外, 也可以通过<code>getppid</code>获取父进程的进程id, 实际上<code>getppid</code>返回的是<code>task_struct</code>的<code>real_parent</code>的<code>tgid</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>SYSCALL_DEFINE0</span><span class=p>(</span><span class=n>getppid</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>rcu_read_lock</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	<span class=n>pid</span> <span class=o>=</span> <span class=n>task_tgid_vnr</span><span class=p>(</span><span class=n>rcu_dereference</span><span class=p>(</span><span class=n>current</span><span class=o>-&gt;</span><span class=n>real_parent</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>	<span class=n>rcu_read_unlock</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=n>pid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>对内核来说, 没有区分进程和线程的概念, 在内核中, 这两种概念都叫task, 由<code>task_struct</code>结构体管理. 所以, 怎么来区分进程和线程呢? 内核会用<code>pid</code>和<code>tgid</code>两个成员区分, <code>pid</code>表示的当前<code>task_struct</code>的id, 可以认为是<code>task_struct</code>的标识符, 每个task都不一样. 如果某个进程/线程创建了一个子线程, 那么就会生成一个新的<code>pid</code>, 但是会继承父结点的<code>tgid</code>.</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b880022a82b.png title=&amp;ldquo;pid和tgid&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b880022a82b.png data-sub-html="<h2>pid和tgid</h2><p>&amp;ldquo;pid和tgid&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b880022a82b.png data-srcset="https://bu.dusays.com/2022/06/26/62b880022a82b.png, https://bu.dusays.com/2022/06/26/62b880022a82b.png 1.5x, https://bu.dusays.com/2022/06/26/62b880022a82b.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b880022a82b.png></a><figcaption class=image-caption>pid和tgid</figcaption></figure></p><p>为什么有这两个概念? 我猜是因为从单核单进程时代到多进程时代迁移的遗留问题.</p><h2 id=亲缘关系>亲缘关系</h2><p>与task亲缘关系相关的成员如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Real parent process: */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>task_struct</span> <span class=n>__rcu</span>	<span class=o>*</span><span class=n>real_parent</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Recipient of SIGCHLD, wait4() reports: */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>task_struct</span> <span class=n>__rcu</span>	<span class=o>*</span><span class=n>parent</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Children/sibling form the list of natural children: */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>list_head</span>		<span class=n>children</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>list_head</span>		<span class=n>sibling</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>real_parent</code>指向的是真正的parent进程, 如下是进程<code>clone</code>时的一段代码, 可以看到<code>real_parent</code>是指向子(新)进程的父进程. 如果创建的是thread, 则和父进程的<code>real_parent</code>相同.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* CLONE_PARENT re-uses the old parent */</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>clone_flags</span> <span class=o>&amp;</span> <span class=p>(</span><span class=n>CLONE_PARENT</span><span class=o>|</span><span class=n>CLONE_THREAD</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span><span class=o>-&gt;</span><span class=n>real_parent</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>real_parent</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span><span class=o>-&gt;</span><span class=n>parent_exec_id</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>parent_exec_id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span><span class=o>-&gt;</span><span class=n>real_parent</span> <span class=o>=</span> <span class=n>current</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span><span class=o>-&gt;</span><span class=n>parent_exec_id</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>self_exec_id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>parent</code>指向的是给当前进程传递<code>SIGCHLD</code>信号的进程, 这个进程一般是debug进程, 比如GDB调试进程, 这时候<code>parent</code>就是指向的GDB进程.</p><p>比如<code>ptrace</code>的link阶段, 就会更新<code>parent</code>的指向.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>void</span> <span class=nf>__ptrace_link</span><span class=p>(</span><span class=k>struct</span> <span class=n>task_struct</span> <span class=o>*</span><span class=n>child</span><span class=p>,</span> <span class=k>struct</span> <span class=n>task_struct</span> <span class=o>*</span><span class=n>new_parent</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		   <span class=k>const</span> <span class=k>struct</span> <span class=n>cred</span> <span class=o>*</span><span class=n>ptracer_cred</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=n>BUG_ON</span><span class=p>(</span><span class=o>!</span><span class=n>list_empty</span><span class=p>(</span><span class=o>&amp;</span><span class=n>child</span><span class=o>-&gt;</span><span class=n>ptrace_entry</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>	<span class=n>list_add</span><span class=p>(</span><span class=o>&amp;</span><span class=n>child</span><span class=o>-&gt;</span><span class=n>ptrace_entry</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>new_parent</span><span class=o>-&gt;</span><span class=n>ptraced</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=n>child</span><span class=o>-&gt;</span><span class=n>parent</span> <span class=o>=</span> <span class=n>new_parent</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>child</span><span class=o>-&gt;</span><span class=n>ptracer_cred</span> <span class=o>=</span> <span class=n>get_cred</span><span class=p>(</span><span class=n>ptracer_cred</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>关于<code>parent</code>的参考信息可见<a href=https://www.mail-archive.com/kernelnewbies@kernelnewbies.org/msg04745.html target=_blank rel="noopener noreffer">kernelnewbies:parent和real_parent</a>.</p><p><code>children</code>用于存放子进程指针, <code>sibling</code>存放兄弟进程指针;</p><h2 id=任务状态>任务状态</h2><p>与任务状态相关的一些成员如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* -1 unrunnable, 0 runnable, &gt;0 stopped: */</span>
+</span></span><span class=line><span class=cl><span class=k>volatile</span> <span class=kt>long</span>			<span class=n>state</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Per task flags (PF_*), defined further below: */</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>int</span>			<span class=n>flags</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span>				<span class=n>exit_state</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>以下是关于state的描述:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Used in tsk-&gt;state: */</span>
+</span></span><span class=line><span class=cl><span class=cp>#define TASK_RUNNING			0x0000
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_INTERRUPTIBLE		0x0001
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_UNINTERRUPTIBLE	0x0002
+</span></span></span><span class=line><span class=cl><span class=cp>#define __TASK_STOPPED			0x0004
+</span></span></span><span class=line><span class=cl><span class=cp>#define __TASK_TRACED			0x0008
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=cm>/* Used in tsk-&gt;exit_state: */</span>
+</span></span><span class=line><span class=cl><span class=cp>#define EXIT_DEAD				0x0010
+</span></span></span><span class=line><span class=cl><span class=cp>#define EXIT_ZOMBIE				0x0020
+</span></span></span><span class=line><span class=cl><span class=cp>#define EXIT_TRACE				(EXIT_ZOMBIE | EXIT_DEAD)
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=cm>/* Used in tsk-&gt;state again: */</span>
+</span></span><span class=line><span class=cl><span class=cp>#define TASK_PARKED				0x0040
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_DEAD				0x0080
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_WAKEKILL			0x0100
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_WAKING				0x0200
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_NOLOAD				0x0400
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_NEW				0x0800
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_STATE_MAX			0x1000
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=cm>/* Convenience macros for the sake of set_current_state: */</span>
+</span></span><span class=line><span class=cl><span class=cp>#define TASK_KILLABLE			(TASK_WAKEKILL | TASK_UNINTERRUPTIBLE)
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_STOPPED			(TASK_WAKEKILL | __TASK_STOPPED)
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_TRACED				(TASK_WAKEKILL | __TASK_TRACED)
+</span></span></span><span class=line><span class=cl><span class=cp>#define TASK_IDLE				(TASK_UNINTERRUPTIBLE | TASK_NOLOAD)
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=cm>/* Convenience macros for the sake of wake_up(): */</span>
+</span></span><span class=line><span class=cl><span class=cp>#define TASK_NORMAL				(TASK_INTERRUPTIBLE | TASK_UNINTERRUPTIBLE)
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=cm>/* get_task_state(): */</span>
+</span></span><span class=line><span class=cl><span class=cp>#define TASK_REPORT				(TASK_RUNNING | TASK_INTERRUPTIBLE | \
+</span></span></span><span class=line><span class=cl><span class=cp>					 			TASK_UNINTERRUPTIBLE | __TASK_STOPPED | \
+</span></span></span><span class=line><span class=cl><span class=cp>					 			__TASK_TRACED | EXIT_DEAD | EXIT_ZOMBIE | \
+</span></span></span><span class=line><span class=cl><span class=cp>					 			TASK_PARKED)
+</span></span></span></code></pre></td></tr></table></div></div><p>总的来说, 进程状态可以分为以下几种: 可运行, 等待(中断/不可中断), 退出(僵死/销毁), 暂停. 这些对应的状态通过ps aux命令也可以查看, 基本是对应的.</p><ul><li><code>TASK_RUNNING</code>表示是可运行的状态, 可运行不仅仅是runable的意思, 也表示running. 实际上处于<code>TASK_RUNNING</code>状态的task会被安排进<code>runqueue</code>, 那么其状态可能是等待执行或者正在执行. 如下一段代码是计算task运行时间的, 如果task状态是<code>TASK_RUNNING</code>就被塞进<code>runqueue</code>.</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm> * Called when a process ceases being the active-running process involuntarily
+</span></span></span><span class=line><span class=cl><span class=cm> * due, typically, to expiring its time slice (this may also be called when
+</span></span></span><span class=line><span class=cl><span class=cm> * switching to the idle task).  Now we can calculate how long we ran.
+</span></span></span><span class=line><span class=cl><span class=cm> * Also, if the process is still in the TASK_RUNNING state, call
+</span></span></span><span class=line><span class=cl><span class=cm> * sched_info_queued() to mark that it has now again started waiting on
+</span></span></span><span class=line><span class=cl><span class=cm> * the runqueue.
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kr>inline</span> <span class=kt>void</span> <span class=nf>sched_info_depart</span><span class=p>(</span><span class=k>struct</span> <span class=n>rq</span> <span class=o>*</span><span class=n>rq</span><span class=p>,</span> <span class=k>struct</span> <span class=n>task_struct</span> <span class=o>*</span><span class=n>t</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=kt>long</span> <span class=n>delta</span> <span class=o>=</span> <span class=n>rq_clock</span><span class=p>(</span><span class=n>rq</span><span class=p>)</span> <span class=o>-</span> <span class=n>t</span><span class=o>-&gt;</span><span class=n>sched_info</span><span class=p>.</span><span class=n>last_arrival</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>rq_sched_info_depart</span><span class=p>(</span><span class=n>rq</span><span class=p>,</span> <span class=n>delta</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=p>(</span><span class=n>t</span><span class=o>-&gt;</span><span class=n>state</span> <span class=o>==</span> <span class=n>TASK_RUNNING</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=n>sched_info_queued</span><span class=p>(</span><span class=n>rq</span><span class=p>,</span> <span class=n>t</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li><p><code>TASK_INTERRUPTIBLE</code>和<code>TASK_UNINTERRUPTIBLE</code>可以表示task的两种等待状态. 在task运行时, 如果需要等待一些IO设备的返回, 就会处于等待状态. 处于<code>TASK_INTERRUPTIBLE</code>状态的task可以被一些信号唤醒, 转而去执行信号处理函数; 处于<code>TASK_UNINTERRUPTIBLE</code>状态的task则不可被信号唤醒, 只能一直等待当前IO返回, 此时一般只能通过重启电脑来杀死这个进程. 通过一些状态的组合, 就可以生成一些更复杂的状态, 比如<code>TASK_KILLABLE</code>, 就表示task不可被一般信号唤醒, 但是可以被系统的kill信号唤醒, 这个状态在控制一些重要进程时是很有用的.</p></li><li><p><code>TASK_DEAD</code>和<code>EXIT_ZOMBIE</code>表示进程的僵死状态. 在task处于退出状态时, 会处于<code>TASK_DEAD</code>状态, 此时<code>exit_state</code>工作. task退出会清空task资源, 但是<code>task_struct</code>这个结构体资源还在保留, 需要父进程清理(调用<code>wait</code>). 为什么需要父进程清理? 因为<code>task_struct</code>中保留了task的退出状态码, 这是需要返回给父进程的, 所以需要被父进程清理. 如果父进程没有清理<code>task_struct</code>, 那么这个只有一个空壳<code>task_struct</code>的task就会占用内核task队列中的资源, 这种就叫僵尸进程. 如果系统中充斥了大量的僵尸进程, 就会占满task队列, 导致不能有新的进程产生. 如果僵尸进程的父进程退出了, 但是没有清理僵尸进程呢? 这时候僵尸进程就被init进程接管, 此时init进程会自动清理僵尸进程.</p></li><li><p><code>TASK_DEAD</code>和<code>EXIT_DEAD</code>表示进程的正常退出状态. 比如用<code>detach</code>分离一个线程, 那么线程退出时直接就是<code>EXIT_DEAD</code>状态. 其他例子不再叙述, 但是也有一个问题(TODO): task正常退出时, 是先处于<code>EXIT_ZOMBIE</code>然后再处于<code>EXIT_DEAD</code>吗?</p></li><li><p><code>TASK_STOPPED</code>和<code>TASK_TRACED</code>可以表示进程的暂停状态. <code>TASK_STOPPED</code>状态是在task收到<code>SIGSTOP/SIGTTIN/SIGTSTP/SIGTTOU</code>信号后进入的状态. <code>TASK_TRACED</code>是调试进程监控当前task时, 如果调试进程暂停了当前进程则会进入该状态.</p></li></ul><p>关于state的状态转换, 可以参考如下:<figure><a class=lightgallery href=https://static001.geekbang.org/resource/image/e2/88/e2fa348c67ce41ef730048ff9ca4c988.jpeg title=state状态机 data-thumbnail=https://static001.geekbang.org/resource/image/e2/88/e2fa348c67ce41ef730048ff9ca4c988.jpeg data-sub-html="<h2>state状态机</h2><p>state状态机</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://static001.geekbang.org/resource/image/e2/88/e2fa348c67ce41ef730048ff9ca4c988.jpeg data-srcset="https://static001.geekbang.org/resource/image/e2/88/e2fa348c67ce41ef730048ff9ca4c988.jpeg, https://static001.geekbang.org/resource/image/e2/88/e2fa348c67ce41ef730048ff9ca4c988.jpeg 1.5x, https://static001.geekbang.org/resource/image/e2/88/e2fa348c67ce41ef730048ff9ca4c988.jpeg 2x" data-sizes=auto alt=https://static001.geekbang.org/resource/image/e2/88/e2fa348c67ce41ef730048ff9ca4c988.jpeg></a><figcaption class=image-caption>state状态机</figcaption></figure></p><p>以下是task的flag:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm> * Per process flags
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=cp>#define PF_IDLE				0x00000002	</span><span class=cm>/* I am an IDLE thread */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_EXITING			0x00000004	</span><span class=cm>/* Getting shut down */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_EXITPIDONE		0x00000008	</span><span class=cm>/* PI exit done on shut down */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_VCPU				0x00000010	</span><span class=cm>/* I&#39;m a virtual CPU */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_WQ_WORKER		0x00000020	</span><span class=cm>/* I&#39;m a workqueue worker */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_FORKNOEXEC		0x00000040	</span><span class=cm>/* Forked but didn&#39;t exec */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_MCE_PROCESS		0x00000080  </span><span class=cm>/* Process policy on mce errors */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_SUPERPRIV		0x00000100	</span><span class=cm>/* Used super-user privileges */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_DUMPCORE			0x00000200	</span><span class=cm>/* Dumped core */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_SIGNALED			0x00000400	</span><span class=cm>/* Killed by a signal */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_MEMALLOC			0x00000800	</span><span class=cm>/* Allocating memory */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_NPROC_EXCEEDED	0x00001000	</span><span class=cm>/* set_user() noticed that RLIMIT_NPROC was exceeded */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_USED_MATH		0x00002000	</span><span class=cm>/* If unset the fpu must be initialized before use */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_USED_ASYNC		0x00004000	</span><span class=cm>/* Used async_schedule*(), used by module init */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_NOFREEZE			0x00008000	</span><span class=cm>/* This thread should not be frozen */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_FROZEN			0x00010000	</span><span class=cm>/* Frozen for system suspend */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_KSWAPD			0x00020000	</span><span class=cm>/* I am kswapd */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_MEMALLOC_NOFS	0x00040000	</span><span class=cm>/* All allocation requests will inherit GFP_NOFS */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_MEMALLOC_NOIO	0x00080000	</span><span class=cm>/* All allocation requests will inherit GFP_NOIO */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_LESS_THROTTLE	0x00100000	</span><span class=cm>/* Throttle me less: I clean memory */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_KTHREAD			0x00200000	</span><span class=cm>/* I am a kernel thread */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_RANDOMIZE		0x00400000	</span><span class=cm>/* Randomize virtual address space */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_SWAPWRITE		0x00800000	</span><span class=cm>/* Allowed to write to swap */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_MEMSTALL			0x01000000	</span><span class=cm>/* Stalled due to lack of memory */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_UMH				0x02000000	</span><span class=cm>/* I&#39;m an Usermodehelper process */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_NO_SETAFFINITY	0x04000000	</span><span class=cm>/* Userland is not allowed to meddle with cpus_allowed */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_MCE_EARLY		0x08000000  </span><span class=cm>/* Early kill for mce process policy */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_MEMALLOC_NOCMA	0x10000000	</span><span class=cm>/* All allocation request will have _GFP_MOVABLE cleared */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_FREEZER_SKIP		0x40000000	</span><span class=cm>/* Freezer should not count it as freezable */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#define PF_SUSPEND_TASK		0x80000000  </span><span class=cm>/* This thread called freeze_processes() and should not be frozen */</span><span class=cp>
+</span></span></span></code></pre></td></tr></table></div></div><p>内容比较多, 但是可以通过这些注释了解到, <code>flag</code>也是表示当前进程的一些状态, 但是不全是运行状态. 比如<code>flag</code>可以表示一个进程是不是kernal的/该进程是否可以被frozen等等.</p><p>关于<code>flag</code>的读写权限, 代码中有如下说明: 除了trace进程和<code>fork</code>时的父进程以及当前进程可以读写<code>flag</code>以外, 其他进程只能读当前进程的<code>flag</code>.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>/*
+</span></span><span class=line><span class=cl> * Only the _current_ task can read/write to tsk-&gt;flags, but other
+</span></span><span class=line><span class=cl> * tasks can access tsk-&gt;flags in readonly mode for example
+</span></span><span class=line><span class=cl> * with tsk_used_math (like during threaded core dumping).
+</span></span><span class=line><span class=cl> * There is however an exception to this rule during ptrace
+</span></span><span class=line><span class=cl> * or during fork: the ptracer task is allowed to write to the
+</span></span><span class=line><span class=cl> * child-&gt;flags of its traced child (same goes for fork, the parent
+</span></span><span class=line><span class=cl> * can write to the child-&gt;flags), because we&#39;re guaranteed the
+</span></span><span class=line><span class=cl> * child is not running and in turn not changing child-&gt;flags
+</span></span><span class=line><span class=cl> * at the same time the parent does it.
+</span></span><span class=line><span class=cl> */
+</span></span></code></pre></td></tr></table></div></div><h2 id=权限>权限</h2><p>和权限相关的成员如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Process credentials: */</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Tracer&#39;s credentials at attach: */</span>
+</span></span><span class=line><span class=cl><span class=k>const</span> <span class=k>struct</span> <span class=n>cred</span> <span class=n>__rcu</span>		<span class=o>*</span><span class=n>ptracer_cred</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Objective and real subjective task credentials (COW): */</span>
+</span></span><span class=line><span class=cl><span class=k>const</span> <span class=k>struct</span> <span class=n>cred</span> <span class=n>__rcu</span>		<span class=o>*</span><span class=n>real_cred</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Effective (overridable) subjective task credentials (COW): */</span>
+</span></span><span class=line><span class=cl><span class=k>const</span> <span class=k>struct</span> <span class=n>cred</span> <span class=n>__rcu</span>		<span class=o>*</span><span class=n>cred</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>对一个task的权限管理分为了三类: trace的权限, 其他task的权限, 当前task的权限. 要了解权限的大体内容, 需要关注<code>cred</code>结构体:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>struct</span> <span class=n>cred</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=n>atomic_t</span>	<span class=n>usage</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_DEBUG_CREDENTIALS
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>atomic_t</span>	<span class=n>subscribers</span><span class=p>;</span>	<span class=cm>/* number of processes subscribed */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>void</span>		<span class=o>*</span><span class=n>put_addr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span>	<span class=n>magic</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#define CRED_MAGIC	0x43736564
+</span></span></span><span class=line><span class=cl><span class=cp>#define CRED_MAGIC_DEAD	0x44656144
+</span></span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=n>kuid_t</span>		<span class=n>uid</span><span class=p>;</span>		<span class=cm>/* real UID of the task */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kgid_t</span>		<span class=n>gid</span><span class=p>;</span>		<span class=cm>/* real GID of the task */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kuid_t</span>		<span class=n>suid</span><span class=p>;</span>		<span class=cm>/* saved UID of the task */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kgid_t</span>		<span class=n>sgid</span><span class=p>;</span>		<span class=cm>/* saved GID of the task */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kuid_t</span>		<span class=n>euid</span><span class=p>;</span>		<span class=cm>/* effective UID of the task */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kgid_t</span>		<span class=n>egid</span><span class=p>;</span>		<span class=cm>/* effective GID of the task */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kuid_t</span>		<span class=n>fsuid</span><span class=p>;</span>		<span class=cm>/* UID for VFS ops */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kgid_t</span>		<span class=n>fsgid</span><span class=p>;</span>		<span class=cm>/* GID for VFS ops */</span>
+</span></span><span class=line><span class=cl>	<span class=c1>// .......
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=n>kernel_cap_t</span>	<span class=n>cap_inheritable</span><span class=p>;</span> <span class=cm>/* caps our children can inherit */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kernel_cap_t</span>	<span class=n>cap_permitted</span><span class=p>;</span>	 <span class=cm>/* caps we&#39;re permitted */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kernel_cap_t</span>	<span class=n>cap_effective</span><span class=p>;</span>	 <span class=cm>/* caps we can actually use */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kernel_cap_t</span>	<span class=n>cap_bset</span><span class=p>;</span>		 <span class=cm>/* capability bounding set */</span>
+</span></span><span class=line><span class=cl>	<span class=n>kernel_cap_t</span>	<span class=n>cap_ambient</span><span class=p>;</span>	 <span class=cm>/* Ambient capability set */</span>
+</span></span><span class=line><span class=cl>	<span class=c1>// .......
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span> <span class=n>__randomize_layout</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>可以看到一个<code>cred</code>主要储存了一些user id和group id以及表示能力的cap.</p><ul><li><code>uid/gid</code>表示当前task的id, 一般是谁启动这个task那么就表示谁.</li><li><code>suid/sgid</code>让本来没有相应权限的用户运行这个程序时, 可以访问他没有权限访问的资.passwd就是一个很鲜明的例子.(<a href=https://www.cnblogs.com/fhefh/archive/2011/09/20/2182155.html target=_blank rel="noopener noreffer">linux：SUID、SGID详解</a>)</li><li><code>euid/egid</code>表示当前task可以操作的一些资源的权限, 比如共享内存/管道等等, 这时候就可以比较这个用户和用户组是否有权限可以操作.</li><li><code>fsuid/fsgid</code>表示当前task可以操作的文件系统的权限, 比如文件打开/读写时, 就会比较这个用户和用户组是否有对应的权限.</li></ul><p>以上的<code>*id</code>都是对用户和用户组授权, 权限粒度比较大, 比如某些task期望给普通用户运行, 但是又期望可以得到一些更高级的权限. 如果只使用<code>*id</code>来区分, 则可能需要赋予root之类高级用户的权限, 相对是不安全的. 这时候<code>kernel_cap_t</code>就起到作用了. <code>kernel_cap_t</code>相当于是一个mask, 通过这个mask可以控制用户的权限粒度, 达到更精细的权限控制的目的. 这样就算是普通用户也可以得到高级用户某些必要权限, 而不污染其他权限.</p><p>关于<code>cred</code>和<code>real_cred</code>在<a href=https://code.woboq.org/linux/linux/include/linux/cred.h.html#cred target=_blank rel="noopener noreffer">源码</a>中有以下解释:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>/*
+</span></span><span class=line><span class=cl> * The security context of a task
+</span></span><span class=line><span class=cl> *
+</span></span><span class=line><span class=cl> * The parts of the context break down into two categories:
+</span></span><span class=line><span class=cl> *
+</span></span><span class=line><span class=cl> *  (1) The objective context of a task.  These parts are used when some other
+</span></span><span class=line><span class=cl> *	task is attempting to affect this one.
+</span></span><span class=line><span class=cl> *
+</span></span><span class=line><span class=cl> *  (2) The subjective context.  These details are used when the task is acting
+</span></span><span class=line><span class=cl> *	upon another object, be that a file, a task, a key or whatever.
+</span></span><span class=line><span class=cl> *
+</span></span><span class=line><span class=cl> * Note that some members of this structure belong to both categories - the
+</span></span><span class=line><span class=cl> * LSM security pointer for instance.
+</span></span><span class=line><span class=cl> *
+</span></span><span class=line><span class=cl> * A task has two security pointers.  task-&gt;real_cred points to the objective
+</span></span><span class=line><span class=cl> * context that defines that task&#39;s actual details.  The objective part of this
+</span></span><span class=line><span class=cl> * context is used whenever that task is acted upon.
+</span></span><span class=line><span class=cl> *
+</span></span><span class=line><span class=cl> * task-&gt;cred points to the subjective context that defines the details of how
+</span></span><span class=line><span class=cl> * that task is going to act upon another object.  This may be overridden
+</span></span><span class=line><span class=cl> * temporarily to point to another security context, but normally points to the
+</span></span><span class=line><span class=cl> * same context as task-&gt;real_cred.
+</span></span><span class=line><span class=cl> */
+</span></span></code></pre></td></tr></table></div></div><h2 id=运行统计>运行统计</h2><p>主要是task的一些时间相关的状态信息.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>u64</span>				<span class=n>utime</span><span class=p>;</span>				<span class=c1>//用户态消耗的CPU时间
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>u64</span>				<span class=n>stime</span><span class=p>;</span>				<span class=c1>//内核态消耗的CPU时间
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cm>/* Context switch counts: */</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>nvcsw</span><span class=p>;</span>		<span class=c1>//自愿的上下文切换计数
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>unsigned</span> <span class=kt>long</span>			<span class=n>nivcsw</span><span class=p>;</span>		<span class=c1>//非自愿的上下文切换计数
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cm>/* Monotonic time in nsecs: */</span>
+</span></span><span class=line><span class=cl><span class=n>u64</span>				<span class=n>start_time</span><span class=p>;</span>			<span class=c1>//进程启动时间, 不包含睡眠时间
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cm>/* Boot based time in nsecs: */</span>
+</span></span><span class=line><span class=cl><span class=n>u64</span>				<span class=n>real_start_time</span><span class=p>;</span>	<span class=c1>//进程启动时间, 包含睡眠时间
+</span></span></span></code></pre></td></tr></table></div></div><h2 id=调度相关>调度相关</h2><p>调度相关成员如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>int</span>							<span class=n>prio</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span>							<span class=n>static_prio</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>int</span>							<span class=n>normal_prio</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>int</span>				<span class=n>rt_priority</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>const</span> <span class=k>struct</span> <span class=n>sched_class</span>	<span class=o>*</span><span class=n>sched_class</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>sched_entity</span>			<span class=n>se</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>sched_rt_entity</span>		<span class=n>rt</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里在看相关资料的时候发现task的优先级还是比较复杂的, 涉及到了不同的调度器, 不同的调度策略等等. 所以调度相关的内容还需要额外一个篇幅来说明的(TODO). 这里就简单介绍一下吧~</p><p>首先我们可以在<a href=https://code.woboq.org/linux/linux/include/linux/sched/prio.h.html#23 target=_blank rel="noopener noreffer">prio.h</a>中找到一些和prio相关的定义.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#define MAX_NICE	19
+</span></span></span><span class=line><span class=cl><span class=cp>#define MIN_NICE	-20
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=cp>#define MAX_USER_RT_PRIO	100
+</span></span></span><span class=line><span class=cl><span class=cp>#define MAX_RT_PRIO			MAX_USER_RT_PRIO				</span><span class=c1>// 100
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#define MAX_PRIO			(MAX_RT_PRIO + NICE_WIDTH)		</span><span class=c1>// 140
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=cp>#define DEFAULT_PRIO		(MAX_RT_PRIO + NICE_WIDTH / 2)  </span><span class=c1>// 120
+</span></span></span></code></pre></td></tr></table></div></div><p>优先级的值越低这表示优先级越高.</p><p><code>*_NICE</code>决定了用户可以设置的task的优先级范围, 比如是<code>[-19, 20]</code>. 通过<code>nice -n</code>和<code>renice -n N -p PID</code>命令, 我们可以对某个程序或者对当前的某个进程设置其nice值. nice值越低则表示优先级越高.</p><p>nice的结果是会作用在<code>*_prio</code>成员上的, 所以nice也只能部分控制task的优先级. 比如参考如下的计算方法:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#define NICE_TO_PRIO(nice)	((nice) + DEFAULT_PRIO)
+</span></span></span><span class=line><span class=cl><span class=cp>#define PRIO_TO_NICE(prio)	((prio) - DEFAULT_PRIO)
+</span></span></span></code></pre></td></tr></table></div></div><p>系统也规定了优先级的范围, 最大范围是[0, 139]. 但是会将这个范围分成几个部分:</p><ul><li><code>[0, MAX_RT_PRIO-1]</code>表示RT的task的优先级范围.</li><li><code>[MAX_RT_PRIO, MAX_PRIO-1]</code>表示<code>SCHED_NORMAL/SCHED_BATCH</code>的task的优先级范围.</li></ul><p>比如查看系统进程信息:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>$ ps -la
+</span></span><span class=line><span class=cl>F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+</span></span><span class=line><span class=cl>4 S  1000 16697  8335  0  80   0 - 537617 futex_ pts/4   00:01:19 hugo
+</span></span></code></pre></td></tr></table></div></div><p>可以看到hugo对应的NI(nice)值是0, PRI(prio)是80, 可以尝试设置hugo的nice值.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>$ renice -n 20 -p 16697 &amp;&amp; ps -la | grep hugo
+</span></span><span class=line><span class=cl>16697 (process ID) old priority 0, new priority 19
+</span></span><span class=line><span class=cl>4 S  1000 16697  8335  0  99  19 - 537617 ep_pol pts/4   00:01:20 hugo
+</span></span></code></pre></td></tr></table></div></div><p>我们设置了nice为20, 但是实际应用的只有19, priority也只能到99. 这是因为hugo这个进程是RT的, 最大优先级也只能到99.
+如果再设置nice值&lt;=0就会发现, 这时候需要root权限才可以设置了, 这是因为如果设置高优先级的话, 就可能会抢占其他进程的资源, 这一般是内核不愿意看到的, 所以会需要更高的权限.</p><h2 id=信号处理>信号处理</h2><p>和信号处理相关的部分成员如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Signal handlers: */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>signal_struct</span>		<span class=o>*</span><span class=n>signal</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>sighand_struct</span>		<span class=o>*</span><span class=n>sighand</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>sigset_t</span>					<span class=n>blocked</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>sigset_t</span>					<span class=n>real_blocked</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Restored if set_restore_sigmask() was used: */</span>
+</span></span><span class=line><span class=cl><span class=n>sigset_t</span>					<span class=n>saved_sigmask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>sigpending</span>			<span class=n>pending</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span>				<span class=n>sas_ss_sp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>size_t</span>						<span class=n>sas_ss_size</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>int</span>				<span class=n>sas_ss_flags</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>pending</code>用于缓存当前task收到的信号, 这些信号还未被处理, 只有在task从内核态跳到用户态的过程中, 才会检查<code>pending</code>中的信号. 而内核进程一般都在内核态运行, 所以无法通过这种方法相应信号, 因此对内核进程我们一般无法使用kill等指令杀死. 对处于<code>TASK_INTERRUPTIBLE</code>状态的进程, 信号发送函数会直接唤醒当前task, 让当前task有机会从内核态转换到用户态, 从而响应信号处理函数. 对处于<code>TASK_UNINTERRUPTIBLE</code>状态的进程, 信号就只被添加进<code>pending</code>队列, 无法响应对应的信号.</p><p><code>sighand</code>用来指向信号处理函数. 信号处理时机可以参考下图:</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87a97ae35b.png title=&amp;ldquo;信号处理时机&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87a97ae35b.png data-sub-html="<h2>信号处理时机</h2><p>&amp;ldquo;信号处理时机&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87a97ae35b.png data-srcset="https://bu.dusays.com/2022/06/26/62b87a97ae35b.png, https://bu.dusays.com/2022/06/26/62b87a97ae35b.png 1.5x, https://bu.dusays.com/2022/06/26/62b87a97ae35b.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87a97ae35b.png></a><figcaption class=image-caption>信号处理时机</figcaption></figure></p><p><code>get_signal</code>函数中会获取当前task的<code>sighand</code>. <code>saved_sigmask</code>也是在这个时间段会被用到. 如下在<a href=https://code.woboq.org/linux/linux/arch/x86/kernel/signal.c.html target=_blank rel="noopener noreffer">kernel/signal.c</a>中可以找到:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=c1>// bool get_signal(struct ksignal *ksig)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>struct</span> <span class=n>sighand_struct</span> <span class=o>*</span><span class=n>sighand</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>sighand</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>signal_struct</span> <span class=o>*</span><span class=n>signal</span> <span class=o>=</span> <span class=n>current</span><span class=o>-&gt;</span><span class=n>signal</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>关于进程信号的使用, 可以参考<a href=/202105/process-ctracon3 rel>进程控制和进程通信三</a>. 查看当前系统支持64种不同的信号, 如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>$ kill -l
+</span></span><span class=line><span class=cl> 1) SIGHUP	 	 2) SIGINT		 3) SIGQUIT		 4) SIGILL	 	5) SIGTRAP
+</span></span><span class=line><span class=cl> 2) SIGABRT	 	 7) SIGBUS		 8) SIGFPE		 9) SIGKILL		10) SIGUSR1
+</span></span><span class=line><span class=cl>1)  SIGSEGV		12) SIGUSR2		13) SIGPIPE		14) SIGALRM		15) SIGTERM
+</span></span><span class=line><span class=cl>2)  SIGSTKFLT	17) SIGCHLD		18) SIGCONT		19) SIGSTOP		20) SIGTSTP
+</span></span><span class=line><span class=cl>3)  SIGTTIN		22) SIGTTOU		23) SIGURG		24) SIGXCPU		25) SIGXFSZ
+</span></span><span class=line><span class=cl>4)  SIGVTALRM	27) SIGPROF		28) SIGWINCH	29) SIGIO		30) SIGPWR
+</span></span><span class=line><span class=cl>5)  SIGSYS		34) SIGRTMIN	35) SIGRTMIN+1	36) SIGRTMIN+2	37) SIGRTMIN+3
+</span></span><span class=line><span class=cl>6)  SIGRTMIN+4	39) SIGRTMIN+5	40) SIGRTMIN+6	41) SIGRTMIN+7	42) SIGRTMIN+8
+</span></span><span class=line><span class=cl>7)  SIGRTMIN+9	44) SIGRTMIN+10	45) SIGRTMIN+11	46) SIGRTMIN+12	47) SIGRTMIN+13
+</span></span><span class=line><span class=cl>8)  SIGRTMIN+14	49) SIGRTMIN+15	50) SIGRTMAX-14	51) SIGRTMAX-13	52) SIGRTMAX-12
+</span></span><span class=line><span class=cl>9)  SIGRTMAX-11	54) SIGRTMAX-10	55) SIGRTMAX-9	56) SIGRTMAX-8	57) SIGRTMAX-7
+</span></span><span class=line><span class=cl>10) SIGRTMAX-6	59) SIGRTMAX-5	60) SIGRTMAX-4	61) SIGRTMAX-3	62) SIGRTMAX-2
+</span></span><span class=line><span class=cl>11) SIGRTMAX-1	64) SIGRTMAX
+</span></span></code></pre></td></tr></table></div></div><h2 id=内存管理>内存管理</h2><p>与内存管理相关的部分成员如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>struct</span> <span class=n>mm_struct</span>		<span class=o>*</span><span class=n>mm</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>mm_struct</span>		<span class=o>*</span><span class=n>active_mm</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>主要关注<code>mm_struct</code>结构体, 其中会包含一些segment的分段信息:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>start_code</span><span class=p>,</span> <span class=n>end_code</span><span class=p>,</span> <span class=n>start_data</span><span class=p>,</span> <span class=n>end_data</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>start_brk</span><span class=p>,</span> <span class=n>brk</span><span class=p>,</span> <span class=n>start_stack</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>arg_start</span><span class=p>,</span> <span class=n>arg_end</span><span class=p>,</span> <span class=n>env_start</span><span class=p>,</span> <span class=n>env_end</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p><figure><a class=lightgallery href=https://img.jbzj.com/file_images/article/201709/2017090617062846.png title=&amp;ldquo;Segment指向&amp;rdquo; data-thumbnail=https://img.jbzj.com/file_images/article/201709/2017090617062846.png data-sub-html="<h2>Segment指向</h2><p>&amp;ldquo;Segment指向&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img.jbzj.com/file_images/article/201709/2017090617062846.png data-srcset="https://img.jbzj.com/file_images/article/201709/2017090617062846.png, https://img.jbzj.com/file_images/article/201709/2017090617062846.png 1.5x, https://img.jbzj.com/file_images/article/201709/2017090617062846.png 2x" data-sizes=auto alt=https://img.jbzj.com/file_images/article/201709/2017090617062846.png></a><figcaption class=image-caption>Segment指向</figcaption></figure></p><p>进程从task_struct如何映射到物理内存的, 大概可以知道是以下流程了:<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b88006a6907.png title=&amp;ldquo;进程到物理内存&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b88006a6907.png data-sub-html="<h2>进程到物理内存</h2><p>&amp;ldquo;进程到物理内存&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b88006a6907.png data-srcset="https://bu.dusays.com/2022/06/26/62b88006a6907.png, https://bu.dusays.com/2022/06/26/62b88006a6907.png 1.5x, https://bu.dusays.com/2022/06/26/62b88006a6907.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b88006a6907.png></a><figcaption class=image-caption>进程到物理内存</figcaption></figure></p><p>当然, 现在依然存在一些盲区, <code>mm_struct</code>怎么指向页表的? 页表在哪里? 页表的工作流程是怎样的?</p><p><code>mm</code>和<code>active_mm</code>有什么区别呢? 这封<a href=https://www.kernel.org/doc/html/latest/vm/active_mm.html target=_blank rel="noopener noreffer">1999-07-30的邮件</a>(和现在的一些表述可能有点区别)中有详细的说明:</p><p>邮件中描述, 内存空间有"real address spaces"和"anonymous address spaces", 这里可以理解为"real address spaces"是指用户空间, &ldquo;anonymous address spaces"指内核空间(The obvious use for a &ldquo;anonymous address space&rdquo; is any thread that doesn&rsquo;t need any user mappings), 因为内核空间是不需要映射关系就可以找到的. <code>mm</code>用来指向"real address spaces&rdquo;, <code>active_mm</code>用来指向"real address spaces". 那么linux内核设计了以下规则: 如果当前进程(一般是内核进程)空间指向"anonymous address spaces", 则<code>mm</code>的值为<code>NULL</code>, <code>active_mm</code>指向当前空间; 如果当前进程空间指向"real address spaces", 则<code>active_mm</code>的值和<code>mm</code>的值保持一致. 所以, 现在一般也可以通过<code>mm</code>的值判断当前是内核进程还是用户进程.</p><h2 id=文件与文件系统>文件与文件系统</h2><p>与文件与文件系统相关的成员如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/* Filesystem information: */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>fs_struct</span>		<span class=o>*</span><span class=n>fs</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cm>/* Open file information: */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>files_struct</span>		<span class=o>*</span><span class=n>files</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>通过<code>fs_struct</code>, 可以拿到文件系统的root路径, 和当前进程的工作路径pwd.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>struct</span> <span class=n>fs_struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>users</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>spinlock_t</span> <span class=n>lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>seqcount_t</span> <span class=n>seq</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>umask</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>in_exec</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>path</span> <span class=n>root</span><span class=p>,</span> <span class=n>pwd</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=n>__randomize_layout</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>files_struct</code>表示当前进程打开的文件.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm> * Open file table structure
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>files_struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cm>/* read mostly part */</span>
+</span></span><span class=line><span class=cl>	<span class=n>atomic_t</span> <span class=n>count</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>bool</span> <span class=n>resize_in_progress</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>wait_queue_head_t</span> <span class=n>resize_wait</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>fdtable</span> <span class=n>__rcu</span> <span class=o>*</span><span class=n>fdt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>fdtable</span> <span class=n>fdtab</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cm>/* written part on a separate cache line in SMP */</span>
+</span></span><span class=line><span class=cl>	<span class=n>spinlock_t</span> <span class=n>file_lock</span> <span class=n>____cacheline_aligned_in_smp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span> <span class=n>next_fd</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>close_on_exec_init</span><span class=p>[</span><span class=mi>1</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>open_fds_init</span><span class=p>[</span><span class=mi>1</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>full_fds_bits_init</span><span class=p>[</span><span class=mi>1</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>file</span> <span class=n>__rcu</span> <span class=o>*</span> <span class=n>fd_array</span><span class=p>[</span><span class=n>NR_OPEN_DEFAULT</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>首先可以关注<code>fd_array</code>这个成员, <code>NR_OPEN_DEFAULT</code>默认值是操作系统的位数, 比如是32或者64, 这表示这个进程可以打开32/64个文件, 如果超过了这个值, 则系统会继续增大这个数组, 但是file数组的大小是有限制的:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#define INR_OPEN_MAX 4096	</span><span class=cm>/* Hard limit for nfile rlimits */</span><span class=cp>
+</span></span></span></code></pre></td></tr></table></div></div><p>比如说操作系统限制一个进程最多可以大概4096个文件, 通过root权限可以更改这个最大值.</p><p>再关注<code>fdtable</code>所指的两个成员, 可以先看看<code>files_struct</code>的结构:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>struct fdtable {
+</span></span><span class=line><span class=cl>	unsigned int max_fds;
+</span></span><span class=line><span class=cl>	struct file __rcu **fd;      /* current fd array */
+</span></span><span class=line><span class=cl>	unsigned long *close_on_exec;
+</span></span><span class=line><span class=cl>	unsigned long *open_fds;
+</span></span><span class=line><span class=cl>	unsigned long *full_fds_bits;
+</span></span><span class=line><span class=cl>	struct rcu_head rcu;
+</span></span><span class=line><span class=cl>};
+</span></span></code></pre></td></tr></table></div></div><p><code>fdtable</code>和<code>files_struct</code>看起来会有冲突的地方, 比如都可以表示打开文件的组数. 对应关系如下:<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b87a8cc55ce.png title=&amp;ldquo;fdtable和files_struct&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b87a8cc55ce.png data-sub-html="<h2>fdtable和files_struct</h2><p>&amp;ldquo;fdtable和files_struct&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b87a8cc55ce.png data-srcset="https://bu.dusays.com/2022/06/26/62b87a8cc55ce.png, https://bu.dusays.com/2022/06/26/62b87a8cc55ce.png 1.5x, https://bu.dusays.com/2022/06/26/62b87a8cc55ce.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b87a8cc55ce.png></a><figcaption class=image-caption>fdtable和files_struct</figcaption></figure></p><p>实际上<code>fdtable</code>在打开文件数量扩充中是有用的, 初始化<code>files_struct</code>最多可以打开<code>NR_OPEN_DEFAULT</code>个文件, 如果超过了则会申请一个新的<code>fdtable</code>内存, 由<code>*fdt</code>指向这块新的内存, 并且不再和<code>fd_array</code>关联(相当于有两块内存存储文件列表), 这时候就可以继续扩充打开文件的数量而不受<code>NR_OPEN_DEFAULT</code>大小限制了.</p><p><figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b8800bd62a6.png title=&amp;ldquo;fdtable扩充&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b8800bd62a6.png data-sub-html="<h2>fdtable扩充</h2><p>&amp;ldquo;fdtable扩充&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b8800bd62a6.png data-srcset="https://bu.dusays.com/2022/06/26/62b8800bd62a6.png, https://bu.dusays.com/2022/06/26/62b8800bd62a6.png 1.5x, https://bu.dusays.com/2022/06/26/62b8800bd62a6.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b8800bd62a6.png></a><figcaption class=image-caption>fdtable扩充</figcaption></figure></p><p>文件系统的内容还需要进一步学习.</p><h2 id=内核栈>内核栈</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>struct</span> <span class=n>thread_info</span>		<span class=n>thread_info</span><span class=p>;</span>		<span class=c1>// 必须是task_struct的第一个成员
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kt>void</span>					<span class=o>*</span><span class=n>stack</span><span class=p>;</span>				<span class=c1>// 内核栈
+</span></span></span></code></pre></td></tr></table></div></div><p>stack是指内核栈, 因为如果是用户态的进程, 某些情况(系统调用/异常触发等)会陷入内核态, 这时候在内核态执行指令同样需要栈空间, 如果使用用户态的栈可能会导致内核不安全, 这时候就需要给内核额外的分配栈, 就是这里的内核栈. 所以在用户进程切换到内核态的时候, 栈也会从用户栈切换到内核栈.</p><p>为什么<code>thread_info</code>必须是第一个成员? 可以看下面的函数:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#define current_thread_info() ((struct thread_info *)current)
+</span></span></span></code></pre></td></tr></table></div></div><p><code>current_thread_info</code>可以把<code>current</code>(上文讲过, 这就是当前的<code>task_struct</code>)转换为<code>thread_info</code>, 所以<code>thread_info</code>需要是第一个成员保证转换正确.</p><p><code>thread_info</code>是干什么用的? 首先<code>task_struct</code>是一种通用的task描述, 和平台架构无关, 但是linux是支持不同平台架构的, 怎么区分这些平台架构, 这时候就是通过<code>thread_info</code>来体现这些差异了.</p><p>也可以通过以下的方式拿到<code>thread_info</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#ifdef CONFIG_THREAD_INFO_IN_TASK
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=k>static</span> <span class=kr>inline</span> <span class=k>struct</span> <span class=n>thread_info</span> <span class=o>*</span><span class=nf>task_thread_info</span><span class=p>(</span><span class=k>struct</span> <span class=n>task_struct</span> <span class=o>*</span><span class=n>task</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=o>&amp;</span><span class=n>task</span><span class=o>-&gt;</span><span class=n>thread_info</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=cp>#elif !defined(__HAVE_THREAD_FUNCTIONS)
+</span></span></span><span class=line><span class=cl><span class=cp># define task_thread_info(task)	((struct thread_info *)(task)-&gt;stack)
+</span></span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></td></tr></table></div></div><p>注意到<code>task_thread_info</code>宏, 可以通过task的<code>stack</code>拿到<code>thread_info</code>, 这也说明<code>stack</code>和<code>thread_info</code>是在同一块内存的. 通过<code>thread_union</code>可以得到<code>stack</code>的大小是4Pages Size(16KB, 不同架构上可能不一样).</p><p>以下是<code>thread_union</code>的定义:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#ifdef CONFIG_KASAN
+</span></span></span><span class=line><span class=cl><span class=cp>#define KASAN_STACK_ORDER 1
+</span></span></span><span class=line><span class=cl><span class=cp>#else
+</span></span></span><span class=line><span class=cl><span class=cp>#define KASAN_STACK_ORDER 0
+</span></span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#define THREAD_SIZE_ORDER	(2 + KASAN_STACK_ORDER)
+</span></span></span><span class=line><span class=cl><span class=cp>#define THREAD_SIZE  (PAGE_SIZE &lt;&lt; THREAD_SIZE_ORDER)
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=k>union</span> <span class=n>thread_union</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifndef CONFIG_ARCH_TASK_STRUCT_ON_STACK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>task_struct</span> <span class=n>task</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp>#ifndef CONFIG_THREAD_INFO_IN_TASK
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>thread_info</span> <span class=n>thread_info</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>unsigned</span> <span class=kt>long</span> <span class=n>stack</span><span class=p>[</span><span class=n>THREAD_SIZE</span><span class=o>/</span><span class=k>sizeof</span><span class=p>(</span><span class=kt>long</span><span class=p>)];</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>在<code>thread_info</code>结构体中, <code>task_struct/thread_info/stack</code>之间的关系如下图:<figure><a class=lightgallery href=https://bu.dusays.com/2022/06/26/62b8800ee9be4.png title=&amp;ldquo;thread_info和stack&amp;rdquo; data-thumbnail=https://bu.dusays.com/2022/06/26/62b8800ee9be4.png data-sub-html="<h2>thread_info和stack</h2><p>&amp;ldquo;thread_info和stack&amp;rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://bu.dusays.com/2022/06/26/62b8800ee9be4.png data-srcset="https://bu.dusays.com/2022/06/26/62b8800ee9be4.png, https://bu.dusays.com/2022/06/26/62b8800ee9be4.png 1.5x, https://bu.dusays.com/2022/06/26/62b8800ee9be4.png 2x" data-sizes=auto alt=https://bu.dusays.com/2022/06/26/62b8800ee9be4.png></a><figcaption class=image-caption>thread_info和stack</figcaption></figure></p><p>为什么将进程内核栈和<code>task_struct</code>放一起? 一个解释是, 为了方便内核快速的获取当前进程的描述符. 如此, 可以通过进程内核栈的栈顶指针esp快速计算得到<code>task_struct</code>的地址.</p><p>如果内核栈增长过多, 就可能踩踏<code>thread_info</code>, 导致task崩溃. 实际上内核提供了一些接口用于查询是否踩踏以保证task的安全.</p></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-09-26</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/>操作系统</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/%E8%BF%9B%E7%A8%8B/>进程</a>,&nbsp;<a href=/tags/%E8%BF%9B%E7%A8%8B%E8%B5%84%E6%BA%90/>进程资源</a>,&nbsp;<a href=/tags/task_struct/>task_struct</a>,&nbsp;<a href=/tags/pcb/>PCB</a></section></div><div class=post-nav><a href=/202105/priavte-bypointer/ class=prev rel=prev title=private不保证安全><i class="fas fa-angle-left fa-fw"></i>private不保证安全</a>
+<a href=/202105/blog-orlike/ class=next rel=next title=使用OrLike为博文添加点赞系统>使用OrLike为博文添加点赞系统<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:51+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

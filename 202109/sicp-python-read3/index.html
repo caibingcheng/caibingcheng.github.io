@@ -1,0 +1,355 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=x-ua-compatible content="IE=edge, chrome=1"><title>《UCB CS61a SICP Python 中文》一周目笔记(三) - Bing's Blog</title><meta name=keywords content="[Life bbing bing hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:title" content="《UCB CS61a SICP Python 中文》一周目笔记(三)"><meta property="og:description" content="
+我们需要将自己看做语言的设计者，而不只是由他人设计的语言用户。
+"><meta property="og:type" content="article"><meta property="og:url" content="https://imcbc.cn/202109/sicp-python-read3/"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-09-02T19:56:00+08:00"><meta property="article:modified_time" content="2021-09-02T19:56:00+08:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="《UCB CS61a SICP Python 中文》一周目笔记(三)"><meta name=twitter:description content="
+我们需要将自己看做语言的设计者，而不只是由他人设计的语言用户。
+"><meta name=application-name content="Bing's Blog"><meta name=apple-mobile-web-app-title content="Bing's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202109/sicp-python-read3/><link rel=prev href=https://imcbc.cn/202108/sicp-python-read2/><link rel=next href=https://imcbc.cn/202109/whyread-useless-content/><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/templates/simple/style-albe-timeline.css><link rel=stylesheet href=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.css><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"《UCB CS61a SICP Python 中文》一周目笔记(三)","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202109\/sicp-python-read3\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"SICP, Python","wordcount":1697,"url":"https:\/\/imcbc.cn\/202109\/sicp-python-read3\/","datePublished":"2021-09-02T19:56:00+08:00","dateModified":"2021-09-02T19:56:00+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=normal header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentcolor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentcolor" class="octo-body"/></svg></a><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i></span>
+</span><a href=https://travellings.link target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i></a>
+<a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i></a>
+<a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title="Bing's Blog">Bing's Blog</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档</a>
+<a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签</a>
+<a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类</a>
+<a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a>
+<a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具</a>
+<a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于</a>
+<a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站</a>
+<a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>《UCB CS61a SICP Python 中文》一周目笔记(三)<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-09-02>2021-09-02</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1697 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#计算机程序的构造和解释>计算机程序的构造和解释</a><ul><li><a href=#递归>递归</a><ul><li><a href=#函数递归>函数递归</a></li><li><a href=#数据递归>数据递归</a></li></ul></li><li><a href=#组合语言解释器>组合语言解释器</a><ul><li><a href=#抽象表达式>抽象表达式</a></li><li><a href=#执行运算符>执行运算符</a></li><li><a href=#解析表达式>解析表达式</a><ul><li><a href=#词法分析>词法分析</a></li><li><a href=#语法分析>语法分析</a></li></ul></li><li><a href=#递归表达式>递归表达式</a></li><li><a href=#读取输入>读取输入</a></li></ul></li></ul></li></ul></nav></div></div><div class=content id=content><blockquote><p>我们需要将自己看做语言的设计者，而不只是由他人设计的语言用户。</p></blockquote><h2 id=计算机程序的构造和解释>计算机程序的构造和解释</h2><h3 id=递归>递归</h3><h4 id=函数递归>函数递归</h4><p>一个将英文单词转换为它的 Pig Latin 等价形式的例子：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>pig_latin</span><span class=p>(</span><span class=n>w</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return the Pig Latin equivalent of English word w.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>starts_with_a_vowel</span><span class=p>(</span><span class=n>w</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>w</span> <span class=o>+</span> <span class=s1>&#39;ay&#39;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>pig_latin</span><span class=p>(</span><span class=n>w</span><span class=p>[</span><span class=mi>1</span><span class=p>:]</span> <span class=o>+</span> <span class=n>w</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>starts_with_a_vowel</span><span class=p>(</span><span class=n>w</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return whether w begins with a vowel.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>w</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>.</span><span class=n>lower</span><span class=p>()</span> <span class=ow>in</span> <span class=s1>&#39;aeiou&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><p>以上，将会产生函数的递归调用<code>pig_latin</code>-><code>pig_latin</code>, 我们可以看下面的环境图示，每次递归调用都将产生新的递归环境，也就是产生新的内存消耗。这就至少说明，递归是有最大深度限制的，最大深度取决于每次递归的环境大小和总内存大小之间的关系。不过， 按照我的理解，如Python这种语言会在解释器层面限制最大递归深度。</p><p><img class=lazyload src=/svg/loading.min.svg data-src=https://wizardforcel.gitbooks.io/sicp-py/content/img/pig_latin.png data-srcset="https://wizardforcel.gitbooks.io/sicp-py/content/img/pig_latin.png, https://wizardforcel.gitbooks.io/sicp-py/content/img/pig_latin.png 1.5x, https://wizardforcel.gitbooks.io/sicp-py/content/img/pig_latin.png 2x" data-sizes=auto alt=https://wizardforcel.gitbooks.io/sicp-py/content/img/pig_latin.png title=img></p><p>从上图我们也可以看到一些别的东西， 如变量引用。两次递归都使用了同一个<code>pun</code>，而不是会复制一份。</p><p>递归也像一个数学归纳的过程，以下是计算阶乘的递归函数的一段说明：</p><blockquote><p>我们不应该关心<code>fact(n-1)</code>如何在<code>fact</code>的函数体中实现；我们只需要相信它计算了<code>n-1</code>的阶乘。将递归调用看做函数抽象叫做递归的“信仰飞跃”（leap of faith）。</p></blockquote><p>这看起来就是数学归纳的过程，所以我想，递归和动态规划应该是同一类问题吧？ 动态规划也是一个数学归纳过程。 这两种编程方法应该是可以互相转换的。下面有一个计算斐波那契数列的例子，使用了递归实现，但是也有状态转移方程，也存储了计算的中间结果。</p><p>一个使用记忆函数计算斐波那契数列的例子， 实现方式值得学习：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>fib</span><span class=p>(</span><span class=n>n</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>n</span> <span class=o>==</span> <span class=mi>1</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>n</span> <span class=o>==</span> <span class=mi>2</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>fib</span><span class=p>(</span><span class=n>n</span><span class=o>-</span><span class=mi>2</span><span class=p>)</span> <span class=o>+</span> <span class=n>fib</span><span class=p>(</span><span class=n>n</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>memo</span><span class=p>(</span><span class=n>f</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return a memoized version of single-argument function f.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>cache</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>memoized</span><span class=p>(</span><span class=n>n</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>n</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>cache</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>cache</span><span class=p>[</span><span class=n>n</span><span class=p>]</span> <span class=o>=</span> <span class=n>f</span><span class=p>(</span><span class=n>n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>cache</span><span class=p>[</span><span class=n>n</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>memoized</span>
+</span></span><span class=line><span class=cl><span class=n>fib</span> <span class=o>=</span> <span class=n>memo</span><span class=p>(</span><span class=n>fib</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>fib</span><span class=p>(</span><span class=mi>40</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>状态转移方程在fib函数中有体现，中间结果的保存过程则体现在memo函数中。初看这个实现方式时，着实令我眼前一新的感觉，代码很现代，值得学习。</p><h4 id=数据递归>数据递归</h4><p>数据递归在数据抽象这一章出现了很多。我对数据递归的理解如下：</p><ol><li>可以迭代</li><li>子集和全集结构相似</li></ol><p>所以，以下数据结构一般都可以是递归结构：</p><ol><li>列表（list，tuple，set，array等等）</li><li>树</li></ol><h3 id=组合语言解释器>组合语言解释器</h3><p>参考和补充原文，实现一个计算器语言：</p><ol><li>支持四个运算符：add，sub，mul，div</li><li>计算器运算符可以接受任意数量参数</li><li>运算符可以组合</li></ol><p>如：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>calc</span><span class=o>&gt;</span> <span class=n>mul</span><span class=p>(</span><span class=n>add</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=mi>3</span><span class=p>),</span> <span class=n>sub</span><span class=p>(</span><span class=mi>10</span><span class=p>,</span><span class=mi>2</span><span class=p>),</span> <span class=n>div</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=n>add</span><span class=p>(</span><span class=mi>3</span><span class=p>,</span><span class=mi>3</span><span class=p>,</span><span class=mi>3</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl><span class=mf>8.88888888888889</span>
+</span></span></code></pre></td></tr></table></div></div><p>实现如下， 源码在<a href=https://github.com/caibingcheng/codemo target=_blank rel="noopener noreffer">github</a>。</p><h4 id=抽象表达式>抽象表达式</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>Exp</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    表达式抽象， 操作符和操作数
+</span></span></span><span class=line><span class=cl><span class=s2>    通过cal_apply调用， cal_apply(operator, operands)
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>operator</span><span class=p>,</span> <span class=n>operands</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>operator</span> <span class=o>=</span> <span class=n>operator</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>operands</span> <span class=o>=</span> <span class=n>operands</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__repr__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=s1>&#39;Exp(</span><span class=si>{0}</span><span class=s1>, </span><span class=si>{1}</span><span class=s1>)&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=nb>repr</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>operator</span><span class=p>),</span> <span class=nb>repr</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>operands</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__str__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>operand_strs</span> <span class=o>=</span> <span class=s1>&#39;, &#39;</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=nb>map</span><span class=p>(</span><span class=nb>str</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>operands</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=s1>&#39;</span><span class=si>{0}</span><span class=s1>(</span><span class=si>{1}</span><span class=s1>)&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>operator</span><span class=p>,</span> <span class=n>operand_strs</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=执行运算符>执行运算符</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>cal_apply</span><span class=p>(</span><span class=n>op</span><span class=p>,</span> <span class=n>args</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    正式计算, 但是没有递归， 所以需要有别的模块解决递归计算问题
+</span></span></span><span class=line><span class=cl><span class=s2>    cal_apply(operator, operands)
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>op</span> <span class=ow>in</span> <span class=p>(</span><span class=s2>&#34;add&#34;</span><span class=p>,</span> <span class=s2>&#34;+&#34;</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nb>sum</span><span class=p>(</span><span class=n>args</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>op</span> <span class=ow>in</span> <span class=p>(</span><span class=s2>&#34;sub&#34;</span><span class=p>,</span> <span class=s2>&#34;-&#34;</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>args</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>TypeError</span><span class=p>(</span><span class=s2>&#34;</span><span class=si>{}</span><span class=s2> require 1 argument at least&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>op</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>elif</span> <span class=nb>len</span><span class=p>(</span><span class=n>args</span><span class=p>)</span> <span class=o>==</span> <span class=mi>1</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=o>-</span><span class=n>args</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=nb>sum</span><span class=p>(</span><span class=n>args</span><span class=p>[:</span><span class=mi>1</span><span class=p>]</span> <span class=o>+</span> <span class=p>[</span><span class=o>-</span><span class=n>arg</span> <span class=k>for</span> <span class=n>arg</span> <span class=ow>in</span> <span class=n>args</span><span class=p>[</span><span class=mi>1</span><span class=p>:]])</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>op</span> <span class=ow>in</span> <span class=p>(</span><span class=s2>&#34;mul&#34;</span><span class=p>,</span> <span class=s2>&#34;*&#34;</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>reduce</span><span class=p>(</span><span class=n>mul</span><span class=p>,</span> <span class=n>args</span><span class=p>,</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>op</span> <span class=ow>in</span> <span class=p>(</span><span class=s2>&#34;div&#34;</span><span class=p>,</span> <span class=s2>&#34;/&#34;</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>args</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>2</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>TypeError</span><span class=p>(</span><span class=s2>&#34;</span><span class=si>{}</span><span class=s2> require 2 argument&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>op</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>args</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>/</span> <span class=n>args</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=解析表达式>解析表达式</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>calc_parse</span><span class=p>(</span><span class=n>line</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    解析表达式， 返回值是Exp
+</span></span></span><span class=line><span class=cl><span class=s2>    先将表达式的各个元素拆开， 再组合为Exp格式
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>tokens</span> <span class=o>=</span> <span class=n>tokenize</span><span class=p>(</span><span class=n>line</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>expression_tree</span> <span class=o>=</span> <span class=n>analyze</span><span class=p>(</span><span class=n>tokens</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>tokens</span><span class=p>)</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>SyntaxError</span><span class=p>(</span><span class=s1>&#39;Extra token(s): &#39;</span> <span class=o>+</span> <span class=s1>&#39; &#39;</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=n>tokens</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>expression_tree</span>
+</span></span></code></pre></td></tr></table></div></div><h5 id=词法分析>词法分析</h5><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>tokenize</span><span class=p>(</span><span class=n>line</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    拆分表示各个元素
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>spaced</span> <span class=o>=</span> <span class=n>line</span><span class=o>.</span><span class=n>replace</span><span class=p>(</span><span class=s1>&#39;(&#39;</span><span class=p>,</span> <span class=s1>&#39; ( &#39;</span><span class=p>)</span><span class=o>.</span><span class=n>replace</span><span class=p>(</span><span class=s1>&#39;)&#39;</span><span class=p>,</span> <span class=s1>&#39; ) &#39;</span><span class=p>)</span><span class=o>.</span><span class=n>replace</span><span class=p>(</span><span class=s1>&#39;,&#39;</span><span class=p>,</span> <span class=s1>&#39; , &#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>spaced</span><span class=o>.</span><span class=n>split</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><h5 id=语法分析>语法分析</h5><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>known_operators</span> <span class=o>=</span> <span class=p>[</span><span class=s1>&#39;add&#39;</span><span class=p>,</span> <span class=s1>&#39;sub&#39;</span><span class=p>,</span> <span class=s1>&#39;mul&#39;</span><span class=p>,</span> <span class=s1>&#39;div&#39;</span><span class=p>,</span> <span class=s1>&#39;+&#39;</span><span class=p>,</span> <span class=s1>&#39;-&#39;</span><span class=p>,</span> <span class=s1>&#39;*&#39;</span><span class=p>,</span> <span class=s1>&#39;/&#39;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>analyze</span><span class=p>(</span><span class=n>tokens</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    表达式元素组合，形成操作树
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>assert_non_empty</span><span class=p>(</span><span class=n>tokens</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 数字或者操作符</span>
+</span></span><span class=line><span class=cl>    <span class=n>token</span> <span class=o>=</span> <span class=n>analyze_token</span><span class=p>(</span><span class=n>tokens</span><span class=o>.</span><span class=n>pop</span><span class=p>(</span><span class=mi>0</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 如果是数字，直接放回就好了，继续求下一个，因为数字是自求解的，本身就是解</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nb>type</span><span class=p>(</span><span class=n>token</span><span class=p>)</span> <span class=ow>in</span> <span class=p>(</span><span class=nb>int</span><span class=p>,</span> <span class=nb>float</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>token</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 如果是操作符，则需要组合为Exp表达式</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>token</span> <span class=ow>in</span> <span class=n>known_operators</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 当前是操作符， 则需要检查后面有没有操作数</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 计算器的操作符后面是有操作数的</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 操作数递归组合即可</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>tokens</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span> <span class=ow>or</span> <span class=n>tokens</span><span class=o>.</span><span class=n>pop</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span> <span class=o>!=</span> <span class=s1>&#39;(&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>SyntaxError</span><span class=p>(</span><span class=s1>&#39;expected ( after &#39;</span> <span class=o>+</span> <span class=n>token</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>Exp</span><span class=p>(</span><span class=n>token</span><span class=p>,</span> <span class=n>analyze_operands</span><span class=p>(</span><span class=n>tokens</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>SyntaxError</span><span class=p>(</span><span class=s1>&#39;unexpected &#39;</span> <span class=o>+</span> <span class=n>token</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>analyze_operands</span><span class=p>(</span><span class=n>tokens</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    生成操作数
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>assert_non_empty</span><span class=p>(</span><span class=n>tokens</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>operands</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 直到闭括号</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=n>tokens</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>!=</span> <span class=s1>&#39;)&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>operands</span> <span class=ow>and</span> <span class=n>tokens</span><span class=o>.</span><span class=n>pop</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span> <span class=o>!=</span> <span class=s1>&#39;,&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>SyntaxError</span><span class=p>(</span><span class=s1>&#39;expected ,&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>operands</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>analyze</span><span class=p>(</span><span class=n>tokens</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=n>assert_non_empty</span><span class=p>(</span><span class=n>tokens</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>tokens</span><span class=o>.</span><span class=n>pop</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span>  <span class=c1># 移除闭括号‘）’</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>operands</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>assert_non_empty</span><span class=p>(</span><span class=n>tokens</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Raise an exception if tokens is empty.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>tokens</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>SyntaxError</span><span class=p>(</span><span class=s1>&#39;unexpected end of line&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>analyze_token</span><span class=p>(</span><span class=n>token</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Return the value of token if it can be analyzed as a number, or token.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nb>int</span><span class=p>(</span><span class=n>token</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>except</span> <span class=p>(</span><span class=ne>TypeError</span><span class=p>,</span> <span class=ne>ValueError</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=nb>float</span><span class=p>(</span><span class=n>token</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>except</span> <span class=p>(</span><span class=ne>TypeError</span><span class=p>,</span> <span class=ne>ValueError</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=c1># 如果不是数字， 则可能是表达式， 先直接返回</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=n>token</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=递归表达式>递归表达式</h4><p>将表达式递归成执行器可以理解的。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>calc_eval</span><span class=p>(</span><span class=n>expression</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    表达式递归求解， 从里到外依次求解
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>expression</span><span class=o>.</span><span class=n>operands</span> <span class=o>=</span> <span class=p>[</span><span class=n>calc_eval</span><span class=p>(</span><span class=n>operand</span><span class=p>)</span> <span class=k>if</span> <span class=nb>type</span><span class=p>(</span><span class=n>operand</span><span class=p>)</span> <span class=o>==</span> <span class=nb>type</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>expression</span><span class=p>)</span> <span class=k>else</span> <span class=n>operand</span> <span class=k>for</span> <span class=n>operand</span> <span class=ow>in</span> <span class=n>expression</span><span class=o>.</span><span class=n>operands</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>cal_apply_result</span> <span class=o>=</span> <span class=n>cal_apply</span><span class=p>(</span><span class=n>expression</span><span class=o>.</span><span class=n>operator</span><span class=p>,</span> <span class=n>expression</span><span class=o>.</span><span class=n>operands</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>cal_apply_result</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=读取输入>读取输入</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>read_eval_print_loop</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Run a read-eval-print loop for calculator.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=kc>True</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>expression_tree</span> <span class=o>=</span> <span class=n>calc_parse</span><span class=p>(</span><span class=nb>input</span><span class=p>(</span><span class=s1>&#39;calc&gt; &#39;</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=n>calc_eval</span><span class=p>(</span><span class=n>expression_tree</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>except</span> <span class=p>(</span><span class=ne>SyntaxError</span><span class=p>,</span> <span class=ne>TypeError</span><span class=p>,</span> <span class=ne>ZeroDivisionError</span><span class=p>)</span> <span class=k>as</span> <span class=n>err</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=nb>type</span><span class=p>(</span><span class=n>err</span><span class=p>)</span><span class=o>.</span><span class=vm>__name__</span> <span class=o>+</span> <span class=s1>&#39;:&#39;</span><span class=p>,</span> <span class=n>err</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>except</span> <span class=p>(</span><span class=ne>KeyboardInterrupt</span><span class=p>,</span> <span class=ne>EOFError</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;Calculation completed.&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span>
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-footer id=post-footer><div class=orlike-box></div><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-09-02</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/>软件设计</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/sicp/>SICP</a>,&nbsp;<a href=/tags/python/>Python</a></section></div><div class=post-nav><a href=/202108/sicp-python-read2/ class=prev rel=prev title="《UCB CS61a SICP Python 中文》一周目笔记(二)"><i class="fas fa-angle-left fa-fw"></i>《UCB CS61a SICP Python 中文》一周目笔记(二)</a>
+<a href=/202109/whyread-useless-content/ class=next rel=next title=为什么看这么多“没用的”东西>为什么看这么多“没用的”东西<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=/css/giscus.css data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2024</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://wiki.imcbc.cn target=_blank rel=noopener title="Bing's Wiki">Wiki</a>
+&nbsp;|&nbsp;
+<a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog</a>
+&nbsp;|&nbsp;
+<a href=https://travellings.link target=_blank rel=noopener title=开往-友链接力>开往-友链接力</a>
+&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2024-03-05T21:35:50+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>
+共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+256K&nbsp;字</div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i>
+</a><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css><script type=text/javascript src=https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/katex@0.11.1/dist/contrib/mhchem.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/caibingcheng/orlike@client/orlike.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{algoliaAppID:"JMTHQS1VUU",algoliaIndex:"blog-bbing",algoliaSearchKey:"0dd43732743475449c844c0d0f21366a",highlightTag:"em",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"algolia"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

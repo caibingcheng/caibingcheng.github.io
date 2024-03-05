@@ -1,0 +1,5 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>线程 - 标签 - Bing's Blog</title><link>https://imcbc.cn/tags/%E7%BA%BF%E7%A8%8B/</link><description>线程 - 标签 - Bing's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>jack_cbc@163.com (bing)</managingEditor><webMaster>jack_cbc@163.com (bing)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 15 Apr 2021 14:01:44 +0800</lastBuildDate><atom:link href="https://imcbc.cn/tags/%E7%BA%BF%E7%A8%8B/" rel="self" type="application/rss+xml"/><item><title>进程、线程和协程概念</title><link>https://imcbc.cn/202104/pandt-what/</link><pubDate>Thu, 15 Apr 2021 14:01:44 +0800</pubDate><author>作者</author><guid>https://imcbc.cn/202104/pandt-what/</guid><description><![CDATA[<h2 id="概念">概念</h2>
+<blockquote>
+<p>问题: 什么是进程/线程/协程? 为什么要有这些概念?</p>
+</blockquote>
+<p>读了一些文章, 要讲清楚这几个概念篇幅会很大, 所以会作为一个小专题来分享. 这篇的目的就是宏观上要对进程/线程/协程有基本的概念.</p>]]></description></item></channel></rss>
