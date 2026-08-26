@@ -1,0 +1,136 @@
+/* 搜索 loading 动画增强 */
+
+.search .search-loading {
+  color: #35a6f7;
+}
+
+.search .search-loading i {
+  font-size: 1.1rem;
+}
+
+[theme=dark] .search .search-loading {
+  color: #4aa8ff;
+}
+
+.search-loading-panel {
+  display: none;
+  background-color: #fff;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .1);
+}
+
+[theme=dark] .search-loading-panel {
+  background-color: #292a2d;
+}
+
+.search-loading-panel.active {
+  display: block;
+}
+
+.search-loading-spinner {
+  font-size: 1.5rem;
+  color: #35a6f7;
+  margin-bottom: .5rem;
+}
+
+[theme=dark] .search-loading-spinner {
+  color: #4aa8ff;
+}
+
+.search-loading-text {
+  font-size: .875rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+[theme=dark] .search-loading-text {
+  color: #a9a9b3;
+}
+
+.search-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  align-items: center;
+  max-width: 80%;
+  margin: 0 auto;
+}
+
+.search-skeleton-line {
+  height: .75rem;
+  width: 100%;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  border-radius: .25rem;
+  animation: search-skeleton-shimmer 1.5s infinite linear;
+}
+
+[theme=dark] .search-skeleton-line {
+  background: linear-gradient(90deg, #3a3b3f 25%, #4a4b50 50%, #3a3b3f 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes search-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 搜索结果展示优化 */
+
+.search-highlight {
+  font-style: normal;
+  background-color: rgba(53, 166, 247, .25);
+}
+
+[theme=dark] .search-highlight {
+  background-color: rgba(50, 112, 194, .4);
+}
+
+.suggestion-parent .suggestion-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.suggestion-parent .suggestion-title {
+  max-width: none;
+}
+
+.suggestion-sub-count {
+  flex-shrink: 0;
+  font-size: .75rem;
+  color: #999;
+}
+
+[theme=dark] .suggestion-sub-count {
+  color: #888;
+}
+
+.suggestion-sub {
+  margin-left: .25rem;
+  padding-left: .75rem;
+  border-left: 2px solid #35a6f7;
+}
+
+[theme=dark] .suggestion-sub {
+  border-left-color: #4aa8ff;
+}
+
+.suggestion-sub .suggestion-title {
+  font-weight: normal;
+  font-size: .9375rem;
+}
+
+.suggestion-parent .suggestion-context {
+  margin-top: .25rem;
+}
+
+.search-empty {
+  padding: 1.5rem 1rem;
+}

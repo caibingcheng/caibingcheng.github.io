@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>NTP on ImCBC</title><link>https://imcbc.cn/tags/ntp/</link><description>Recent content in NTP on ImCBC</description><generator>Hugo</generator><language>zh-CN</language><managingEditor>jack_cbc@163.com (bing)</managingEditor><webMaster>jack_cbc@163.com (bing)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 13 Jun 2024 07:23:34 +0800</lastBuildDate><atom:link href="https://imcbc.cn/tags/ntp/index.xml" rel="self" type="application/rss+xml"/><item><title>时间同步概述</title><link>https://imcbc.cn/202406/time-sync-summary/</link><pubDate>Thu, 13 Jun 2024 07:23:34 +0800</pubDate><author>jack_cbc@163.com (bing)</author><guid>https://imcbc.cn/202406/time-sync-summary/</guid><description>&lt;p&gt;本文涉及的时间同步协议包括：NTP、PTP。泛泛而谈，以构建对时间同步的基本认识。&lt;/p&gt;
+&lt;p&gt;当我第一次接触时间同步的概念时，是很疑惑的。为什么要做时间同步？时间同步是什么？为什么会有各种各样的协议？本文将尽量以我的认识从几个方面解答：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;什么是时间同步；&lt;/li&gt;
+&lt;li&gt;为什么要做时间同步；&lt;/li&gt;
+&lt;li&gt;时间同步协议的基本原理；&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;1和2是困扰我比较久的问题，3则是可以通过代码和文档直接获得的知识，没有太多的阻塞点。&lt;/p&gt;</description></item></channel></rss>

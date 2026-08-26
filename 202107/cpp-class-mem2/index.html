@@ -1,0 +1,501 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=X-UA-Compatible content="IE=edge, chrome=1"><title>C++类的内存分布(二) - ImCBC</title><meta name=keywords content="[Life bbing bing bingcheng hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:url" content="https://imcbc.cn/202107/cpp-class-mem2/"><meta property="og:site_name" content="ImCBC"><meta property="og:title" content="C++类的内存分布(二)"><meta property="og:description" content="在《C++类的内存分布》中, 我们使用gdb大概了解了C++类的内存结构, 并得到了以下结论:"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-07-06T10:04:46+08:00"><meta property="article:modified_time" content="2022-03-11T15:37:46+08:00"><meta property="article:tag" content="Cpp"><meta property="article:tag" content="内存"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="C++类的内存分布(二)"><meta name=twitter:description content="在《C++类的内存分布》中, 我们使用gdb大概了解了C++类的内存结构, 并得到了以下结论:"><meta name=application-name content="ImCBC"><meta name=apple-mobile-web-app-title content="ImCBC"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel=preconnect href=https://fastly.jsdelivr.net crossorigin><link rel=dns-prefetch href=https://fastly.jsdelivr.net><link rel=preconnect href=https://giscus.app crossorigin><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202107/cpp-class-mem2/><link rel=prev href=https://imcbc.cn/202106/array-heap-stack/><link rel=next href=https://imcbc.cn/202107/rss-rssblog/><style>html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:initial}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}template{display:none}[hidden]{display:none}</style><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css crossorigin=anonymous><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css crossorigin=anonymous><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"C++类的内存分布(二)","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202107\/cpp-class-mem2\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Cpp, 内存","wordcount":3164,"url":"https:\/\/imcbc.cn\/202107\/cpp-class-mem2\/","datePublished":"2021-07-06T10:04:46+08:00","dateModified":"2022-03-11T15:37:46+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=fixed header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentColor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentColor" class="octo-body"/></svg></a><div class=header-title><a href=/ title=ImCBC>ImCBC</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i>
+</a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i>
+</a><span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i>
+</span></span><a href=https://www.travellings.cn/go.html target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i>
+</a><a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i>
+</a><a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=ImCBC>ImCBC</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i>
+</a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i>
+</a><span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档
+</a><a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签
+</a><a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类
+</a><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链
+</a><a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具
+</a><a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于
+</a><a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站
+</a><a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>C++类的内存分布(二)<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-07-06>2021-07-06</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3164 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 7 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#带virtual的类的内存结构>带virtual的类的内存结构</a><ul><li><a href=#问题1-类是怎么指向虚表的>问题1: 类是怎么指向虚表的?</a></li><li><a href=#问题2-虚表怎么指向函数的>问题2: 虚表怎么指向函数的?</a></li><li><a href=#问题3-怎么调用虚函数的>问题3: 怎么调用虚函数的？</a></li></ul></li><li><a href=#单继承>单继承</a><ul><li><a href=#两个析构函数>两个析构函数?</a></li></ul></li><li><a href=#多继承>多继承</a></li><li><a href=#总结>总结</a></li></ul></nav></div></div><details class=summary-details><summary class=summary-title>摘要</summary><div class=summary title="version: 1.0.3, model: gpt-4o, score: A"><i version=1.0.3 model=gpt-4o></i><p>本文深入探讨了C++类的内存分布，特别是虚表（vtable）和虚指针（vptr）的工作原理。作者通过代码和汇编分析，展示了类如何通过vptr指向vtable，以及vtable如何指向虚函数地址。此外，文章详细解析了虚函数调用的流程、单继承和多继承情况下的内存结构，以及虚析构函数的生成和作用。通过实验，作者揭示了虚表在多态实现中的关键角色，并解释了两个析构函数的存在原因。本文适合对C++内存管理和多态机制感兴趣的开发者，提供了理论与实践结合的深刻理解。</p><div class=summary-meta>评分: A</div></div></details><hr class=summary-separator><br><div data-pagefind-body class=content id=content><p>在<a href=/202101/cpp-class-mem/ rel>《C++类的内存分布》</a>中, 我们使用gdb大概了解了C++类的内存结构, 并得到了以下结论:</p><ul><li>类成员函数只有一份，所有实例共享</li><li>类的成员变量有多份，不同实例维护不同的成员变量</li><li>即使是继承关系，派生类的成员变量也只是基类的复制体，而不是指向同一块内存</li><li>派生类会把从基类继承过来的成员变量当做自己的普通成员变量一样看待</li><li>类的虚表只有一份，所有实例共享</li><li>编译器在编译的时候, 通过给类添加<code>__vptr</code>指针指向虚表而得到虚表地址.</li></ul><p>本文主要目的是扩展<code>vptr</code>和vtable部分, 深入了解C++多态的实现原理.</p><p>以下环境基于x86-64架构下的gcc 11.1编译器. 测试代码在<a href=https://gcc.godbolt.org/z/fEfWovxGE target=_blank rel="noopener noreffer">这里</a>.</p><h2 id=带virtual的类的内存结构>带virtual的类的内存结构</h2><p>上文中, 我们得到了这样的类内存结构:</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877f6b35a5.webp title=结构图 data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877f6b35a5.webp data-sub-html="<h2>结构图</h2><p>结构图</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877f6b35a5.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877f6b35a5.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877f6b35a5.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877f6b35a5.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877f6b35a5.webp></a><figcaption class=image-caption>结构图</figcaption></figure></p><p>在这里有两个疑问:</p><ol><li>类是怎么指向虚表的?</li><li>虚表怎么指向函数的?</li></ol><p>我们先来看结论, 再一起研究怎么得到这个结论:</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877fdc28e0.webp title=&ldquo;vptr和vtable&rdquo; data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877fdc28e0.webp data-sub-html="<h2>vptr和vtable</h2><p>&ldquo;vptr和vtable&rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877fdc28e0.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877fdc28e0.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877fdc28e0.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877fdc28e0.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b877fdc28e0.webp></a><figcaption class=image-caption>vptr和vtable</figcaption></figure></p><h3 id=问题1-类是怎么指向虚表的>问题1: 类是怎么指向虚表的?</h3><p>我们可以验证下面一段代码, 输出的值是多少?</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;iostream&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=k>namespace</span> <span class=n>std</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Base</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>Base</span><span class=p>(){}</span>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=o>~</span><span class=n>Base</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;release Base&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>vfunc1</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>a</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;hello vfunc1 &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>a</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>vfunc2</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>        <span class=kt>double</span> <span class=n>a</span> <span class=o>=</span> <span class=mf>1.111</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;hello vfunc2 &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>a</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=kt>void</span> <span class=nf>vfunc3</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>        <span class=kt>char</span> <span class=n>a</span> <span class=o>=</span><span class=mi>64</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;hello vfunc3 &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>a</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>func_s1</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>a</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;hello func_s1 &#34;</span> <span class=o>&lt;&lt;</span> <span class=n>a</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>Base</span><span class=p>)</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>编译运行, 可以看到输出值是<code>8</code>. 根据上文的结论, 我们知道, 如果类里面有<code>virtual</code>关键词, 则会生成一个<code>vptr</code>变量指向虚表. 现在可以断定, 这里的<code>8</code>, 就是<code>vptr</code>指针的占位.</p><p>一般, 我们可以直接通过类头指针直接拿到<code>vptr</code>. 看下面一段代码:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>Base</span> <span class=o>*</span><span class=n>base</span> <span class=o>=</span> <span class=k>new</span> <span class=n>Base</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=n>uint64</span> <span class=o>=</span> <span class=kt>unsigned</span> <span class=kt>long</span> <span class=kt>long</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>using</span> <span class=n>func_type</span> <span class=o>=</span> <span class=kt>void</span><span class=o>*</span><span class=p>(</span><span class=kt>void</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_base_v</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>base</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=o>*</span><span class=n>vptr_base</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base_v</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>我们把<code>base</code>指针重新解释为<code>uint64*</code>, 因为按照<code>Base*</code>的内存结构不是我们想要的, 所以要把"地址解释为地址", 换句话说, 并解引用得到<code>vptr_base_v</code>. 这里用<code>uint64</code>是为了方便我们后续查看和重新解释指针. 现在<code>vptr_base_v</code>就是vtable地址的值了. 接下来, 对<code>vptr_base_v</code>重新解释, 将<code>uint64</code>解释为<code>uint64*</code>得到<code>vptr_base</code>. 现在<code>vptr_base</code>真正是C++编译器可以认识的地址, 并且指向vtable.</p><p>现在可以知道类怎么得到vptr, vptr又是怎么指向vtable的了:<figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a33a14af.webp title=vptr到vtable data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a33a14af.webp data-sub-html="<h2>vptr到vtable</h2><p>vptr到vtable</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a33a14af.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a33a14af.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a33a14af.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a33a14af.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a33a14af.webp></a><figcaption class=image-caption>vptr到vtable</figcaption></figure></p><h3 id=问题2-虚表怎么指向函数的>问题2: 虚表怎么指向函数的?</h3><p>以上, 我们拿到了vtable. table类设计一般都比较容易猜想, 虚函数指针会"一列一列"的排列在vtable上.</p><p>首先, 直接打印函数地址, 作为参照:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=kt>void</span> <span class=o>*</span><span class=n>base_vfunc1_void</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=kt>void</span> <span class=o>*&gt;</span><span class=p>(</span><span class=o>&amp;</span><span class=n>Base</span><span class=o>::</span><span class=n>vfunc1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>base_vfunc1</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span><span class=o>&gt;</span><span class=p>(</span><span class=n>base_vfunc1_void</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=o>*</span><span class=n>base_vfunc2_void</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=kt>void</span> <span class=o>*&gt;</span><span class=p>(</span><span class=o>&amp;</span><span class=n>Base</span><span class=o>::</span><span class=n>vfunc2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>base_vfunc2</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span><span class=o>&gt;</span><span class=p>(</span><span class=n>base_vfunc2_void</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=o>*</span><span class=n>base_vfunc3_void</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=kt>void</span> <span class=o>*&gt;</span><span class=p>(</span><span class=o>&amp;</span><span class=n>Base</span><span class=o>::</span><span class=n>vfunc3</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>base_vfunc3</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span><span class=o>&gt;</span><span class=p>(</span><span class=n>base_vfunc3_void</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>这几个输出是:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>       base::vfunc*
+</span></span><span class=line><span class=cl>vfunc1 0x401aca
+</span></span><span class=line><span class=cl>vfunc2 0x401b0c
+</span></span><span class=line><span class=cl>vfunc3 0x401b58
+</span></span></code></pre></td></tr></table></div></div><p>再来尝试分析虚函数在虚表中的定位:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=c1>//*reinterpret_cast&lt;uint64 *&gt;(vptr_base + 0)
+</span></span></span><span class=line><span class=cl><span class=c1>//*reinterpret_cast&lt;uint64 *&gt;(vptr_base + 1)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=n>uint64</span> <span class=n>vptr_base_vfunc1</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base</span> <span class=o>+</span> <span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_base_vfunc2</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base</span> <span class=o>+</span> <span class=mi>3</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_base_vfunc3</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base</span> <span class=o>+</span> <span class=mi>4</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>第0和1是对不上的, 尝试2-4, 可以得到以下地址:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>       base vptr     base::vfunc*
+</span></span><span class=line><span class=cl>vfunc1 0x401aca      0x401aca
+</span></span><span class=line><span class=cl>vfunc2 0x401b0c      0x401b0c
+</span></span><span class=line><span class=cl>vfunc3 0x401b58      0x401b58
+</span></span></code></pre></td></tr></table></div></div><p>和函数地址是匹配的, 但是0和1是什么? 我们可以打印0和1的地址:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_base_v0</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base</span> <span class=o>+</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_base_v1</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>得到:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>  base vptr
+</span></span><span class=line><span class=cl>0 0x401a66
+</span></span><span class=line><span class=cl>1 0x401a9e
+</span></span></code></pre></td></tr></table></div></div><p>再看汇编, 可以知道0和1分别对应<strong>两个虚析构函数</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ASM data-lang=ASM><span class=line><span class=cl><span class=c1># Base::~Base():
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=err>0</span><span class=nl>x401a66:</span>   <span class=nf>push</span>   <span class=no>rbp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rbp</span><span class=p>,</span><span class=no>rsp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>sub</span>    <span class=no>rsp</span><span class=p>,</span><span class=mi>0x10</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>],</span><span class=no>rdi</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>edx</span><span class=p>,</span><span class=mi>0x402370</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rax</span><span class=p>],</span><span class=no>rdx</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x402008</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>edi</span><span class=p>,</span><span class=mi>0x4040c0</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>401080</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>basic_ostream</span><span class=err>&lt;</span><span class=no>char</span><span class=p>,</span> <span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;&amp;</span> <span class=no>std</span><span class=p>::</span><span class=no>operator</span><span class=err>&lt;&lt;</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;</span><span class=p>(</span><span class=no>std</span><span class=p>::</span><span class=no>basic_ostream</span><span class=err>&lt;</span><span class=no>char</span><span class=p>,</span> <span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;&amp;</span><span class=p>,</span> <span class=no>char</span> <span class=no>const</span><span class=p>*)</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x401050</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>4010</span><span class=no>b0</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=p>::</span><span class=no>operator</span><span class=err>&lt;&lt;</span><span class=p>(</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=err>&amp;</span> <span class=p>(*)(</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=err>&amp;</span><span class=p>))</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span><span class=line><span class=cl>            <span class=nf>leave</span>
+</span></span><span class=line><span class=cl>            <span class=nf>ret</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span><span class=line><span class=cl><span class=c1># Base::~Base():
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=err>0</span><span class=nl>x401a9e:</span>   <span class=nf>push</span>   <span class=no>rbp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rbp</span><span class=p>,</span><span class=no>rsp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>sub</span>    <span class=no>rsp</span><span class=p>,</span><span class=mi>0x10</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>],</span><span class=no>rdi</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>401</span><span class=no>a66</span> <span class=err>&lt;</span><span class=no>Base</span><span class=p>::</span><span class=err>~</span><span class=no>Base</span><span class=p>()</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x8</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>4010</span><span class=no>a0</span> <span class=err>&lt;</span><span class=no>operator</span> <span class=no>delete</span><span class=p>(</span><span class=no>void</span><span class=p>*,</span> <span class=no>unsigned</span> <span class=no>long</span><span class=p>)</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>leave</span>
+</span></span><span class=line><span class=cl>            <span class=nf>ret</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span><span class=line><span class=cl><span class=c1># ...
+</span></span></span></code></pre></td></tr></table></div></div><p>以上, 我们知道怎么从vtable指向函数了:</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a373d1d3.webp title=vtable到vfunc data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a373d1d3.webp data-sub-html="<h2>vtable到vfunc</h2><p>vtable到vfunc</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a373d1d3.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a373d1d3.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a373d1d3.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a373d1d3.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a373d1d3.webp></a><figcaption class=image-caption>vtable到vfunc</figcaption></figure></p><h3 id=问题3-怎么调用虚函数的>问题3: 怎么调用虚函数的？</h3><p>（本小结2022年3月11日更新）</p><p>参考以上示例代码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>Base</span> <span class=o>*</span><span class=n>base</span> <span class=o>=</span> <span class=n>new</span> <span class=nf>Base</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=n>D1</span> <span class=o>*</span><span class=n>d1</span> <span class=o>=</span> <span class=n>new</span> <span class=nf>D1</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>base</span><span class=o>-&gt;</span><span class=nf>vfunc1</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=n>d1</span><span class=o>-&gt;</span><span class=nf>vfunc1</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><p>其汇编代码是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>mov    edi,0x8
+</span></span><span class=line><span class=cl>call   401090 &lt;operator new(unsigned long)@plt&gt;
+</span></span><span class=line><span class=cl>mov    rbx,rax
+</span></span><span class=line><span class=cl>mov    rdi,rbx
+</span></span><span class=line><span class=cl>call   401a4e &lt;Base::Base()&gt;
+</span></span><span class=line><span class=cl>mov    QWORD PTR [rbp-0x18],rbx
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>mov    edi,0x8
+</span></span><span class=line><span class=cl>call   401090 &lt;operator new(unsigned long)@plt&gt;
+</span></span><span class=line><span class=cl>mov    rbx,rax
+</span></span><span class=line><span class=cl>mov    rdi,rbx
+</span></span><span class=line><span class=cl>call   401c20 &lt;D1::D1()&gt;
+</span></span><span class=line><span class=cl>mov    QWORD PTR [rbp-0x20],rbx
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>mov    rax,QWORD PTR [rbp-0x18]
+</span></span><span class=line><span class=cl>mov    rax,QWORD PTR [rax]
+</span></span><span class=line><span class=cl>add    rax,0x10
+</span></span><span class=line><span class=cl>mov    rdx,QWORD PTR [rax]
+</span></span><span class=line><span class=cl>mov    rax,QWORD PTR [rbp-0x18]
+</span></span><span class=line><span class=cl>mov    rdi,rax
+</span></span><span class=line><span class=cl>call   rdx
+</span></span></code></pre></td></tr></table></div></div><p>按照我们的代码顺序，先后构造了两个类<code>Base</code>和<code>D1</code>。然后在汇编的第三小节，开始执行函数<code>base->vfunc1();</code>，其流程是：</p><ol><li>拿到<code>Base</code>的地址，其实对应的就是<code>vptr</code>：</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>mov    rax,QWORD PTR [rbp-0x18]
+</span></span><span class=line><span class=cl>mov    rax,QWORD PTR [rax]
+</span></span></code></pre></td></tr></table></div></div><ol start=2><li>计算<code>vfunc1</code>的偏移，增加<code>16B</code>相当于跳过了虚函数表开头的两个析构函数地址，所以得到了<code>vfunc1</code>的地址：</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>add    rax,0x10
+</span></span><span class=line><span class=cl>mov    rdx,QWORD PTR [rax]
+</span></span></code></pre></td></tr></table></div></div><ol start=3><li>调用函数<code>vfunc1</code>，和常规调用一样，这里也需要保存当前的环境，然后<code>call rdx</code>：</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>mov    rax,QWORD PTR [rbp-0x18]
+</span></span><span class=line><span class=cl>mov    rdi,rax
+</span></span><span class=line><span class=cl>call   rdx
+</span></span></code></pre></td></tr></table></div></div><h2 id=单继承>单继承</h2><p>以上, 我们知道了一个基类的内存分布, 如果是单继承的子类呢?</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=k>class</span> <span class=nc>D1</span> <span class=o>:</span> <span class=k>public</span> <span class=n>Base</span><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=k>public</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>D1</span><span class=p>(){}</span>
+</span></span><span class=line><span class=cl>    <span class=k>virtual</span> <span class=o>~</span><span class=n>D1</span><span class=p>(){</span>
+</span></span><span class=line><span class=cl>        <span class=n>cout</span> <span class=o>&lt;&lt;</span> <span class=s>&#34;release D1&#34;</span> <span class=o>&lt;&lt;</span> <span class=n>endl</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>类比第一节, 可以拿到子类的vtable:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>D1</span> <span class=o>*</span><span class=n>d1</span> <span class=o>=</span> <span class=k>new</span> <span class=n>D1</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_d1_v</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>d1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=o>*</span><span class=n>vptr_d1</span> <span class=o>=</span> <span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_d1_v</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>以及子类的vtable的指向:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_base_vfunc1</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base</span> <span class=o>+</span> <span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_base_vfunc2</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base</span> <span class=o>+</span> <span class=mi>3</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_base_vfunc3</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_base</span> <span class=o>+</span> <span class=mi>4</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>可以得到输出:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>       d1 vptr       base vptr     base::vfunc*
+</span></span><span class=line><span class=cl>vfunc1 0x401aca      0x401aca      0x401aca
+</span></span><span class=line><span class=cl>vfunc2 0x401b0c      0x401b0c      0x401b0c
+</span></span><span class=line><span class=cl>vfunc3 0x401b58      0x401b58      0x401b58
+</span></span></code></pre></td></tr></table></div></div><p>子类相对于复制了父类的vtable, 但是需要注意这是两个不同的vtable:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>base     d1
+</span></span><span class=line><span class=cl>0x402370 0x402310
+</span></span></code></pre></td></tr></table></div></div><p>再来观察子类vtable的0和1号元素:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C++ data-lang=C++><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_d1_v0</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_d1</span> <span class=o>+</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>uint64</span> <span class=n>vptr_d1_v1</span> <span class=o>=</span> <span class=o>*</span><span class=k>reinterpret_cast</span><span class=o>&lt;</span><span class=n>uint64</span> <span class=o>*&gt;</span><span class=p>(</span><span class=n>vptr_d1</span> <span class=o>+</span> <span class=mi>1</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>得到:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>  d1 vptr       base vptr
+</span></span><span class=line><span class=cl>0 0x401c48      0x401a66
+</span></span><span class=line><span class=cl>1 0x401c8c      0x401a9e
+</span></span></code></pre></td></tr></table></div></div><p>子类vtable的0号元素和1号元素和父类指向不同, 继续观察汇编结果, 可以发现子类vtable的0号和1号元素指向的是子类的两个析构函数:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ASM data-lang=ASM><span class=line><span class=cl><span class=c1># D1::~D1():
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=err>0</span><span class=nf>x401c48</span>    <span class=no>push</span>   <span class=no>rbp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rbp</span><span class=p>,</span><span class=no>rsp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>sub</span>    <span class=no>rsp</span><span class=p>,</span><span class=mi>0x10</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>],</span><span class=no>rdi</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>edx</span><span class=p>,</span><span class=mi>0x402310</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rax</span><span class=p>],</span><span class=no>rdx</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x40204d</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>edi</span><span class=p>,</span><span class=mi>0x4040c0</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>401080</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>basic_ostream</span><span class=err>&lt;</span><span class=no>char</span><span class=p>,</span> <span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;&amp;</span> <span class=no>std</span><span class=p>::</span><span class=no>operator</span><span class=err>&lt;&lt;</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;</span><span class=p>(</span><span class=no>std</span><span class=p>::</span><span class=no>basic_ostream</span><span class=err>&lt;</span><span class=no>char</span><span class=p>,</span> <span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;&amp;</span><span class=p>,</span> <span class=no>char</span> <span class=no>const</span><span class=p>*)</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x401050</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>4010</span><span class=no>b0</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=p>::</span><span class=no>operator</span><span class=err>&lt;&lt;</span><span class=p>(</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=err>&amp;</span> <span class=p>(*)(</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=err>&amp;</span><span class=p>))</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>401</span><span class=no>a66</span> <span class=err>&lt;</span><span class=no>Base</span><span class=p>::</span><span class=err>~</span><span class=no>Base</span><span class=p>()</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span><span class=line><span class=cl>            <span class=nf>leave</span>
+</span></span><span class=line><span class=cl>            <span class=nf>ret</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span><span class=line><span class=cl><span class=c1># D1::~D1():
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=err>0</span><span class=nf>x401c8c</span>    <span class=no>push</span>   <span class=no>rbp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rbp</span><span class=p>,</span><span class=no>rsp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>sub</span>    <span class=no>rsp</span><span class=p>,</span><span class=mi>0x10</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>],</span><span class=no>rdi</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>401</span><span class=no>c48</span> <span class=err>&lt;</span><span class=no>D1</span><span class=p>::</span><span class=err>~</span><span class=no>D1</span><span class=p>()</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x8</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>4010</span><span class=no>a0</span> <span class=err>&lt;</span><span class=no>operator</span> <span class=no>delete</span><span class=p>(</span><span class=no>void</span><span class=p>*,</span> <span class=no>unsigned</span> <span class=no>long</span><span class=p>)</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>leave</span>
+</span></span><span class=line><span class=cl>            <span class=nf>ret</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span></code></pre></td></tr></table></div></div><p>类比<code>Base</code>类的析构, 可以发现子类的析构会调用<code>Base</code>类的析构, 所以, 现在我们可以得到一个教科书上的结论:</p><blockquote><p>在堆上分配的子类, 执行子类析构会先调用子类的析构函数, 然后再调用父类的析构函数, 最后对子类资源正真执行delete.</p></blockquote><p>(尽管这是很多教科书上已有的结论, 但是现在我们从根源观察到了这个执行流程.)</p><p>现在, 我们可以得到单继承的类的内存分布的关系图:</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a514b8c1.webp title=单继承 data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a514b8c1.webp data-sub-html="<h2>单继承</h2><p>单继承</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a514b8c1.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a514b8c1.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a514b8c1.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a514b8c1.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a514b8c1.webp></a><figcaption class=image-caption>单继承</figcaption></figure></p><h3 id=两个析构函数>两个析构函数?</h3><p>以上, 我们发现虚析构函数在汇编的时候会生成两个析构函数, 有点奇怪.(实际上, 上文中已经给出一些结论了:D)</p><p>我们继续拿<code>D1</code>来讲:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ASM data-lang=ASM><span class=line><span class=cl><span class=c1># D1::~D1():
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=err>0</span><span class=nf>x401c48</span>    <span class=no>push</span>   <span class=no>rbp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rbp</span><span class=p>,</span><span class=no>rsp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>sub</span>    <span class=no>rsp</span><span class=p>,</span><span class=mi>0x10</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>],</span><span class=no>rdi</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>edx</span><span class=p>,</span><span class=mi>0x402310</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rax</span><span class=p>],</span><span class=no>rdx</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x40204d</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>edi</span><span class=p>,</span><span class=mi>0x4040c0</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>401080</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>basic_ostream</span><span class=err>&lt;</span><span class=no>char</span><span class=p>,</span> <span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;&amp;</span> <span class=no>std</span><span class=p>::</span><span class=no>operator</span><span class=err>&lt;&lt;</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;</span><span class=p>(</span><span class=no>std</span><span class=p>::</span><span class=no>basic_ostream</span><span class=err>&lt;</span><span class=no>char</span><span class=p>,</span> <span class=no>std</span><span class=p>::</span><span class=no>char_traits</span><span class=err>&lt;</span><span class=no>char</span><span class=err>&gt;</span> <span class=err>&gt;&amp;</span><span class=p>,</span> <span class=no>char</span> <span class=no>const</span><span class=p>*)</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x401050</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>4010</span><span class=no>b0</span> <span class=err>&lt;</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=p>::</span><span class=no>operator</span><span class=err>&lt;&lt;</span><span class=p>(</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=err>&amp;</span> <span class=p>(*)(</span><span class=no>std</span><span class=p>::</span><span class=no>ostream</span><span class=err>&amp;</span><span class=p>))</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>401</span><span class=no>a66</span> <span class=err>&lt;</span><span class=no>Base</span><span class=p>::</span><span class=err>~</span><span class=no>Base</span><span class=p>()</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span><span class=line><span class=cl>            <span class=nf>leave</span>
+</span></span><span class=line><span class=cl>            <span class=nf>ret</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span><span class=line><span class=cl><span class=c1># D1::~D1():
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=err>0</span><span class=nf>x401c8c</span>    <span class=no>push</span>   <span class=no>rbp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rbp</span><span class=p>,</span><span class=no>rsp</span>
+</span></span><span class=line><span class=cl>            <span class=nf>sub</span>    <span class=no>rsp</span><span class=p>,</span><span class=mi>0x10</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>],</span><span class=no>rdi</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>401</span><span class=no>c48</span> <span class=err>&lt;</span><span class=no>D1</span><span class=p>::</span><span class=err>~</span><span class=no>D1</span><span class=p>()</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rax</span><span class=p>,</span><span class=no>QWORD</span> <span class=no>PTR</span> <span class=p>[</span><span class=no>rbp-0x8</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>esi</span><span class=p>,</span><span class=mi>0x8</span>
+</span></span><span class=line><span class=cl>            <span class=nf>mov</span>    <span class=no>rdi</span><span class=p>,</span><span class=no>rax</span>
+</span></span><span class=line><span class=cl>            <span class=nf>call</span>   <span class=mi>4010</span><span class=no>a0</span> <span class=err>&lt;</span><span class=no>operator</span> <span class=no>delete</span><span class=p>(</span><span class=no>void</span><span class=p>*,</span> <span class=no>unsigned</span> <span class=no>long</span><span class=p>)</span><span class=err>@</span><span class=no>plt</span><span class=err>&gt;</span>
+</span></span><span class=line><span class=cl>            <span class=nf>leave</span>
+</span></span><span class=line><span class=cl>            <span class=nf>ret</span>
+</span></span><span class=line><span class=cl>            <span class=nf>nop</span>
+</span></span></code></pre></td></tr></table></div></div><p>因为父类的析构函数是<code>virtual</code>的, 所以子类"继承了"父类的析构函数, 这里可以类比普通的虚函数. 又因为析构函数有默认函数, 所以必然会重写父类的析构函数.</p><p>先看第一个析构函数<code>0x401c48</code>, 它的作用一部分是执行了用户自定义的析构函数, 然后再调用基类的析构函数<code>~Base()</code>.</p><p>再看第二个析构函数<code>0x401c8c</code>, 它会先调用第一个析构函数, 然后再调用<code>delete</code>.</p><p>我们执行<code>delele</code>的时候调用的是第二个析构函数, 因此可以保证会析构子类和父类, 并且<code>delete</code>子类的资源.</p><p>如果我们测试以下代码:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>D1 nd1 = D1();
+</span></span></code></pre></td></tr></table></div></div><p>可以发现调用的会是第一个析构函数:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>call   401c48 &lt;D1::~D1()&gt;
+</span></span></code></pre></td></tr></table></div></div><p>因为资源在栈上分配, 所以也无需关心资源分配的问题了.</p><p>现在, 我们可得到关于为什么要有两个析构函数的结论:</p><blockquote><p>两个析构函数可以解决堆上分配和栈上分配的问题, 如果是堆分配则调用第二个析构函数, 如果是栈分配则调用第一个析构函数</p></blockquote><h2 id=多继承>多继承</h2><p>多继承和单继承是类似的. 多继承可能包含多个<code>vptr</code>和vtable.</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a563b2a0.webp title=多继承 data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a563b2a0.webp data-sub-html="<h2>多继承</h2><p>多继承</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a563b2a0.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a563b2a0.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a563b2a0.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a563b2a0.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a563b2a0.webp></a><figcaption class=image-caption>多继承</figcaption></figure></p><h2 id=总结>总结</h2><p>本文可以得到的几个结论:</p><ol><li>vptr一般在类内存的头部(和编译器相关)</li><li>如果基类析构函数是虚函数, 则vtable的前两项会指向析构函数</li></ol><p>(有点累&mldr;过两天继续)</p></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-03-11</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/cpp/>Cpp</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/cpp/>Cpp</a>,&nbsp;<a href=/tags/%E5%86%85%E5%AD%98/>内存</a></section></div><div class=post-nav><a href=/202106/array-heap-stack/ class=prev rel=prev title=用数组[1]替代堆分配><i class="fas fa-angle-left fa-fw"></i>用数组[1]替代堆分配</a>
+<a href=/202107/rss-rssblog/ class=next rel=next title=博文聚合站-RSSBlog>博文聚合站-RSSBlog<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div><section><script>const preload_related_posts=[{title:"C++闭包二",link:"/202409/cpp-closure2/",date:"2024-09-11"},{title:"轻量级参数解析库-tiny_cmdline",link:"/202408/about_tiny_summary/",date:"2024-08-13"},{title:"C++标签派发技术",link:"/202408/cpp_tag_dispatch/",date:"2024-08-01"},{title:"栈buffer对比堆buffer",link:"/202407/stack_vs_heap_buffer/",date:"2024-07-29"},{title:"十亿行挑战-C++",link:"/202406/1brc-cpp/",date:"2024-06-28"},{title:"日志透传工具-channel",link:"/202405/transmite-log-channel/",date:"2024-05-27"},{title:"终端数独游戏",link:"/202303/terminal-sudoku/",date:"2023-03-06"},{title:"tagged-pointer-让指针包含更多信息",link:"/202211/tagged-pointer/",date:"2022-11-20"},{title:"《现代C++白皮书》一周目读后感",link:"/202209/cpp_hopl4_reading/",date:"2022-09-27"},{title:"STL-tuple源码阅读",link:"/202207/cpp-stl-tuple/",date:"2022-07-13"},{title:"STL-any源码阅读",link:"/202207/cpp-stl-any/",date:"2022-07-06"},{title:"C++在给定内存上构造",link:"/202206/cpp_placementnew_allocator/",date:"2022-06-20"},{title:"像数学公式一样写C++代码",link:"/202206/mathlike-cpp/",date:"2022-06-06"},{title:"NULL和nullptr实际问题分析",link:"/202203/null-nullptr-problem/",date:"2022-03-21"},{title:"STL-智能指针三剑客源码阅读",link:"/202112/stl-smartpointers/",date:"2021-12-29"},{title:"explicit说明符",link:"/202112/cpp-explicit/",date:"2021-12-23"},{title:"pair的内存结构",link:"/202112/pair-memstruct/",date:"2021-12-14"},{title:"i++和++i在函数入参时的一些问题",link:"/202110/ppi-ipp-func/",date:"2021-10-29"},{title:"C,C++安全指南",link:"/202108/secguide_c_tc/",date:"2021-08-19"},{title:"现代C++容易忽略的一些特性",link:"/202107/cpp-modern-feature/",date:"2021-07-30"},{title:"用数组[1]替代堆分配",link:"/202106/array-heap-stack/",date:"2021-06-25"},{title:"private不保证安全",link:"/202105/priavte-bypointer/",date:"2021-05-17"},{title:"数据结构与算法之位图",link:"/202105/cpp-bitmap/",date:"2021-05-14"},{title:"数据结构与算法之字符串匹配",link:"/202104/str-match/",date:"2021-04-06"},{title:"struct位域",link:"/202103/c-strcut-bits/",date:"2021-03-18"},{title:"const和constexpr",link:"/202103/cpp-const-adconsexpr/",date:"2021-03-11"},{title:"数据结构与算法之图",link:"/202103/cpp-graph/",date:"2021-03-09"},{title:"STL-迭代器",link:"/202103/cpp-what-iterator/",date:"2021-03-04"},{title:"数组名不是指针",link:"/202103/cpp-arrynotpointer/",date:"2021-03-03"},{title:"为什么推荐加const或constexpr修饰常量",link:"/202103/cpp-addconst/",date:"2021-03-02"},{title:"数据结构与算法之堆",link:"/202102/salgo-heap/",date:"2021-02-24"},{title:"C++闭包",link:"/202102/cpp-closure/",date:"2021-02-23"},{title:"数据结构与算法之二叉查找树",link:"/202102/salgo-binschtree/",date:"2021-02-08"},{title:"数据结构与算法之二叉树的遍历",link:"/202102/salgo-bintree-list/",date:"2021-02-01"},{title:"C里面的变长参数",link:"/202101/purec-stdarg/",date:"2021-01-27"},{title:"数据结构与算法之二叉树",link:"/202101/salgo-bintree/",date:"2021-01-25"},{title:"数据结构与算法之单调栈",link:"/202101/salgo-mstack/",date:"2021-01-20"},{title:"数据结构与算法之栈",link:"/202101/salgo-stack/",date:"2021-01-15"},{title:"通过返回值'重载'函数",link:"/202101/cpp-temp-meta/",date:"2021-01-14"},{title:"C++模板问题之多出的static",link:"/202101/cpp-more-static/",date:"2021-01-13"},{title:"值传递OR引用传递",link:"/202101/cpp-cp-ref/",date:"2021-01-10"},{title:"C++容器操作",link:"/202101/cpp-erase-clear/",date:"2021-01-08"},{title:"Union可以怎么用",link:"/202101/cpp-how-union/",date:"2021-01-07"},{title:"C++解包函数tie的用法",link:"/202101/cpp-func-tie/",date:"2021-01-05"},{title:"对C++bind的理解",link:"/202101/cpp-func-bind/",date:"2021-01-04"},{title:"C++类的内存分布",link:"/202101/cpp-class-mem/",date:"2021-01-04"}]</script></section></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2026</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog
+</a>&nbsp;|&nbsp;
+<a href=https://www.travellings.cn/go.html target=_blank rel=noopener title=开往-友链接力>开往-友链接力
+</a>&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2026-08-26T11:40:37+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+130&nbsp;篇
+&nbsp;|&nbsp;
+292K&nbsp;字</div><div class=footer-line><a href=/friends title=友情链接>友情链接:</a>&nbsp;&nbsp;
+<a target=_blank href=https://thiscute.world/ title="This Cute World">This Cute World</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://dusays.com title=杜老师说>杜老师说</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://panqiincs.me/ title=辛未羊的网络日志>辛未羊的网络日志</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://lewky.cn title=雨临Lewis的博客>雨临Lewis的博客</a></div></div></footer></div><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=/css/innerworld-side.css><link rel=stylesheet href=/css/search-loading.css><script type=text/javascript src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/marked@13.0.2/marked.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},search:{highlightTag:"em",maxResultLength:50,noResultsFound:"没有找到结果",snippetLength:50,type:"pagefind"}}</script><script type=text/javascript src=/js/search-results.js></script><script type=text/javascript src=/js/theme.js></script><script type=text/javascript src=/js/innerworld-side.js></script><script type=text/javascript src=/js/search-loading.js></script></body></html>

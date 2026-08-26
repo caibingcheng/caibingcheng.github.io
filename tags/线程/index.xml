@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>线程 on ImCBC</title><link>https://imcbc.cn/tags/%E7%BA%BF%E7%A8%8B/</link><description>Recent content in 线程 on ImCBC</description><generator>Hugo</generator><language>zh-CN</language><managingEditor>jack_cbc@163.com (bing)</managingEditor><webMaster>jack_cbc@163.com (bing)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 19 Apr 2021 20:53:02 +0800</lastBuildDate><atom:link href="https://imcbc.cn/tags/%E7%BA%BF%E7%A8%8B/index.xml" rel="self" type="application/rss+xml"/><item><title>进程、线程和协程概念</title><link>https://imcbc.cn/202104/pandt-what/</link><pubDate>Thu, 15 Apr 2021 14:01:44 +0800</pubDate><author>jack_cbc@163.com (bing)</author><guid>https://imcbc.cn/202104/pandt-what/</guid><description>&lt;h2 id="概念"&gt;概念&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;问题: 什么是进程/线程/协程? 为什么要有这些概念?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;读了一些文章, 要讲清楚这几个概念篇幅会很大, 所以会作为一个小专题来分享. 这篇的目的就是宏观上要对进程/线程/协程有基本的概念.&lt;/p&gt;</description></item></channel></rss>

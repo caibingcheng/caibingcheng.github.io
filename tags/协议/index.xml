@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>协议 on ImCBC</title><link>https://imcbc.cn/tags/%E5%8D%8F%E8%AE%AE/</link><description>Recent content in 协议 on ImCBC</description><generator>Hugo</generator><language>zh-CN</language><managingEditor>jack_cbc@163.com (bing)</managingEditor><webMaster>jack_cbc@163.com (bing)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 29 Jul 2024 15:31:08 +0800</lastBuildDate><atom:link href="https://imcbc.cn/tags/%E5%8D%8F%E8%AE%AE/index.xml" rel="self" type="application/rss+xml"/><item><title>clockdiff时间差测量原理</title><link>https://imcbc.cn/202405/clockdiff-sourcecode/</link><pubDate>Fri, 31 May 2024 09:20:13 +0800</pubDate><author>jack_cbc@163.com (bing)</author><guid>https://imcbc.cn/202405/clockdiff-sourcecode/</guid><description>&lt;p&gt;clockdiff是iputils库下的一个时间测量工具，用于测量两台设备之间的时间差。基本用法是：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-shell" data-lang="shell"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;clockdiff &amp;lt;destination&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;本文主要学习clockdiff测量时间差的原理。&lt;/p&gt;</description></item></channel></rss>

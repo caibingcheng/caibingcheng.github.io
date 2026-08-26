@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房贷计算器</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            width: 100%;
+            overflow: auto;
+        }
+
+        .input-table-container {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(14px);
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-container input[type="number"] {
+            flex: 1;
+        }
+
+        .input-container .switch {
+            margin-left: 10px;
+        }
+
+        .calculate-button {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-sizing: border-box;
+            align-self: center;
+        }
+
+        .calculate-button:hover {
+            background-color: #1976D2;
+        }
+
+        .output-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            width: 100%;
+        }
+        /* reach min-width */
+        @media screen and (max-width: 1200px) {
+            .output-container {
+                font-size: 0.4rem !important;
+            }
+        }
+
+        .output-table {
+            width: 48%;
+            border-collapse: collapse;
+            display: block;
+        }
+
+        .output-table th,
+        .output-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .output-table th {
+            background-color: #f2f2f2;
+        }
+
+        .output-table thead {
+            width: calc(100% - 1em);
+        }
+
+        .highlight {
+            background-color: #ffff99;
+        }
+
+        .hover-highlight {
+            background-color: #ceceaa;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(33, 150, 243, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .back-to-top:hover {
+            background-color: rgba(25, 118, 210, 0.7);
+        }
+
+        .summary b {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="input-table-container">
+            <table style="width: auto;">
+                <tr>
+                    <th>贷款本金</th>
+                    <td><input type="number" id="principal" value="1100000" min="0"></td>
+                </tr>
+                <tr>
+                    <th>年利率 (%)</th>
+                    <td><input type="number" id="annualInterestRate" value="2.85" min="0"></td>
+                </tr>
+                <tr>
+                    <th>贷款月数</th>
+                    <td>
+                        <div class="input-container">
+                            <input type="number" id="months" value="360" min="1" max="360">
+                            <label class="switch">
+                                <input type="checkbox" id="monthsSwitch" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>最大月供</th>
+                    <td>
+                        <div class="input-container">
+                            <input type="number" id="maxMonthlyPayment" value="6000" min="0" disabled>
+                            <label class="switch">
+                                <input type="checkbox" id="maxMonthlyPaymentSwitch">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>预期提前还款月数</th>
+                    <td><input type="number" id="prepaymentMonths" value="120" min="1" max="360"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="output-container">
+            <table class="output-table" id="equalPrincipalAndInterestTable">
+                <thead>
+                    <tr>
+                        <th>月份</th>
+                        <th>月供</th>
+                        <th>月供本金</th>
+                        <th>月供利息</th>
+                        <th>已还本金</th>
+                        <th>已还利息</th>
+                        <th>剩余本金</th>
+                        <th>剩余利息</th>
+                    </tr>
+                    <tr class="summary">
+                        <td colspan="8"></td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <table class="output-table" id="equalPrincipalTable">
+                <thead>
+                    <tr>
+                        <th>月份</th>
+                        <th>月供</th>
+                        <th>月供本金</th>
+                        <th>月供利息</th>
+                        <th>已还本金</th>
+                        <th>已还利息</th>
+                        <th>剩余本金</th>
+                        <th>剩余利息</th>
+                    </tr>
+                    <tr class="summary">
+                        <td colspan="8"></td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <button class="back-to-top" id="backToTopButton">↑</button>
+    <script>
+        document.getElementById('monthsSwitch').addEventListener('change', function () {
+            document.getElementById('maxMonthlyPaymentSwitch').checked = !this.checked;
+            document.getElementById('maxMonthlyPayment').disabled = this.checked;
+            document.getElementById('months').disabled = !this.checked;
+            calculateHelper();
+        });
+
+        document.getElementById('maxMonthlyPaymentSwitch').addEventListener('change', function () {
+            document.getElementById('monthsSwitch').checked = !this.checked;
+            document.getElementById('months').disabled = this.checked;
+            document.getElementById('maxMonthlyPayment').disabled = !this.checked;
+            calculateHelper();
+        });
+
+        document.getElementById('principal').addEventListener('input', calculateHelper);
+        document.getElementById('annualInterestRate').addEventListener('input', calculateHelper);
+        document.getElementById('months').addEventListener('input', calculateHelper);
+        document.getElementById('maxMonthlyPayment').addEventListener('input', calculateHelper);
+        document.getElementById('prepaymentMonths').addEventListener('input', calculateHelper);
+
+
+        var timerId = null;
+        function calculateHelper() {
+            clearTimeout(timerId);
+            timerId = setTimeout(calculate, 500);
+        }
+        function calculate() {
+            const principal = parseFloat(document.getElementById('principal').value);
+            const annualInterestRate = parseFloat(document.getElementById('annualInterestRate').value);
+            const months = parseInt(document.getElementById('months').value);
+            const maxMonthlyPayment = parseFloat(document.getElementById('maxMonthlyPayment').value);
+            const maxMonthlyPaymentSwitch = document.getElementById('maxMonthlyPaymentSwitch').checked;
+            const prepaymentMonths = parseInt(document.getElementById('prepaymentMonths').value);
+            console.log(`贷款本金: ${principal} 元`);
+            if (maxMonthlyPaymentSwitch) {
+                const loanTerms = calculateLoanTerms(principal, annualInterestRate, maxMonthlyPayment);
+                console.log(`满足不超过每月月供 ${maxMonthlyPayment} 元的贷款月数:`);
+                console.log(`等额本息: ${loanTerms.equalPrincipalAndInterestMinMonths} 个月`);
+                console.log(`等额本金: ${loanTerms.equalPrincipalMinMonths} 个月`);
+
+                if (loanTerms.equalPrincipalAndInterestMinMonths !== null) {
+                    const resultEqualPrincipalAndInterest = calculateEqualPrincipalAndInterest(principal, annualInterestRate, loanTerms.equalPrincipalAndInterestMinMonths);
+                    updateTable('equalPrincipalAndInterestTable', resultEqualPrincipalAndInterest.payments, prepaymentMonths, loanTerms.equalPrincipalAndInterestMinMonths, principal, resultEqualPrincipalAndInterest.totalInterest, resultEqualPrincipalAndInterest.monthlyPayment);
+                }
+
+                if (loanTerms.equalPrincipalMinMonths !== null) {
+                    const resultEqualPrincipal = calculateEqualPrincipal(principal, annualInterestRate, loanTerms.equalPrincipalMinMonths);
+                    updateTable('equalPrincipalTable', resultEqualPrincipal.payments, prepaymentMonths, loanTerms.equalPrincipalMinMonths, principal, resultEqualPrincipal.totalInterest, resultEqualPrincipal.payments[0].principal + resultEqualPrincipal.payments[0].interest);
+                }
+            } else {
+                const resultEqualPrincipalAndInterest = calculateEqualPrincipalAndInterest(principal, annualInterestRate, months);
+                console.log(`等额本息 - 月供: ${resultEqualPrincipalAndInterest.monthlyPayment} 元`);
+                console.log(`等额本息 - 总利息: ${resultEqualPrincipalAndInterest.totalInterest} 元`);
+                updateTable('equalPrincipalAndInterestTable', resultEqualPrincipalAndInterest.payments, prepaymentMonths, months, principal, resultEqualPrincipalAndInterest.totalInterest, resultEqualPrincipalAndInterest.monthlyPayment);
+
+                const resultEqualPrincipal = calculateEqualPrincipal(principal, annualInterestRate, months);
+                console.log(`等额本金 - 总利息: ${resultEqualPrincipal.totalInterest} 元`);
+                updateTable('equalPrincipalTable', resultEqualPrincipal.payments, prepaymentMonths, months, principal, resultEqualPrincipal.totalInterest, resultEqualPrincipal.payments[0].principal + resultEqualPrincipal.payments[0].interest);
+            }
+        }
+
+        function updateTable(tableId, payments, prepaymentMonths, totalMonths, principal, totalInterest, monthlyPayment) {
+            const tableBody = document.getElementById(tableId).querySelector('tbody');
+            const tableHead = document.getElementById(tableId).querySelector('thead');
+            const typeStr = tableId === 'equalPrincipalAndInterestTable' ? '等额本息' : '等额本金';
+            const totalYears = parseInt(totalMonths / 12);
+            const remainMonths = totalMonths % 12;
+            const totalTimeStr = totalYears + '年' + (remainMonths > 0 ? remainMonths + '月' : '');
+            const totalPayment = (parseFloat(payments[totalMonths - 1].totalPrincipalPaid) + parseFloat(payments[totalMonths - 1].totalInterestPaid)).toFixed(2);
+
+            let preStr = '';
+            if (totalMonths >= prepaymentMonths) {
+                const totalPrincipalPaid = payments[prepaymentMonths - 1].totalPrincipalPaid;
+                const totalInterestPaid = payments[prepaymentMonths - 1].totalInterestPaid;
+                const totalPreYears = parseInt(prepaymentMonths / 12);
+                const remainPreMonths = prepaymentMonths % 12;
+                const preTimeStr = totalPreYears + '年' + (remainPreMonths > 0 ? remainPreMonths + '月' : '');
+                preStr = `计划于第<b>${preTimeStr}</b>提前还款，此时已还本金<b>${totalPrincipalPaid}</b>元, 已还利息<b>${totalInterestPaid}</b>元`;
+            } else {
+                preStr = '计划提前还款的时间大于贷款年限'
+            }
+
+            tableBody.innerHTML = '';
+            tableHead.innerHTML = `
+                <tr>
+                    <th>月份</th>
+                    <th>月供</th>
+                    <th>月供本金</th>
+                    <th>月供利息</th>
+                    <th>已还本金</th>
+                    <th>已还利息</th>
+                    <th>剩余本金</th>
+                    <th>剩余利息</th>
+                </tr>
+                <tr class="summary">
+                    <td colspan="8">${typeStr}。贷款年限为<b>${totalTimeStr}</b>, 一共需还款<b>${totalPayment}</b>元, 其中本金<b>${principal}</b>元、利息<b>${totalInterest}</b>元。${preStr}</td>
+                </tr>
+            `;
+            payments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.month}</td>
+                    <td>${(parseFloat(payment.principal) + parseFloat(payment.interest)).toFixed(2)}</td>
+                    <td>${payment.principal}</td>
+                    <td>${payment.interest}</td>
+                    <td>${payment.totalPrincipalPaid}</td>
+                    <td>${payment.totalInterestPaid}</td>
+                    <td>${payment.remainingPrincipal}</td>
+                    <td>${payment.remainingInterest}</td>
+                `;
+                if (payment.month == prepaymentMonths) {
+                    row.classList.add('highlight');
+                }
+                row.addEventListener('mouseover', function () {
+                    row.classList.add('hover-highlight');
+                    const otherTable = tableId === 'equalPrincipalAndInterestTable' ? 'equalPrincipalTable' : 'equalPrincipalAndInterestTable';
+                    const otherRow = document.getElementById(otherTable).querySelector(`tbody tr:nth-child(${payment.month})`);
+                    otherRow.classList.add('hover-highlight');
+                });
+                row.addEventListener('mouseout', function () {
+                    row.classList.remove('hover-highlight');
+                    const otherTable = tableId === 'equalPrincipalAndInterestTable' ? 'equalPrincipalTable' : 'equalPrincipalAndInterestTable';
+                    const otherRow = document.getElementById(otherTable).querySelector(`tbody tr:nth-child(${payment.month})`);
+                    otherRow.classList.remove('hover-highlight');
+                });
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Back to top button functionality
+        const backToTopButton = document.getElementById('backToTopButton');
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 200) {
+                backToTopButton.style.display = 'flex';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+
+        backToTopButton.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+
+    <script>
+        /**
+         * 计算房贷月供和总利息（等额本息）
+         * @param {number} principal - 贷款本金
+         * @param {number} annualInterestRate - 年利率（百分比）
+         * @param {number} months - 贷款月数
+         * @returns {object} - 包含月供和总利息的对象
+         */
+        function calculateEqualPrincipalAndInterest(principal, annualInterestRate, months) {
+            const monthlyInterestRate = annualInterestRate / 100 / 12;
+            const monthlyPayment = (principal * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -months));
+            const totalPayment = monthlyPayment * months;
+            const totalInterest = totalPayment - principal;
+            const payments = [];
+            let totalPrincipalPaid = 0;
+            let totalInterestPaid = 0;
+
+            for (let i = 0; i < months; i++) {
+                const interest = (principal - totalPrincipalPaid) * monthlyInterestRate;
+                const principalPayment = monthlyPayment - interest;
+                totalPrincipalPaid += principalPayment;
+                totalInterestPaid += interest;
+                payments.push({
+                    month: i + 1,
+                    principal: principalPayment.toFixed(2),
+                    interest: interest.toFixed(2),
+                    totalPrincipalPaid: totalPrincipalPaid.toFixed(2),
+                    totalInterestPaid: totalInterestPaid.toFixed(2),
+                    remainingPrincipal: (principal - totalPrincipalPaid).toFixed(2),
+                    remainingInterest: (totalInterest - totalInterestPaid).toFixed(2)
+                });
+            }
+
+            return {
+                monthlyPayment: monthlyPayment.toFixed(2),
+                totalInterest: totalInterest.toFixed(2),
+                payments: payments
+            };
+        }
+
+        /**
+         * 计算房贷月供和总利息（等额本金）
+         * @param {number} principal - 贷款本金
+         * @param {number} annualInterestRate - 年利率（百分比）
+         * @param {number} months - 贷款月数
+         * @returns {object} - 包含每月月供数组和总利息的对象
+         */
+        function calculateEqualPrincipal(principal, annualInterestRate, months) {
+            const monthlyInterestRate = annualInterestRate / 100 / 12;
+            const monthlyPrincipal = principal / months;
+            let totalInterest = 0;
+            const payments = [];
+            let totalPrincipalPaid = 0;
+            let totalInterestPaid = 0;
+
+            for (let i = 0; i < months; i++) {
+                const interest = (principal - totalPrincipalPaid) * monthlyInterestRate;
+                const monthlyPayment = monthlyPrincipal + interest;
+                totalPrincipalPaid += monthlyPrincipal;
+                totalInterestPaid += interest;
+                payments.push({
+                    month: i + 1,
+                    principal: monthlyPrincipal.toFixed(2),
+                    interest: interest.toFixed(2),
+                    totalPrincipalPaid: totalPrincipalPaid.toFixed(2),
+                    totalInterestPaid: totalInterestPaid.toFixed(2),
+                    remainingPrincipal: (principal - totalPrincipalPaid).toFixed(2),
+                });
+                totalInterest += interest;
+            }
+            for (let i = 0; i < months; i++) {
+                payments[i].remainingInterest = (totalInterest - payments[i].totalInterestPaid).toFixed(2);
+            }
+
+            return {
+                totalInterest: totalInterest.toFixed(2),
+                payments: payments
+            };
+        }
+
+        /**
+         * 计算满足不超过每月月供的贷款月数列表
+         * @param {number} principal - 贷款本金
+         * @param {number} annualInterestRate - 年利率（百分比）
+         * @param {number} maxMonthlyPayment - 期望的每月月供
+         * @returns {object} - 包含等额本息和等额本金的最小贷款月数
+         */
+        function calculateLoanTerms(principal, annualInterestRate, maxMonthlyPayment) {
+            const monthlyInterestRate = annualInterestRate / 100 / 12;
+            const maxMonths = 30 * 12;
+            let equalPrincipalAndInterestMinMonths = null;
+            let equalPrincipalMinMonths = null;
+
+            for (let months = 1; months <= maxMonths; months++) {
+                const monthlyPaymentEqualPrincipalAndInterest = (principal * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -months));
+                if (monthlyPaymentEqualPrincipalAndInterest <= maxMonthlyPayment && equalPrincipalAndInterestMinMonths === null) {
+                    equalPrincipalAndInterestMinMonths = months;
+                }
+
+                const monthlyPrincipal = principal / months;
+                const firstMonthPaymentEqualPrincipal = monthlyPrincipal + (principal * monthlyInterestRate);
+                if (firstMonthPaymentEqualPrincipal <= maxMonthlyPayment && equalPrincipalMinMonths === null) {
+                    equalPrincipalMinMonths = months;
+                }
+
+                if (equalPrincipalAndInterestMinMonths !== null && equalPrincipalMinMonths !== null) {
+                    break;
+                }
+            }
+
+            return {
+                equalPrincipalAndInterestMinMonths: equalPrincipalAndInterestMinMonths,
+                equalPrincipalMinMonths: equalPrincipalMinMonths
+            };
+        }
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>性能优化 on ImCBC</title><link>https://imcbc.cn/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</link><description>Recent content in 性能优化 on ImCBC</description><generator>Hugo</generator><language>zh-CN</language><managingEditor>jack_cbc@163.com (bing)</managingEditor><webMaster>jack_cbc@163.com (bing)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 29 Jul 2024 21:42:19 +0800</lastBuildDate><atom:link href="https://imcbc.cn/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/index.xml" rel="self" type="application/rss+xml"/><item><title>栈buffer对比堆buffer</title><link>https://imcbc.cn/202407/stack_vs_heap_buffer/</link><pubDate>Mon, 29 Jul 2024 21:42:19 +0800</pubDate><author>jack_cbc@163.com (bing)</author><guid>https://imcbc.cn/202407/stack_vs_heap_buffer/</guid><description>&lt;p&gt;我印象中一直有这样一个观点：栈内存比堆内存更快。但是自从尝试&lt;a href="https://imcbc.cn/202406/1brc-cpp/" rel=""&gt;《十亿行挑战》&lt;/a&gt;后，便对其怀疑。
+本文将通过实验调查堆内存和栈内存用作buffer时表现的差异及其原因。&lt;/p&gt;
+&lt;!--mroe--&gt;
+&lt;div class="details admonition note open"&gt;
+ &lt;div class="details-summary admonition-title"&gt;
+ &lt;i class="icon fas fa-pencil-alt fa-fw"&gt;&lt;/i&gt;注意&lt;i class="details-icon fas fa-angle-right fa-fw"&gt;&lt;/i&gt;
+ &lt;/div&gt;
+ &lt;div class="details-content"&gt;
+ &lt;div class="admonition-content"&gt;具体问题需要具体分析，需要根据代码情况验证，不能一概而论。本文会通过benchmark和汇编代码分析来验证“栈内存不一定比堆内存快”这一观点。&lt;/div&gt;
+ &lt;/div&gt;
+ &lt;/div&gt;
+&lt;h3 id="验证case"&gt;验证case&lt;/h3&gt;
+&lt;p&gt;栈buffer使用&lt;code&gt;std::array&lt;/code&gt;，堆buffer使用&lt;code&gt;std::unique_ptr&lt;/code&gt;。buffer定义如下：&lt;/p&gt;</description></item><item><title>十亿行挑战-C++</title><link>https://imcbc.cn/202406/1brc-cpp/</link><pubDate>Fri, 28 Jun 2024 22:42:00 +0800</pubDate><author>jack_cbc@163.com (bing)</author><guid>https://imcbc.cn/202406/1brc-cpp/</guid><description>&lt;p&gt;十亿行挑战本是一个针对现代Java的性能优化挑战，该挑战没有什么内容是针对Java独占的，因此尝试使用C++实现，限制为C++17版本。&lt;/p&gt;</description></item><item><title>设置CPU使用率的工具-cpuocup</title><link>https://imcbc.cn/202305/cpuocup/</link><pubDate>Tue, 09 May 2023 22:02:11 +0800</pubDate><author>jack_cbc@163.com (bing)</author><guid>https://imcbc.cn/202305/cpuocup/</guid><description>&lt;p&gt;&lt;code&gt;cpuocup&lt;/code&gt;是一款设置CPU使用率的工具, 可以设置若干线程的CPU使用率, 可以将线程绑定到对应的CPU核心, 也可以设置线程的执行优先级(需要sudo权限). 在一些需要低效CPU的测试场合, 该工具可能帮得上忙.&lt;/p&gt;</description></item></channel></rss>

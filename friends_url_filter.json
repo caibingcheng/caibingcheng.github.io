@@ -1,0 +1,92 @@
+[
+    {
+        "name": "AONOTE",
+        "url": "https://www.aonote.cn",
+        "logo": "https://www.aonote.cn/img/avatar.jpg",
+        "word": "SOMETIMES CODE, SOMETIMES DESIGN"
+    },
+    {
+        "name": "Barney’s Blog",
+        "url": "https://hugo.bnblogs.cc",
+        "logo": "https://hugo.bnblogs.cc/images/img/20220215001349.png",
+        "word": "All the truth is simple"
+    },
+    {
+        "name": "DearXuan",
+        "url": "https://blog.dearxuan.com/",
+        "logo": "https://bu.dusays.com/2021/08/25/32f61f6ad6985.png",
+        "word": "编程,算法"
+    },
+    {
+        "name": "P3ter's Blog",
+        "url": "https://p3ter.me/",
+        "logo": "https://bu.dusays.com/2022/06/21/62b1583017bae.jpg",
+        "word": "来人间一趟，你要看看太阳"
+    },
+    {
+        "name": "This Cute World",
+        "url": "https://thiscute.world/",
+        "logo": "https://thiscute.world/avatar/myself.webp",
+        "word": "赞美快乐~"
+    },
+    {
+        "name": "Yunyi's Blog",
+        "url": "https://www.yunyitang.me/",
+        "logo": "https://www.yunyitang.me/img/Avatar.png",
+        "word": "Little squirrel Hopping around"
+    },
+    {
+        "name": "cywhat’s blog",
+        "url": "https://cywhat.cn",
+        "logo": "https://fastly.jsdelivr.net/gh/chaoyangya/cywhat-cdn@master/images/cywhat-logo.png",
+        "word": "一位摸爬滚打的测开Dog."
+    },
+    {
+        "name": "liaooo",
+        "url": "https://liaooo.cn",
+        "logo": "https://liaooo.cn/img/ico.png",
+        "word": "拍照、修图、写代码"
+    },
+    {
+        "name": "qinxs",
+        "url": "https://7bxing.com",
+        "logo": "https://fastly.jsdelivr.net/gh/qinxs/cdn-assets@master/img/avatar.png",
+        "word": "技术总结, 各种折腾"
+    },
+    {
+        "name": "无妄当自持",
+        "url": "https://www.insidentally.com",
+        "logo": "https://www.insidentally.com/images/icon/avatar.svg",
+        "word": "君子死知己，提剑出燕京。"
+    },
+    {
+        "name": "杜老师说",
+        "url": "https://dusays.com",
+        "logo": "https://cdn.dusays.com/avatar.png",
+        "word": "..."
+    },
+    {
+        "name": "秃头张",
+        "url": "https://www.tutouzhang.com",
+        "logo": "https://www.nxyxs.cn/bloglogo.jpg",
+        "word": "探索世界，发现自己"
+    },
+    {
+        "name": "辛未羊的网络日志",
+        "url": "https://panqiincs.me/",
+        "logo": "https://panqiincs.me/images/avatar.jpg",
+        "word": "记录生活和学习的清静之地"
+    },
+    {
+        "name": "雨临Lewis的博客",
+        "url": "https://lewky.cn",
+        "logo": "https://fastly.jsdelivr.net/gh/lewky/lewky.github.io@master/images/avatar.jpg",
+        "word": "不想当写手的码农不是好咸鱼_(xз」∠)_"
+    },
+    {
+        "name": "liangbm3's blog",
+        "url": "https://liangbm3.top/",
+        "logo": "https://liangbm3.top/upload/avatar.png",
+        "word": "总有人间一两风，填我十万八千梦！"
+    }
+]

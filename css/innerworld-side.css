@@ -1,0 +1,198 @@
+/* 里世界进入/退出动画 */
+
+.innerworld-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    pointer-events: none;
+    display: flex;
+    overflow: hidden;
+}
+
+.crack-left,
+.crack-right {
+    width: 50%;
+    height: 100%;
+    transition: transform 2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+/* 裂缝边缘发光效果 */
+.crack-left::after,
+.crack-right::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.5);
+}
+
+.crack-left::after {
+    right: 0;
+}
+
+.crack-right::after {
+    left: 0;
+}
+
+/* 进入里世界：黑色从两侧向中间"吞噬" */
+.innerworld-overlay.enter .crack-left,
+.innerworld-overlay.enter .crack-right {
+    background: #0a0a0a;
+}
+
+.innerworld-overlay.enter .crack-left {
+    transform: translateX(-100%);
+}
+
+.innerworld-overlay.enter .crack-right {
+    transform: translateX(100%);
+}
+
+.innerworld-overlay.enter.active .crack-left,
+.innerworld-overlay.enter.active .crack-right {
+    transform: translateX(0);
+}
+
+/* 退出里世界：亮色从两侧向中间"吞噬" */
+.innerworld-overlay.exit .crack-left,
+.innerworld-overlay.exit .crack-right {
+    background: var(--bg-color, #f5f5f5);
+}
+
+.innerworld-overlay.exit .crack-left {
+    transform: translateX(-100%);
+}
+
+.innerworld-overlay.exit .crack-right {
+    transform: translateX(100%);
+}
+
+.innerworld-overlay.exit.active .crack-left,
+.innerworld-overlay.exit.active .crack-right {
+    transform: translateX(0);
+}
+
+/* 提示文字 - 固定在最上层，mix-blend-mode自动根据背景反色 */
+.innerworld-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100000;
+    font-size: 1.5rem;
+    font-weight: bold;
+    pointer-events: none;
+    white-space: nowrap;
+    mix-blend-mode: difference;
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    animation: hintFadeInOut 1.5s ease-in-out;
+}
+
+@keyframes hintFadeInOut {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+    15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+}
+
+/* 页面内容模糊 - 直接应用到主容器，渐进动画 */
+.innerworld-blur-active {
+    filter: blur(5px) !important;
+    transition: filter 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 页面震动效果 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+    20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+body.innerworld-animating {
+    overflow: hidden;
+    animation: shake 0.8s ease-in-out;
+}
+
+/* 标题触发器样式 */
+#home-title-trigger {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#home-title-trigger:hover {
+    opacity: 0.7;
+}
+
+/* 里世界页面进入欢迎动画 */
+.innerworld-welcome {
+    animation: innerworldFadeIn 1.5s ease-out;
+}
+
+@keyframes innerworldFadeIn {
+    from {
+        opacity: 0;
+        filter: brightness(0) contrast(1.2);
+    }
+    to {
+        opacity: 1;
+        filter: brightness(1) contrast(1);
+    }
+}
+
+/* 未授权提示 */
+.innerworld-unauthorized {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 2rem;
+}
+
+.innerworld-unauthorized h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #dc3545;
+}
+
+.innerworld-unauthorized p {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    color: #6c757d;
+}
+
+/* 过期提示 */
+.innerworld-expired {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 2rem;
+}
+
+.innerworld-expired h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #fd7e14;
+}
+
+.innerworld-expired p {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    color: #6c757d;
+}

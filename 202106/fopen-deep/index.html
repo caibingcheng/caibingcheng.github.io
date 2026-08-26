@@ -1,0 +1,478 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=X-UA-Compatible content="IE=edge, chrome=1"><title>glibc-fopen源码阅读 - ImCBC</title><meta name=keywords content="[Life bbing bing bingcheng hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:url" content="https://imcbc.cn/202106/fopen-deep/"><meta property="og:site_name" content="ImCBC"><meta property="og:title" content="glibc-fopen源码阅读"><meta property="og:description" content="FILE fopen返回值是FILE结构体, 先来看看FILE结构体的内容:"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-06-01T17:21:19+08:00"><meta property="article:modified_time" content="2021-06-01T20:44:46+08:00"><meta property="article:tag" content="Linux"><meta property="article:tag" content="文件系统"><meta property="article:tag" content="Glibc"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="glibc-fopen源码阅读"><meta name=twitter:description content="FILE fopen返回值是FILE结构体, 先来看看FILE结构体的内容:"><meta name=application-name content="ImCBC"><meta name=apple-mobile-web-app-title content="ImCBC"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel=preconnect href=https://fastly.jsdelivr.net crossorigin><link rel=dns-prefetch href=https://fastly.jsdelivr.net><link rel=preconnect href=https://giscus.app crossorigin><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202106/fopen-deep/><link rel=prev href=https://imcbc.cn/202106/html5-maodian-scroll/><link rel=next href=https://imcbc.cn/202106/process-ctracon5/><style>html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:initial}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}template{display:none}[hidden]{display:none}</style><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css crossorigin=anonymous><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css crossorigin=anonymous><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"glibc-fopen源码阅读","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202106\/fopen-deep\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Linux, 文件系统, glibc","wordcount":2503,"url":"https:\/\/imcbc.cn\/202106\/fopen-deep\/","datePublished":"2021-06-01T17:21:19+08:00","dateModified":"2021-06-01T20:44:46+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bbing"},"description":""}</script></head><body header-desktop=fixed header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentColor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentColor" class="octo-body"/></svg></a><div class=header-title><a href=/ title=ImCBC>ImCBC</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i>
+</a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i>
+</a><span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i>
+</span></span><a href=https://www.travellings.cn/go.html target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i>
+</a><a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i>
+</a><a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=ImCBC>ImCBC</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i>
+</a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i>
+</a><span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档
+</a><a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签
+</a><a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类
+</a><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链
+</a><a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具
+</a><a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于
+</a><a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站
+</a><a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>glibc-fopen源码阅读<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2021-06-01>2021-06-01</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2503 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#file>FILE</a><ul><li><a href=#缓存区>缓存区</a></li><li><a href=#wide-data>wide data</a></li></ul></li><li><a href=#sturct-file>sturct file</a></li><li><a href=#fopen>fopen</a><ul><li><a href=#解析mode>解析mode</a></li><li><a href=#获取fd>获取fd</a></li></ul></li><li><a href=#总结>总结</a></li><li><a href=#参考链接>参考链接</a></li></ul></nav></div></div><details class=summary-details><summary class=summary-title>摘要</summary><div class=summary title="version: 1.0.4-batch, model: gpt-4o, score: A"><i version=1.0.4-batch model=gpt-4o></i><p>本文详细解析了glibc中fopen函数的源码实现，重点介绍了FILE结构体的组成及其缓存区、宽字符流的处理方式，并探讨了fopen如何通过文件描述符（fd）找到文件的具体内容。文章通过分析fopen的实现过程，展示了其如何解析文件模式、获取文件描述符并最终返回FILE结构体。文中还对涉及的关键数据结构（如_IO_FILE、_IO_wide_data、struct file等）进行了详细说明，并通过代码示例和流程图直观展示了fopen的工作原理。</p><div class=summary-meta>评分: A</div></div></details><hr class=summary-separator><br><div data-pagefind-body class=content id=content><h2 id=file>FILE</h2><p><code>fopen</code>返回值是<code>FILE</code>结构体, 先来看看<a href=https://code.woboq.org/userspace/glibc/libio/bits/types/struct_FILE.h.html#_IO_FILE target=_blank rel="noopener noreffer">FILE</a>结构体的内容:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>struct</span> <span class=n>_IO_FILE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>typedef</span> <span class=k>struct</span> <span class=n>_IO_FILE</span> <span class=n>FILE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>_IO_FILE</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>_flags</span><span class=p>;</span>                <span class=cm>/* High-order word is _IO_MAGIC; rest is flags. */</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* The following pointers correspond to the C++ streambuf protocol. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_read_ptr</span><span class=p>;</span>        <span class=cm>/* Current read pointer */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_read_end</span><span class=p>;</span>        <span class=cm>/* End of get area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_read_base</span><span class=p>;</span>       <span class=cm>/* Start of putback+get area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_write_base</span><span class=p>;</span>      <span class=cm>/* Start of put area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_write_ptr</span><span class=p>;</span>       <span class=cm>/* Current put pointer. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_write_end</span><span class=p>;</span>       <span class=cm>/* End of put area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_buf_base</span><span class=p>;</span>        <span class=cm>/* Start of reserve area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_buf_end</span><span class=p>;</span>         <span class=cm>/* End of reserve area. */</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* The following fields are used to support backing up and undo. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_save_base</span><span class=p>;</span>       <span class=cm>/* Pointer to start of non-current get area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_backup_base</span><span class=p>;</span>     <span class=cm>/* Pointer to first valid character of backup area */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span> <span class=o>*</span><span class=n>_IO_save_end</span><span class=p>;</span>        <span class=cm>/* Pointer to end of non-current get area. */</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>_IO_marker</span> <span class=o>*</span><span class=n>_markers</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>_IO_FILE</span>   <span class=o>*</span><span class=n>_chain</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>_fileno</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>_flags2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>__off_t</span> <span class=n>_old_offset</span><span class=p>;</span>       <span class=cm>/* This used to be _offset but it&#39;s too small.  */</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* 1+column number of pbase(); 0 is unknown. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>unsigned</span> <span class=kt>short</span> <span class=n>_cur_column</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>signed</span> <span class=kt>char</span>    <span class=n>_vtable_offset</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>char</span>           <span class=n>_shortbuf</span><span class=p>[</span><span class=mi>1</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>  <span class=n>_IO_lock_t</span>     <span class=o>*</span><span class=n>_lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>__off64_t</span>      <span class=n>_offset</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* Wide character stream stuff.  */</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>_IO_codecvt</span>   <span class=o>*</span><span class=n>_codecvt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>_IO_wide_data</span> <span class=o>*</span><span class=n>_wide_data</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=kt>int</span> <span class=n>_mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* Make sure we don&#39;t get into trouble again.  */</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// 最后这个成员_unused2比较有意思, 给的解释是这个成员可以保证不会再出错.
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=kt>char</span> <span class=n>_unused2</span><span class=p>[</span><span class=mi>15</span> <span class=o>*</span> <span class=k>sizeof</span> <span class=p>(</span><span class=kt>int</span><span class=p>)</span> <span class=o>-</span> <span class=mi>4</span> <span class=o>*</span> <span class=k>sizeof</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=p>)</span> <span class=o>-</span> <span class=k>sizeof</span> <span class=p>(</span><span class=kt>size_t</span><span class=p>)];</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>首先, <code>FILE</code>结构体中包含了缓存区(<code>fopen</code>是有缓存区域的)读写指针的位置, 如<code>_IO_read_ptr</code>/<code>_IO_write_ptr</code>, 也会有指向缓存区头尾的指针, 如<code>_IO_backup_base</code>. 还有<code>_fileno</code>成员, 会指向文件的fd, 通过<code>_fileno</code>可以真正的拿到文件.</p><h3 id=缓存区>缓存区</h3><p>一般来说读写指针都是指向的缓存区, 如下图是<strong>可能的</strong>两种关系:<figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a78756d6.webp title=&ldquo;情况一&rdquo; data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a78756d6.webp data-sub-html="<h2>情况一</h2><p>&ldquo;情况一&rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a78756d6.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a78756d6.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a78756d6.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a78756d6.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a78756d6.webp></a><figcaption class=image-caption>情况一</figcaption></figure></p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8966aa2.webp title=&ldquo;情况二&rdquo; data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8966aa2.webp data-sub-html="<h2>情况二</h2><p>&ldquo;情况二&rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8966aa2.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8966aa2.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8966aa2.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8966aa2.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8966aa2.webp></a><figcaption class=image-caption>情况二</figcaption></figure></p><h3 id=wide-data>wide data</h3><p>同时注意到, 上述读写等指针都是<code>char*</code>型的, 应对ascii的字符没问题, 但是文件不仅只有ascii, 会有其他更复杂的格式, 这时候怎么办呢?</p><p>针对字符编码格式问题, glibc提供了宽字符流. 在<code>FILE</code>中, <code>_codecvt</code>指向的是<code>_IO_codecvt</code>, 这是针对字符编码转换的函数表, <code>_wide_data</code>指向<code>_IO_wide_data</code>, 这是针对宽字符的读写指针, 如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>struct</span> <span class=n>_IO_wide_data</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_read_ptr</span><span class=p>;</span>          <span class=cm>/* Current read pointer */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_read_end</span><span class=p>;</span>          <span class=cm>/* End of get area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_read_base</span><span class=p>;</span>         <span class=cm>/* Start of putback+get area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_write_base</span><span class=p>;</span>        <span class=cm>/* Start of put area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_write_ptr</span><span class=p>;</span>         <span class=cm>/* Current put pointer. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_write_end</span><span class=p>;</span>         <span class=cm>/* End of put area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_buf_base</span><span class=p>;</span>          <span class=cm>/* Start of reserve area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_buf_end</span><span class=p>;</span>           <span class=cm>/* End of reserve area. */</span>
+</span></span><span class=line><span class=cl>  <span class=cm>/* The following fields are used to support backing up and undo. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_save_base</span><span class=p>;</span>         <span class=cm>/* Pointer to start of non-current get area. */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_backup_base</span><span class=p>;</span>       <span class=cm>/* Pointer to first valid character of
+</span></span></span><span class=line><span class=cl><span class=cm>                                   backup area */</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span> <span class=o>*</span><span class=n>_IO_save_end</span><span class=p>;</span>          <span class=cm>/* Pointer to end of non-current get area. */</span>
+</span></span><span class=line><span class=cl>  <span class=n>__mbstate_t</span> <span class=n>_IO_state</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>__mbstate_t</span> <span class=n>_IO_last_state</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>_IO_codecvt</span>  <span class=n>_codecvt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=kt>wchar_t</span>             <span class=n>_shortbuf</span><span class=p>[</span><span class=mi>1</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=k>struct</span> <span class=n>_IO_jump_t</span> <span class=o>*</span><span class=n>_wide_vtable</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>区别于<code>_IO_FILE</code>自带的指针, 宽字符的读写指针是<code>wchar_t*</code>. 还会有<code>_wide_vtable</code>, 这是指向<code>_IO_jump_t</code>的指针, <code>_IO_jump_t</code>可以看作是一个操作表, 包含了类似于<code>read</code>/<code>write</code>等操作.</p><h2 id=sturct-file>sturct file</h2><p>fd是什么, 见<a href=/202105/process-ctracon4/ rel>进程控制和进程通信(四)</a>, 进程<code>task_struct</code>会有指向进程打开的文件的列表的指针(<code>struct file</code>), 如下图. 本文的fd就是指向这个文件列表的下标.</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8cc55ce.webp title=&ldquo;fd和files_struct&rdquo; data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8cc55ce.webp data-sub-html="<h2>fd和files_struct</h2><p>&ldquo;fd和files_struct&rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8cc55ce.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8cc55ce.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8cc55ce.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8cc55ce.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a8cc55ce.webp></a><figcaption class=image-caption>fd和files_struct</figcaption></figure></p><p><a href=https://code.woboq.org/linux/linux/include/linux/fs.h.html#file target=_blank rel="noopener noreffer">struct file</a>如下:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=k>struct</span> <span class=n>file</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>union</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>struct</span> <span class=n>llist_node</span>	<span class=n>fu_llist</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>		<span class=k>struct</span> <span class=n>rcu_head</span> 	<span class=n>fu_rcuhead</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span> <span class=n>f_u</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>path</span>		                <span class=n>f_path</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>inode</span>      	          <span class=o>*</span><span class=n>f_inode</span><span class=p>;</span>	<span class=cm>/* cached value */</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=k>struct</span> <span class=n>file_operations</span>	<span class=o>*</span><span class=n>f_op</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Protects f_ep_links, f_flags.
+</span></span></span><span class=line><span class=cl><span class=cm>	 * Must not be taken from IRQ context.
+</span></span></span><span class=line><span class=cl><span class=cm>	 */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>spinlock_t</span>		        <span class=n>f_lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>enum</span> <span class=n>rw_hint</span>		      <span class=n>f_write_hint</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>atomic_long_t</span>		      <span class=n>f_count</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>unsigned</span> <span class=kt>int</span> 		      <span class=n>f_flags</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>fmode_t</span>			          <span class=n>f_mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>mutex</span>		      <span class=n>f_pos_lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>loff_t</span>			          <span class=n>f_pos</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>fown_struct</span>	  <span class=n>f_owner</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=k>struct</span> <span class=n>cred</span>	    <span class=o>*</span><span class=n>f_cred</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>file_ra_state</span>	<span class=n>f_ra</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=n>u64</span>			              <span class=n>f_version</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_SECURITY
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=kt>void</span>			            <span class=o>*</span><span class=n>f_security</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* needed for tty driver, and maybe others */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>void</span>			            <span class=o>*</span><span class=n>private_data</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef CONFIG_EPOLL
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=cm>/* Used by fs/eventpoll.c to link all the hooks to this file */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>	    <span class=n>f_ep_links</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>list_head</span>	    <span class=n>f_tfile_llink</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=cm>/* #ifdef CONFIG_EPOLL */</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span>	<span class=k>struct</span> <span class=n>address_space</span>	<span class=o>*</span><span class=n>f_mapping</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>errseq_t</span>		          <span class=n>f_wb_err</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=n>__randomize_layout</span>
+</span></span><span class=line><span class=cl>  <span class=nf>__attribute__</span><span class=p>((</span><span class=nf>aligned</span><span class=p>(</span><span class=mi>4</span><span class=p>)));</span>	<span class=cm>/* lest something weird decides that 2 is OK */</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>struct file</code>会有成员<code>f_inode</code>指向文件的inode, 这时候就可以找到文件对应的内容了. (TODO: vfs inode如何对应文件系统inode依然没有找到很好的资料&mldr;所以暂且认为有一个表指向吧~)
+<code>f_op</code>包含了文件的基本操作(这里是指Linux广义的文件), 如<code>open/read/write</code>等等, 本文就不再探究这些操作的具体内容了.</p><p>综上所述, <code>fopen</code>返回的<code>FILE</code>结构体可以通过fd找到<code>struct file</code>, 最终找到对应的inode. 那么<code>fopen</code>是如何找到fd的呢? 下面来追踪一下fopen的实现方式.</p><h2 id=fopen>fopen</h2><p><code>fopen</code>是glibc提供的用户态的api, 不同操作系统对<code>fopen</code>的实现方式是不同的, 这里采用64位Linux的实现方式(<code>__USE_FILE_OFFSET64</code> & <code>__USE_LARGEFILE64</code>)</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#define fopen   fopen64
+</span></span></span></code></pre></td></tr></table></div></div><p>在<a href=https://code.woboq.org/userspace/glibc/libio/stdio.h.html target=_blank rel="noopener noreffer">stdio.h</a>可以找到fopen64和fopen的接口是一样的.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=cp>#ifdef __USE_LARGEFILE64
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=k>extern</span> <span class=n>FILE</span> <span class=o>*</span><span class=nf>fopen64</span>   <span class=p>(</span><span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>__restrict</span> <span class=n>__filename</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                        <span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>__restrict</span> <span class=n>__modes</span><span class=p>)</span> <span class=n>__wur</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span></code></pre></td></tr></table></div></div><p>在<a href=https://code.woboq.org/userspace/glibc/libio/iofopen.c.html target=_blank rel="noopener noreffer">iofopen.c</a>, fopen会被绑定到__fopen_internal:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>FILE</span> <span class=o>*</span>
+</span></span><span class=line><span class=cl><span class=nf>__fopen_internal</span> <span class=p>(</span><span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>filename</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>mode</span><span class=p>,</span> <span class=kt>int</span> <span class=n>is32</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>locked_FILE</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>struct</span> <span class=n>_IO_FILE_plus</span> <span class=n>fp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef _IO_MTSAFE_IO
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=n>_IO_lock_t</span> <span class=n>lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>    <span class=k>struct</span> <span class=n>_IO_wide_data</span> <span class=n>wd</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=o>*</span><span class=n>new_f</span> <span class=o>=</span> <span class=p>(</span><span class=k>struct</span> <span class=n>locked_FILE</span> <span class=o>*</span><span class=p>)</span> <span class=nf>malloc</span> <span class=p>(</span><span class=k>sizeof</span> <span class=p>(</span><span class=k>struct</span> <span class=n>locked_FILE</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>new_f</span> <span class=o>==</span> <span class=nb>NULL</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef _IO_MTSAFE_IO
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=n>new_f</span><span class=o>-&gt;</span><span class=n>fp</span><span class=p>.</span><span class=n>file</span><span class=p>.</span><span class=n>_lock</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>new_f</span><span class=o>-&gt;</span><span class=n>lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span>  <span class=nf>_IO_no_init</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>new_f</span><span class=o>-&gt;</span><span class=n>fp</span><span class=p>.</span><span class=n>file</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>new_f</span><span class=o>-&gt;</span><span class=n>wd</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>_IO_wfile_jumps</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>_IO_JUMPS</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>new_f</span><span class=o>-&gt;</span><span class=n>fp</span><span class=p>)</span> <span class=o>=</span> <span class=o>&amp;</span><span class=n>_IO_file_jumps</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nf>_IO_new_file_init_internal</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>new_f</span><span class=o>-&gt;</span><span class=n>fp</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=nf>_IO_file_fopen</span> <span class=p>((</span><span class=n>FILE</span> <span class=o>*</span><span class=p>)</span> <span class=n>new_f</span><span class=p>,</span> <span class=n>filename</span><span class=p>,</span> <span class=n>mode</span><span class=p>,</span> <span class=n>is32</span><span class=p>)</span> <span class=o>!=</span> <span class=nb>NULL</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nf>__fopen_maybe_mmap</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>new_f</span><span class=o>-&gt;</span><span class=n>fp</span><span class=p>.</span><span class=n>file</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>_IO_un_link</span> <span class=p>(</span><span class=o>&amp;</span><span class=n>new_f</span><span class=o>-&gt;</span><span class=n>fp</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nf>free</span> <span class=p>(</span><span class=n>new_f</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>FILE</span> <span class=o>*</span>
+</span></span><span class=line><span class=cl><span class=nf>_IO_new_fopen</span> <span class=p>(</span><span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>filename</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>mode</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=nf>__fopen_internal</span> <span class=p>(</span><span class=n>filename</span><span class=p>,</span> <span class=n>mode</span><span class=p>,</span> <span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nf>weak_alias</span> <span class=p>(</span><span class=n>_IO_new_fopen</span><span class=p>,</span> <span class=n>fopen64</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>关注第20行的<code>_IO_file_fopen</code>, 在正常情况下, 会调用<a href=https://code.woboq.org/userspace/glibc/libio/fileops.c.html target=_blank rel="noopener noreffer">_IO_file_fopen</a></p><h3 id=解析mode>解析mode</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=nf>versioned_symbol</span> <span class=p>(</span><span class=n>libc</span><span class=p>,</span> <span class=n>_IO_new_file_fopen</span><span class=p>,</span> <span class=n>_IO_file_fopen</span><span class=p>,</span> <span class=n>GLIBC_2_1</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><p>glibc中将<a href=https://code.woboq.org/userspace/glibc/libio/fileops.c.html target=_blank rel="noopener noreffer">_IO_file_fopen</a>绑定到<a href=https://code.woboq.org/userspace/glibc/libio/fileops.c.html#_IO_new_file_fopen target=_blank rel="noopener noreffer">_IO_new_file_fopen</a>, 下面看<a href=https://code.woboq.org/userspace/glibc/libio/fileops.c.html#_IO_new_file_fopen target=_blank rel="noopener noreffer">_IO_new_file_fopen</a>的实现:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>FILE</span> <span class=o>*</span><span class=nf>_IO_new_file_fopen</span> <span class=p>(</span><span class=n>FILE</span> <span class=o>*</span><span class=n>fp</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>filename</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>mode</span><span class=p>,</span> <span class=kt>int</span> <span class=n>is32not64</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=kt>int</span> <span class=n>oprot</span> <span class=o>=</span> <span class=mo>0666</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>FILE</span> <span class=o>*</span><span class=n>result</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=k>switch</span> <span class=p>(</span><span class=o>*</span><span class=n>mode</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>case</span> <span class=sc>&#39;r&#39;</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>      <span class=n>omode</span> <span class=o>=</span> <span class=n>O_RDONLY</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>read_write</span> <span class=o>=</span> <span class=n>_IO_NO_WRITES</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>case</span> <span class=sc>&#39;w&#39;</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>      <span class=n>omode</span> <span class=o>=</span> <span class=n>O_WRONLY</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>oflags</span> <span class=o>=</span> <span class=n>O_CREAT</span><span class=o>|</span><span class=n>O_TRUNC</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>read_write</span> <span class=o>=</span> <span class=n>_IO_NO_READS</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=n>last_recognized</span> <span class=o>=</span> <span class=n>mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>for</span> <span class=p>(</span><span class=n>i</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mi>7</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>switch</span> <span class=p>(</span><span class=o>*++</span><span class=n>mode</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=sc>&#39;\0&#39;</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>          <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=sc>&#39;+&#39;</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>          <span class=n>omode</span> <span class=o>=</span> <span class=n>O_RDWR</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=n>read_write</span> <span class=o>&amp;=</span> <span class=n>_IO_IS_APPENDING</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=n>last_recognized</span> <span class=o>=</span> <span class=n>mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=sc>&#39;x&#39;</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>          <span class=n>oflags</span> <span class=o>|=</span> <span class=n>O_EXCL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=n>last_recognized</span> <span class=o>=</span> <span class=n>mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=sc>&#39;b&#39;</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>          <span class=n>last_recognized</span> <span class=o>=</span> <span class=n>mode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=k>continue</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=n>result</span> <span class=o>=</span> <span class=nf>_IO_file_open</span> <span class=p>(</span><span class=n>fp</span><span class=p>,</span> <span class=n>filename</span><span class=p>,</span> <span class=n>omode</span><span class=o>|</span><span class=n>oflags</span><span class=p>,</span> <span class=n>oprot</span><span class=p>,</span> <span class=n>read_write</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                          <span class=n>is32not64</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>result</span> <span class=o>!=</span> <span class=nb>NULL</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//...... 这里主要处理宽字符情况, 会修改一些字符指针和操作表
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=获取fd>获取fd</h3><p>在<code>_IO_new_file_fopen</code>处理了<code>fopen</code>指定的文件权限和打开模式, 然后调用<a href=https://code.woboq.org/userspace/glibc/libio/fileops.c.html#_IO_file_open target=_blank rel="noopener noreffer">_IO_file_open</a>打开文件:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=n>FILE</span> <span class=o>*</span>
+</span></span><span class=line><span class=cl><span class=nf>_IO_file_open</span> <span class=p>(</span><span class=n>FILE</span> <span class=o>*</span><span class=n>fp</span><span class=p>,</span> <span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>filename</span><span class=p>,</span> <span class=kt>int</span> <span class=n>posix_mode</span><span class=p>,</span> <span class=kt>int</span> <span class=n>prot</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>               <span class=kt>int</span> <span class=n>read_write</span><span class=p>,</span> <span class=kt>int</span> <span class=n>is32not64</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>fdesc</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=nf>__glibc_unlikely</span> <span class=p>(</span><span class=n>fp</span><span class=o>-&gt;</span><span class=n>_flags2</span> <span class=o>&amp;</span> <span class=n>_IO_FLAGS2_NOTCANCEL</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=n>fdesc</span> <span class=o>=</span> <span class=nf>__open_nocancel</span> <span class=p>(</span><span class=n>filename</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                             <span class=n>posix_mode</span> <span class=o>|</span> <span class=p>(</span><span class=n>is32not64</span> <span class=o>?</span> <span class=mi>0</span> <span class=o>:</span> <span class=n>O_LARGEFILE</span><span class=p>),</span> <span class=n>prot</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>else</span>
+</span></span><span class=line><span class=cl>    <span class=n>fdesc</span> <span class=o>=</span> <span class=nf>__open</span> <span class=p>(</span><span class=n>filename</span><span class=p>,</span> <span class=n>posix_mode</span> <span class=o>|</span> <span class=p>(</span><span class=n>is32not64</span> <span class=o>?</span> <span class=mi>0</span> <span class=o>:</span> <span class=n>O_LARGEFILE</span><span class=p>),</span> <span class=n>prot</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>fdesc</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nb>NULL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>fp</span><span class=o>-&gt;</span><span class=n>_fileno</span> <span class=o>=</span> <span class=n>fdesc</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=c1>//......
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=nf>_IO_link_in</span> <span class=p>((</span><span class=k>struct</span> <span class=n>_IO_FILE_plus</span> <span class=o>*</span><span class=p>)</span> <span class=n>fp</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>fp</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里主要关注<code>__open</code>函数, 这依然是glibc的函数调用, 但是glibc会把<code>__open</code>绑定到<a href=https://code.woboq.org/userspace/glibc/sysdeps/unix/sysv/linux/open64.c.html#58 target=_blank rel="noopener noreffer">__libc_open64</a></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=nf>strong_alias</span> <span class=p>(</span><span class=n>__libc_open64</span><span class=p>,</span> <span class=n>__open</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p><a href=https://code.woboq.org/userspace/glibc/sysdeps/unix/sysv/linux/open64.c.html#58 target=_blank rel="noopener noreffer">__libc_open64</a>则会执行系统调用.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=line><span class=cl><span class=kt>int</span>
+</span></span><span class=line><span class=cl><span class=nf>__libc_open64</span> <span class=p>(</span><span class=k>const</span> <span class=kt>char</span> <span class=o>*</span><span class=n>file</span><span class=p>,</span> <span class=kt>int</span> <span class=n>oflag</span><span class=p>,</span> <span class=p>...)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int</span> <span class=n>mode</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=nf>__OPEN_NEEDS_MODE</span> <span class=p>(</span><span class=n>oflag</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>va_list</span> <span class=n>arg</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=nf>va_start</span> <span class=p>(</span><span class=n>arg</span><span class=p>,</span> <span class=n>oflag</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=n>mode</span> <span class=o>=</span> <span class=nf>va_arg</span> <span class=p>(</span><span class=n>arg</span><span class=p>,</span> <span class=kt>int</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=nf>va_end</span> <span class=p>(</span><span class=n>arg</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=nf>SYSCALL_CANCEL</span> <span class=p>(</span><span class=n>openat</span><span class=p>,</span> <span class=n>AT_FDCWD</span><span class=p>,</span> <span class=n>file</span><span class=p>,</span> <span class=n>oflag</span> <span class=o>|</span> <span class=n>EXTRA_OPEN_FLAGS</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>mode</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>抛开<code>__libc_open64</code>继续关注<code>__open</code>, 可以看到<code>__open</code>返回的是文件的fd, 会保存在FILE结构体的<code>_fileno</code>中.</p><h2 id=总结>总结</h2><p><code>fopen</code>如何打开文件, 可以见下图:</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a9109048.webp title=&ldquo;fopen到inode&rdquo; data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a9109048.webp data-sub-html="<h2>fopen到inode</h2><p>&ldquo;fopen到inode&rdquo;</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a9109048.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a9109048.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a9109048.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a9109048.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/62b87a9109048.webp></a><figcaption class=image-caption>fopen到inode</figcaption></figure></p><h2 id=参考链接>参考链接</h2><ul><li><code>FILE</code>: <a href=https://code.woboq.org/userspace/glibc/libio/bits/types/struct_FILE.h.html target=_blank rel="noopener noreffer">https://code.woboq.org/userspace/glibc/libio/bits/types/struct_FILE.h.html</a></li><li><code>struct file</code>: <a href=https://code.woboq.org/linux/linux/include/linux/fs.h.html target=_blank rel="noopener noreffer">https://code.woboq.org/linux/linux/include/linux/fs.h.html</a></li><li><code>fopen</code>: <a href=https://code.woboq.org/userspace/glibc/libio/stdio.h.html target=_blank rel="noopener noreffer">https://code.woboq.org/userspace/glibc/libio/stdio.h.html</a></li><li><code>iofopen</code>: <a href=https://code.woboq.org/userspace/glibc/libio/iofopen.c.html target=_blank rel="noopener noreffer">https://code.woboq.org/userspace/glibc/libio/iofopen.c.html</a></li><li><code>fileops</code>: <a href=https://code.woboq.org/userspace/glibc/libio/fileops.c.html target=_blank rel="noopener noreffer">https://code.woboq.org/userspace/glibc/libio/fileops.c.html</a></li><li><code>open64</code>: <a href=https://code.woboq.org/userspace/glibc/sysdeps/unix/sysv/linux/open64.c.html target=_blank rel="noopener noreffer">https://code.woboq.org/userspace/glibc/sysdeps/unix/sysv/linux/open64.c.html</a></li></ul></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2021-06-01</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/>操作系统</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/linux/>Linux</a>,&nbsp;<a href=/tags/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/>文件系统</a>,&nbsp;<a href=/tags/glibc/>Glibc</a></section></div><div class=post-nav><a href=/202106/html5-maodian-scroll/ class=prev rel=prev title=html5锚点滚动><i class="fas fa-angle-left fa-fw"></i>html5锚点滚动</a>
+<a href=/202106/process-ctracon5/ class=next rel=next title=进程控制和通信(五)>进程控制和通信(五)<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div><section><script>const preload_related_posts=[{title:"DMA拼接",link:"/202504/dma-ring/",date:"2025-04-20"},{title:"二维数据可视化工具-painter",link:"/202412/2d-vistual-painter/",date:"2024-12-09"},{title:"轻量级参数解析库-tiny_cmdline",link:"/202408/about_tiny_summary/",date:"2024-08-13"},{title:"clockdiff时间差测量原理",link:"/202405/clockdiff-sourcecode/",date:"2024-05-31"},{title:"设置CPU使用率的工具-cpuocup",link:"/202305/cpuocup/",date:"2023-05-09"},{title:"glibc-read/write源码阅读",link:"/202301/glibc-read-write/",date:"2023-01-08"},{title:"文件和文件夹md5工具-md5any",link:"/202210/md5fileandic-md5any/",date:"2022-10-11"},{title:"系统信息悬浮窗-fstats",link:"/202207/sysinfo-fstats/",date:"2022-07-21"},{title:"glibc-malloc源码阅读二",link:"/202203/glibc-malloc2/",date:"2022-03-30"},{title:"glibc-malloc源码阅读",link:"/202203/glibc-malloc/",date:"2022-03-25"},{title:"glibc-mmap源码阅读",link:"/202202/glibc-mmap/",date:"2022-02-28"},{title:"glibc-fopen源码阅读-补充篇-open系统调用",link:"/202202/fopen-sys-open/",date:"2022-02-22"},{title:"程序的栈帧",link:"/202201/framestack/",date:"2022-01-26"},{title:"glibc-exit源码阅读",link:"/202201/glibc-exit/",date:"2022-01-24"},{title:"glibc-raise源码阅读",link:"/202111/glibc-raise/",date:"2021-11-16"},{title:"glibc-abort源码阅读",link:"/202111/glibc-abort/",date:"2021-11-11"},{title:"进程控制和通信(五)",link:"/202106/process-ctracon5/",date:"2021-06-03"},{title:"初探Linux文件和文件系统",link:"/202105/linux-filesystem/",date:"2021-05-14"},{title:"进程控制和通信(三)",link:"/202105/process-ctracon3/",date:"2021-05-07"},{title:"进程控制和通信(二)",link:"/202104/process-ctracon2/",date:"2021-04-23"},{title:"进程控制和通信(一)",link:"/202104/process-ctracon1/",date:"2021-04-21"},{title:"进程、线程和协程概念",link:"/202104/pandt-what/",date:"2021-04-15"}]</script></section></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2026</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog
+</a>&nbsp;|&nbsp;
+<a href=https://www.travellings.cn/go.html target=_blank rel=noopener title=开往-友链接力>开往-友链接力
+</a>&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2026-08-26T11:40:37+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+130&nbsp;篇
+&nbsp;|&nbsp;
+292K&nbsp;字</div><div class=footer-line><a href=/friends title=友情链接>友情链接:</a>&nbsp;&nbsp;
+<a target=_blank href=https://thiscute.world/ title="This Cute World">This Cute World</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://dusays.com title=杜老师说>杜老师说</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://panqiincs.me/ title=辛未羊的网络日志>辛未羊的网络日志</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://lewky.cn title=雨临Lewis的博客>雨临Lewis的博客</a></div></div></footer></div><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=/css/innerworld-side.css><link rel=stylesheet href=/css/search-loading.css><script type=text/javascript src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/marked@13.0.2/marked.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},search:{highlightTag:"em",maxResultLength:50,noResultsFound:"没有找到结果",snippetLength:50,type:"pagefind"}}</script><script type=text/javascript src=/js/search-results.js></script><script type=text/javascript src=/js/theme.js></script><script type=text/javascript src=/js/innerworld-side.js></script><script type=text/javascript src=/js/search-loading.js></script></body></html>

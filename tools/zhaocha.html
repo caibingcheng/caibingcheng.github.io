@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Clickable Chess Board</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .chess-board-container {
+            display: flex;
+            justify-content: center;
+            width: calc(100% - 64px);
+            padding: 0 32px;
+        }
+
+        .chess-board {
+            display: grid;
+            margin: 16px;
+        }
+
+        .chess-cell {
+            width: 0;
+            height: 0;
+            border: 1px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+        }
+
+        .chess-board-settings {
+            width: 300px;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chess-board-settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #333;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 60%;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .chess-board-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chess-board-header">
+    </div>
+    <div>
+        <div class="chess-board-container">
+            <div id="chess-board-left">
+            </div>
+            <div id="chess-board-right">
+            </div>
+        </div>
+
+        <div class="chess-board-settings">
+            <div class="chess-board-settings-item">
+                <label for="chess-board-size">棋盘大小</label>
+                <input type="number" id="chess-board-size" value="8" />
+            </div>
+            <div class="chess-board-settings-item">
+                <label for="chess-board-difficulty">难度</label>
+                <input type="number" id="chess-board-difficulty" value="2" />
+            </div>
+            <div class="chess-board-settings-item">
+                <label for="chess-board-colors">颜色</label>
+                <input type="text" id="chess-board-colors"
+                    value="#FF0000, #00FF00, #FFA500, #FFFF00, #FF1493, #00CED1, #800080" />
+            </div>
+            <div class="chess-board-settings-item">
+                <button id="chess-board-start">开始</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function range(start, end) {
+            const array = [];
+            for (let i = start; i <= end; i++) {
+                array.push(i);
+            }
+            return array;
+        }
+
+        function sampleWithoutReplacement(array) {
+            if (!array || array.length === 0) return;
+
+            const randomIndex = Math.floor(Math.random() * array.length);
+            const element = array.splice(randomIndex, 1)[0];
+
+            return element;
+        }
+
+        document.querySelector('.chess-board-container').style.display = 'none';
+        // press 's' show settings
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 's') {
+                const settings = document.querySelector('.chess-board-settings');
+                const container = document.querySelector('.chess-board-container');
+                if (settings.style.display === 'none') {
+                    container.style.display = 'none';
+                    settings.style.display = 'block';
+                } else {
+                    settings.style.display = 'none';
+                    container.style.display = 'flex';
+                }
+            }
+        });
+
+        document.getElementById('chess-board-start').addEventListener('click', function () {
+            initBoard();
+        });
+
+        var costTime = 0;
+        var pauseClick = false;
+        function initBoard() {
+            pauseClick = false;
+
+            const settings = document.querySelector('.chess-board-settings');
+            const container = document.querySelector('.chess-board-container');
+            settings.style.display = 'none';
+            container.style.display = 'flex';
+
+            // remove all circles
+            const circles = document.querySelectorAll('.circle');
+            circles.forEach(circle => {
+                circle.remove();
+            });
+
+            let size = parseInt(document.getElementById('chess-board-size').value);
+            let colors = document.getElementById('chess-board-colors').value.split(',');
+            let diffCount = parseInt(document.getElementById('chess-board-difficulty').value);
+            let tryTimes = diffCount + 1;
+
+            const header = document.querySelector('.chess-board-header');
+            header.innerHTML = `剩余不同：${diffCount}，剩余次数：${tryTimes}`;
+
+            // choise diffCount element from range 0 to size * size
+            let indexArray = range(0, size * size - 1);
+            let diffList = [];
+            for (let i = 0; i < diffCount; i++) {
+                diffList.push(sampleWithoutReplacement(indexArray));
+            }
+            let cellColors = [];
+            let diffColors = [];
+            for (let i = 0; i < size * size; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                cellColors.push(color);
+                diffColors.push(color);
+            }
+            for (let i = 0; i < diffCount; i++) {
+                do {
+                    diffColors[diffList[i]] = colors[Math.floor(Math.random() * colors.length)];
+                } while (cellColors[diffList[i]] == diffColors[diffList[i]]);
+            }
+
+            let boardLeft = document.getElementById('chess-board-left');
+            let boardRight = document.getElementById('chess-board-right');
+            boardLeft.innerHTML = "";
+            boardRight.innerHTML = "";
+
+            let windowWidth = window.innerWidth;
+            let windowHeight = window.innerHeight;
+            let chessCellSize = 50;
+            if (chessCellSize * size > windowWidth * 0.8) {
+                chessCellSize = windowWidth * 0.8 / size;
+            }
+            if (chessCellSize * size > windowHeight * 0.8) {
+                chessCellSize = windowHeight * 0.8 / size;
+            }
+
+            function markCell(i) {
+                const cellLeftPosition = boardLeft.children[i].getBoundingClientRect();
+                const cellRightPosition = boardRight.children[i].getBoundingClientRect();
+                // generate a div circle
+                [cellLeftPosition, cellRightPosition].forEach(cellPosition => {
+                    const circle = document.createElement('div');
+                    const outSize = chessCellSize / 2;
+                    circle.classList.add('circle');
+                    circle.style.position = 'fixed';
+                    circle.style.top = cellPosition.top - outSize + 'px';
+                    circle.style.left = cellPosition.left - outSize + 'px';
+                    circle.style.width = chessCellSize + outSize * 2 + 'px';
+                    circle.style.height = chessCellSize + outSize * 2 + 'px';
+                    circle.style.borderRadius = '50%';
+                    circle.style.backgroundColor = 'transparent';
+                    circle.style.border = '5px solid #cecece';
+                    circle.style.zIndex = 100;
+                    document.body.appendChild(circle);
+                });
+            }
+
+            [boardLeft, boardRight].forEach(board => {
+                for (let i = 0; i < size * size; i++) {
+                    let cell = document.createElement('div');
+                    cell.innerHTML = "";
+                    cell.classList.add('chess-cell');
+                    cell.addEventListener('click', function () {
+                        if (pauseClick) return;
+                        tryTimes--;
+                        const leftColor = boardLeft.children[i].style.backgroundColor;
+                        const rightColor = boardRight.children[i].style.backgroundColor;
+                        if (leftColor != rightColor) {
+                            diffCount--;
+                            markCell(i);
+                        }
+                        header.innerHTML = `剩余不同：${diffCount}，剩余次数：${tryTimes}`;
+                        if (diffCount <= 0) {
+                            pauseClick = true;
+                            costTime = new Date().getTime() - costTime;
+                            header.innerHTML = `剩余不同：${diffCount}，剩余次数：${tryTimes}，游戏结束！ 用时${costTime / 1000}秒`;
+                            setTimeout(function () {
+                                confirm('用时' + costTime / 1000 + '秒');
+                                initBoard();
+                            }, 50);
+                        }
+                        if (tryTimes <= 0) {
+                            pauseClick = true;
+                            for (let diff of diffList) {
+                                markCell(diff);
+                            }
+                            header.innerHTML = `剩余不同：${diffCount}，剩余次数：${tryTimes}，游戏结束！`;
+                            setTimeout(function () {
+                                confirm('游戏结束');
+                                initBoard();
+                            }, 50);
+                        }
+                    });
+                    cell.style.width = chessCellSize + 'px';
+                    cell.style.height = chessCellSize + 'px';
+                    if (board == boardLeft) {
+                        cell.style.backgroundColor = diffColors[i];
+                    }
+                    else if (board == boardRight) {
+                        cell.style.backgroundColor = cellColors[i];
+                    } else {
+                        // do nothing
+                    }
+                    board.appendChild(cell);
+                }
+                board.classList.add('chess-board');
+                board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+            });
+
+            // get current time in ms
+            costTime = new Date().getTime();
+        }
+    </script>
+</body>
+
+</html>

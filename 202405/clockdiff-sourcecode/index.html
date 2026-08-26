@@ -1,0 +1,233 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=X-UA-Compatible content="IE=edge, chrome=1"><title>clockdiff时间差测量原理 - ImCBC</title><meta name=keywords content="[Life bbing bing bingcheng hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:url" content="https://imcbc.cn/202405/clockdiff-sourcecode/"><meta property="og:site_name" content="ImCBC"><meta property="og:title" content="clockdiff时间差测量原理"><meta property="og:description" content="clockdiff是iputils库下的一个时间测量工具，用于测量两台设备之间的时间差。基本用法是：
+1 clockdiff <destination> 本文主要学习clockdiff测量时间差的原理。"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2024-05-31T09:20:13+08:00"><meta property="article:modified_time" content="2024-07-29T15:31:08+08:00"><meta property="article:tag" content="Linux"><meta property="article:tag" content="Socket"><meta property="article:tag" content="协议"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="clockdiff时间差测量原理"><meta name=twitter:description content="clockdiff是iputils库下的一个时间测量工具，用于测量两台设备之间的时间差。基本用法是：
+1 clockdiff <destination> 本文主要学习clockdiff测量时间差的原理。"><meta name=application-name content="ImCBC"><meta name=apple-mobile-web-app-title content="ImCBC"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel=preconnect href=https://fastly.jsdelivr.net crossorigin><link rel=dns-prefetch href=https://fastly.jsdelivr.net><link rel=preconnect href=https://giscus.app crossorigin><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202405/clockdiff-sourcecode/><link rel=prev href=https://imcbc.cn/202405/transmite-log-channel/><link rel=next href=https://imcbc.cn/202406/time-sync-summary/><style>html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:initial}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}template{display:none}[hidden]{display:none}</style><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css crossorigin=anonymous><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css crossorigin=anonymous><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"clockdiff时间差测量原理","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202405\/clockdiff-sourcecode\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"Linux, socket, 协议","wordcount":2069,"url":"https:\/\/imcbc.cn\/202405\/clockdiff-sourcecode\/","datePublished":"2024-05-31T09:20:13+08:00","dateModified":"2024-07-29T15:31:08+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bing"},"description":""}</script></head><body header-desktop=fixed header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentColor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentColor" class="octo-body"/></svg></a><div class=header-title><a href=/ title=ImCBC>ImCBC</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i>
+</a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i>
+</a><span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i>
+</span></span><a href=https://www.travellings.cn/go.html target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i>
+</a><a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i>
+</a><a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=ImCBC>ImCBC</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i>
+</a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i>
+</a><span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档
+</a><a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签
+</a><a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类
+</a><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链
+</a><a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具
+</a><a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于
+</a><a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站
+</a><a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>clockdiff时间差测量原理<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2024-05-31>2024-05-31</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2069 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><ul><li><a href=#icmp协议>ICMP协议</a></li><li><a href=#clockdiff-发送-icmp-timestamp-request>clockdiff 发送 ICMP timestamp request</a></li><li><a href=#clockdiff-接收-icmp-timestamp-reply>clockdiff 接收 ICMP timestamp reply</a></li><li><a href=#clockdiff-网络异常处理>clockdiff 网络异常处理</a></li></ul></li></ul></nav></div></div><details class=summary-details><summary class=summary-title>摘要</summary><div class=summary title="version: 1.0.4-batch, model: gpt-4o, score: A"><i version=1.0.4-batch model=gpt-4o></i><p>本文详细解析了clockdiff工具的时间差测量原理，重点介绍了其基于ICMP协议的实现方式。通过分析ICMP报文的Type和Code字段，作者解释了clockdiff如何发送ICMP Timestamp Request报文并处理回复，进而计算两台设备的时间差。文章还探讨了clockdiff的网络异常处理机制以及如何通过多次测量提高精度。此外，代码片段展示了报文构造、时间戳更新和延迟计算的具体实现，帮助读者深入理解clockdiff的工作原理。</p><div class=summary-meta>评分: A</div></div></details><hr class=summary-separator><br><div data-pagefind-body class=content id=content><p>clockdiff是iputils库下的一个时间测量工具，用于测量两台设备之间的时间差。基本用法是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>clockdiff &lt;destination&gt;
+</span></span></code></pre></td></tr></table></div></div><p>本文主要学习clockdiff测量时间差的原理。</p><p>clockdiff运行时，不需要对端也打开clockdiff就能测量时间，这依赖于ICMP协议。</p><h3 id=icmp协议>ICMP协议</h3><p>主要参考一些其他文章：</p><ul><li><a href=https://zhuanlan.zhihu.com/p/369623317 target=_blank rel="noopener noreffer">https://zhuanlan.zhihu.com/p/369623317</a></li><li><a href=https://cloud.tencent.com/developer/article/1593056 target=_blank rel="noopener noreffer">https://cloud.tencent.com/developer/article/1593056</a></li></ul><p>通过wireshark抓包，可以看到在ping命令和clockdiff命令下，ICMP报文的Type和Code字段对应不同的值。</p><p>对ICMP Timestamp Request报文，Type和Code分别对应13、0（Reply则是14，0）：</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63c2eb.webp title=ICMP_timestamp_request.png data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63c2eb.webp data-sub-html="<h2>timestamp</h2><p>ICMP_timestamp_request.png</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63c2eb.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63c2eb.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63c2eb.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63c2eb.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63c2eb.webp></a><figcaption class=image-caption>timestamp</figcaption></figure></p><p>对ICMP Ping Request（Echo Request）对应的Type和Code分别是8，0（Reply则是0，0）：</p><p><figure><a class=lightgallery href=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63b898.webp title=ICMP_ping_request.png data-thumbnail=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63b898.webp data-sub-html="<h2>ping</h2><p>ICMP_ping_request.png</p>"><img class=lazyload src=/svg/loading.min.svg data-src=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63b898.webp data-srcset="https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63b898.webp, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63b898.webp 1.5x, https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63b898.webp 2x" data-sizes=auto alt=https://cdn.jsdelivr.net/gh/caibingcheng/caibingcheng.github.io@assets/static/images/665488e63b898.webp></a><figcaption class=image-caption>ping</figcaption></figure></p><h3 id=clockdiff-发送-icmp-timestamp-request>clockdiff 发送 ICMP timestamp request</h3><p>先是构造报文的类型：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>mv</span><span class=p>.</span><span class=n>length</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=k>struct</span> <span class=n>sockaddr_in</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>ctl</span><span class=o>-&gt;</span><span class=n>ip_opt_len</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>oicp</span><span class=o>-&gt;</span><span class=n>type</span> <span class=o>=</span> <span class=n>ICMP_ECHO</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>else</span>
+</span></span><span class=line><span class=cl>    <span class=n>oicp</span><span class=o>-&gt;</span><span class=n>type</span> <span class=o>=</span> <span class=n>ICMP_TIMESTAMP</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>oicp</span><span class=o>-&gt;</span><span class=n>code</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>oicp</span><span class=o>-&gt;</span><span class=n>checksum</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>oicp</span><span class=o>-&gt;</span><span class=n>un</span><span class=p>.</span><span class=n>echo</span><span class=p>.</span><span class=n>id</span> <span class=o>=</span> <span class=n>ctl</span><span class=o>-&gt;</span><span class=n>id</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>((</span><span class=kt>uint32_t</span> <span class=o>*</span><span class=p>)</span> <span class=p>(</span><span class=n>oicp</span> <span class=o>+</span> <span class=mi>1</span><span class=p>))[</span><span class=mi>0</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>((</span><span class=kt>uint32_t</span> <span class=o>*</span><span class=p>)</span> <span class=p>(</span><span class=n>oicp</span> <span class=o>+</span> <span class=mi>1</span><span class=p>))[</span><span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>((</span><span class=kt>uint32_t</span> <span class=o>*</span><span class=p>)</span> <span class=p>(</span><span class=n>oicp</span> <span class=o>+</span> <span class=mi>1</span><span class=p>))[</span><span class=mi>2</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>ICMP_ECHO先跳过，现在往ICMP报文塞了type = ICMP_TIMESTAMP（13）和 code = 0。这是一个ICMP Timestamp Request报文。</p><p>这里的0、1、2三个uint32_t则是ICMP Timestamp报文需求的三个时间戳：发送时间戳、接收时间戳、回传时间戳。这部分是不包含在<code>icmphdr</code>定义中的，所以预分配空间时需要考虑这部分空间。</p><p>而后，更新发送时间戳，和checksum：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>oicp</span><span class=o>-&gt;</span><span class=n>un</span><span class=p>.</span><span class=n>echo</span><span class=p>.</span><span class=n>sequence</span> <span class=o>=</span> <span class=o>++</span><span class=n>ctl</span><span class=o>-&gt;</span><span class=n>seqno</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>oicp</span><span class=o>-&gt;</span><span class=n>checksum</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nf>clock_gettime</span><span class=p>(</span><span class=n>CLOCK_REALTIME</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>mv</span><span class=p>.</span><span class=n>ts1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=o>*</span><span class=p>(</span><span class=kt>uint32_t</span> <span class=o>*</span><span class=p>)</span> <span class=p>(</span><span class=n>oicp</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span> <span class=o>=</span>
+</span></span><span class=line><span class=cl>    <span class=nf>htonl</span><span class=p>((</span><span class=n>mv</span><span class=p>.</span><span class=n>ts1</span><span class=p>.</span><span class=n>tv_sec</span> <span class=o>%</span> <span class=p>(</span><span class=mi>24</span> <span class=o>*</span> <span class=mi>60</span> <span class=o>*</span> <span class=mi>60</span><span class=p>))</span> <span class=o>*</span> <span class=mi>1000</span> <span class=o>+</span> <span class=n>mv</span><span class=p>.</span><span class=n>ts1</span><span class=p>.</span><span class=n>tv_nsec</span> <span class=o>/</span> <span class=mi>1000000</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=n>oicp</span><span class=o>-&gt;</span><span class=n>checksum</span> <span class=o>=</span> <span class=nf>in_cksum</span><span class=p>((</span><span class=kt>unsigned</span> <span class=kt>short</span> <span class=o>*</span><span class=p>)</span><span class=n>oicp</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=o>*</span><span class=n>oicp</span><span class=p>)</span> <span class=o>+</span> <span class=mi>12</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>mv</span><span class=p>.</span><span class=n>count</span> <span class=o>=</span> <span class=nf>sendto</span><span class=p>(</span><span class=n>ctl</span><span class=o>-&gt;</span><span class=n>sock_raw</span><span class=p>,</span> <span class=p>(</span><span class=kt>char</span> <span class=o>*</span><span class=p>)</span><span class=n>opacket</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=o>*</span><span class=n>oicp</span><span class=p>)</span> <span class=o>+</span> <span class=mi>12</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>           <span class=p>(</span><span class=k>struct</span> <span class=n>sockaddr</span> <span class=o>*</span><span class=p>)</span><span class=o>&amp;</span><span class=n>ctl</span><span class=o>-&gt;</span><span class=n>server</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=k>struct</span> <span class=n>sockaddr_in</span><span class=p>));</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里的发送时间戳使用的是软时钟、系统时间，然后<strong>按天取模</strong>，所以传递出去的时间戳是以当天0点为基准的偏移时间，单位是ms。</p><p>时间单位如果用us，则会被uint32_t类型溢出，或者可以考虑使用100us为最小刻度，这样是不溢出的。但是使用非1刻度就需要考虑对端刻度是否一致。</p><p>在发送ICMP Timestamp Request报文前，包含一个for循环，这说明需要多次测量，默认是50次：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>for</span> <span class=p>(</span><span class=n>mv</span><span class=p>.</span><span class=n>msgcount</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>mv</span><span class=p>.</span><span class=n>msgcount</span> <span class=o>&lt;</span> <span class=n>MSGS</span><span class=p>;)</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=clockdiff-接收-icmp-timestamp-reply>clockdiff 接收 ICMP timestamp reply</h3><p>首先会设置期望的timeout时间：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>long</span> <span class=n>tmo</span> <span class=o>=</span> <span class=nf>MAX</span><span class=p>(</span><span class=n>ctl</span><span class=o>-&gt;</span><span class=n>rtt</span> <span class=o>+</span> <span class=n>ctl</span><span class=o>-&gt;</span><span class=n>rtt_sigma</span><span class=p>,</span> <span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>mv</span><span class=o>-&gt;</span><span class=n>tout</span><span class=p>.</span><span class=n>tv_sec</span> <span class=o>=</span> <span class=n>tmo</span> <span class=o>/</span> <span class=mi>1000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>mv</span><span class=o>-&gt;</span><span class=n>tout</span><span class=p>.</span><span class=n>tv_nsec</span> <span class=o>=</span> <span class=p>(</span><span class=n>tmo</span> <span class=o>-</span> <span class=p>(</span><span class=n>tmo</span> <span class=o>/</span> <span class=mi>1000</span><span class=p>)</span> <span class=o>*</span> <span class=mi>1000</span><span class=p>)</span> <span class=o>*</span> <span class=mi>1000000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>((</span><span class=n>mv</span><span class=o>-&gt;</span><span class=n>count</span> <span class=o>=</span> <span class=nf>ppoll</span><span class=p>(</span><span class=o>&amp;</span><span class=n>p</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>mv</span><span class=o>-&gt;</span><span class=n>tout</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>))</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>BREAK</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p>如果超时还没收到reply，则认为异常。那么就回到服务端再发送一遍，然后尝试接收。这里的ctl->rtt（默认值1000ms） + ctl->rtt_sigma是动态变化的，主要用于拥塞控制。更新逻辑为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>ctl-&gt;rtt = (ctl-&gt;rtt * 3 + diff) / 4;
+</span></span><span class=line><span class=cl>ctl-&gt;rtt_sigma = (ctl-&gt;rtt_sigma * 3 + labs(diff - ctl-&gt;rtt)) / 4;
+</span></span></code></pre></td></tr></table></div></div><p>这里的diff表示的是，本地发送和接收时间戳的差值，时间戳都来自系统时钟。</p><p>上面还没有获取对端的接收时间，获取方式为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>if (!ctl-&gt;ip_opt_len) {
+</span></span><span class=line><span class=cl>    histime = ntohl(((uint32_t *) (mv-&gt;icp + 1))[1]);
+</span></span><span class=line><span class=cl>    /*
+</span></span><span class=line><span class=cl>     * a hosts using a time format different from ms.  since midnight
+</span></span><span class=line><span class=cl>     * UT (as per RFC792) should set the high order bit of the 32-bit
+</span></span><span class=line><span class=cl>     * time value it transmits.
+</span></span><span class=line><span class=cl>     */
+</span></span><span class=line><span class=cl>    if ((histime &amp; 0x80000000) != 0)
+</span></span><span class=line><span class=cl>        return NONSTDTIME;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>这里只获取对端的接收时间戳，没有获取对端发送时间戳。我认为，一般是没有必要的，如上文，这里的时间戳最小刻度是1ms，一般情况下，接收和发送的时间间隔会小于1ms，是测量不出来的。所以这里没有必要再获取对端的发送时间戳。</p><p>而后就是获取两个方向的延迟：本地发送到对端的延迟和对端发送到本地的延迟。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>delta1 = histime - sendtime;
+</span></span><span class=line><span class=cl>/*
+</span></span><span class=line><span class=cl> * Handles wrap-around to avoid that around midnight small time
+</span></span><span class=line><span class=cl> * differences appear enormous.  However, the two machine&#39;s clocks must
+</span></span><span class=line><span class=cl> * be within 12 hours from each other.
+</span></span><span class=line><span class=cl> */
+</span></span><span class=line><span class=cl>if (delta1 &lt; BIASN)
+</span></span><span class=line><span class=cl>    delta1 += MODULO;
+</span></span><span class=line><span class=cl>else if (delta1 &gt; BIASP)
+</span></span><span class=line><span class=cl>    delta1 -= MODULO;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>if (ctl-&gt;ip_opt_len)
+</span></span><span class=line><span class=cl>    delta2 = recvtime - histime1;
+</span></span><span class=line><span class=cl>else
+</span></span><span class=line><span class=cl>    delta2 = recvtime - histime;
+</span></span><span class=line><span class=cl>if (delta2 &lt; BIASN)
+</span></span><span class=line><span class=cl>    delta2 += MODULO;
+</span></span><span class=line><span class=cl>else if (delta2 &gt; BIASP)
+</span></span><span class=line><span class=cl>    delta2 -= MODULO;
+</span></span></code></pre></td></tr></table></div></div><p>还需要考虑“午夜”问题，因为ICMP Timestamp报文中包含的时间戳是以当天0点起始的。</p><p>然后更新最小的延迟：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>if (delta1 &lt; mv-&gt;min1)
+</span></span><span class=line><span class=cl>    mv-&gt;min1 = delta1;
+</span></span><span class=line><span class=cl>if (delta2 &lt; mv-&gt;min2)
+</span></span><span class=line><span class=cl>    mv-&gt;min2 = delta2;
+</span></span><span class=line><span class=cl>if (delta1 + delta2 &lt; ctl-&gt;min_rtt) {
+</span></span><span class=line><span class=cl>    ctl-&gt;min_rtt = delta1 + delta2;
+</span></span><span class=line><span class=cl>    ctl-&gt;measure_delta1 = (delta1 - delta2) / 2 + PROCESSING_TIME;
+</span></span><span class=line><span class=cl>}
+</span></span><span class=line><span class=cl>if (diff &lt; RANGE) {
+</span></span><span class=line><span class=cl>    mv-&gt;min1 = delta1;
+</span></span><span class=line><span class=cl>    mv-&gt;min2 = delta2;
+</span></span><span class=line><span class=cl>    return BREAK;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>这里的<code>RANGE</code>表示最小测量范围，是1ms。</p><p>最后测量两设备的时间差是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>ctl</span><span class=o>-&gt;</span><span class=n>measure_delta</span> <span class=o>=</span> <span class=p>(</span><span class=n>mv</span><span class=p>.</span><span class=n>min1</span> <span class=o>-</span> <span class=n>mv</span><span class=p>.</span><span class=n>min2</span><span class=p>)</span> <span class=o>/</span> <span class=mi>2</span> <span class=o>+</span> <span class=n>PROCESSING_TIME</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>PROCESSING_TIME</code>一般是0，这个公式为什么可以表示两设备的时间差？</p><p>上述表述中，隐式的假设了本地和对端的时间是同步的，但是一般情况下是存在差异的，先假设本地时间是T，那么对端时间就是T + offset，考虑链路来回延迟都为delay那么，对本地的发送和和对端发送时间T1、T2（对端发送时间等于对端接收时间）有：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>mv.min1 = (T1 + offset) + delay - T1;
+</span></span><span class=line><span class=cl>mv.min2 = (T2 - offset) + delay - T2;
+</span></span><span class=line><span class=cl>==&gt;
+</span></span><span class=line><span class=cl>offset = (mv.min1 - mv.min2) / 2
+</span></span></code></pre></td></tr></table></div></div><p>这里的基本假设是网络链路来回时延一致。</p><p>我想迭代50次的原因之一，也是为了保证来回链路的状态一致，而尽量保证来回时延一致。另外，本地的收发时间戳都是在用户空间获取的软时钟系统时间戳，也有一定的误差（获取时间戳时刻和真实收发时刻的误差），如上公式，只要保证获取发送时间戳和真实发送时刻的差值与真实接收时刻和获取接收时间戳的差值一致（或者差异很小），倒也没有太大影响。</p><h3 id=clockdiff-网络异常处理>clockdiff 网络异常处理</h3><p>首先是在发送部分，如果发送的sequence number和接收ack number相差过大，则说明可能丢失报文（链路上丢失，或对端下线）：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm> * If no answer is received for TRIALS consecutive times, the machine is
+</span></span></span><span class=line><span class=cl><span class=cm> * assumed to be down
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>ctl</span><span class=o>-&gt;</span><span class=n>seqno</span> <span class=o>-</span> <span class=n>ctl</span><span class=o>-&gt;</span><span class=n>acked</span> <span class=o>&gt;</span> <span class=n>TRIALS</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>errno</span> <span class=o>=</span> <span class=n>EHOSTDOWN</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>HOSTDOWN</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后是在发送时，如果发送失败，则是不可达：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>mv</span><span class=p>.</span><span class=n>count</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>errno</span> <span class=o>=</span> <span class=n>EHOSTUNREACH</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>UNREACHABLE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2024-07-29</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E5%B7%A5%E5%85%B7/>工具</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/linux/>Linux</a>,&nbsp;<a href=/tags/socket/>Socket</a>,&nbsp;<a href=/tags/%E5%8D%8F%E8%AE%AE/>协议</a></section></div><div class=post-nav><a href=/202405/transmite-log-channel/ class=prev rel=prev title=日志透传工具-channel><i class="fas fa-angle-left fa-fw"></i>日志透传工具-channel</a>
+<a href=/202406/time-sync-summary/ class=next rel=next title=时间同步概述>时间同步概述<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div><section><script>const preload_related_posts=[{title:"DMA拼接",link:"/202504/dma-ring/",date:"2025-04-20"},{title:"二维数据可视化工具-painter",link:"/202412/2d-vistual-painter/",date:"2024-12-09"},{title:"轻量级参数解析库-tiny_cmdline",link:"/202408/about_tiny_summary/",date:"2024-08-13"},{title:"日志透传工具-channel",link:"/202405/transmite-log-channel/",date:"2024-05-27"},{title:"设置CPU使用率的工具-cpuocup",link:"/202305/cpuocup/",date:"2023-05-09"},{title:"glibc-read/write源码阅读",link:"/202301/glibc-read-write/",date:"2023-01-08"},{title:"文件和文件夹md5工具-md5any",link:"/202210/md5fileandic-md5any/",date:"2022-10-11"},{title:"系统信息悬浮窗-fstats",link:"/202207/sysinfo-fstats/",date:"2022-07-21"},{title:"glibc-malloc源码阅读二",link:"/202203/glibc-malloc2/",date:"2022-03-30"},{title:"glibc-malloc源码阅读",link:"/202203/glibc-malloc/",date:"2022-03-25"},{title:"glibc-mmap源码阅读",link:"/202202/glibc-mmap/",date:"2022-02-28"},{title:"glibc-fopen源码阅读-补充篇-open系统调用",link:"/202202/fopen-sys-open/",date:"2022-02-22"},{title:"程序的栈帧",link:"/202201/framestack/",date:"2022-01-26"},{title:"glibc-exit源码阅读",link:"/202201/glibc-exit/",date:"2022-01-24"},{title:"glibc-raise源码阅读",link:"/202111/glibc-raise/",date:"2021-11-16"},{title:"glibc-abort源码阅读",link:"/202111/glibc-abort/",date:"2021-11-11"},{title:"进程控制和通信(五)",link:"/202106/process-ctracon5/",date:"2021-06-03"},{title:"glibc-fopen源码阅读",link:"/202106/fopen-deep/",date:"2021-06-01"},{title:"初探Linux文件和文件系统",link:"/202105/linux-filesystem/",date:"2021-05-14"},{title:"进程控制和通信(三)",link:"/202105/process-ctracon3/",date:"2021-05-07"},{title:"进程控制和通信(二)",link:"/202104/process-ctracon2/",date:"2021-04-23"},{title:"进程控制和通信(一)",link:"/202104/process-ctracon1/",date:"2021-04-21"},{title:"进程、线程和协程概念",link:"/202104/pandt-what/",date:"2021-04-15"}]</script></section></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2026</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog
+</a>&nbsp;|&nbsp;
+<a href=https://www.travellings.cn/go.html target=_blank rel=noopener title=开往-友链接力>开往-友链接力
+</a>&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2026-08-26T11:40:37+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+130&nbsp;篇
+&nbsp;|&nbsp;
+292K&nbsp;字</div><div class=footer-line><a href=/friends title=友情链接>友情链接:</a>&nbsp;&nbsp;
+<a target=_blank href=https://thiscute.world/ title="This Cute World">This Cute World</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://dusays.com title=杜老师说>杜老师说</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://panqiincs.me/ title=辛未羊的网络日志>辛未羊的网络日志</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://lewky.cn title=雨临Lewis的博客>雨临Lewis的博客</a></div></div></footer></div><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i></a></div><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css><link rel=stylesheet href=/css/innerworld-side.css><link rel=stylesheet href=/css/search-loading.css><script type=text/javascript src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/marked@13.0.2/marked.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},lightGallery:{actualSize:!1,exThumbImage:"data-thumbnail",hideBarsDelay:2e3,selector:".lightgallery",speed:400,thumbContHeight:80,thumbWidth:80,thumbnail:!0},search:{highlightTag:"em",maxResultLength:50,noResultsFound:"没有找到结果",snippetLength:50,type:"pagefind"}}</script><script type=text/javascript src=/js/search-results.js></script><script type=text/javascript src=/js/theme.js></script><script type=text/javascript src=/js/innerworld-side.js></script><script type=text/javascript src=/js/search-loading.js></script></body></html>

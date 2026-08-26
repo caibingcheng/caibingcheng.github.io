@@ -1,0 +1,145 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><meta http-equiv=X-UA-Compatible content="IE=edge, chrome=1"><title>生成文章摘要 - ImCBC</title><meta name=keywords content="[Life bbing bing bingcheng hugo Blog C++ LoveIt]"><meta name=Description content="个人技术博客"><meta property="og:url" content="https://imcbc.cn/202504/summary-by-ai/"><meta property="og:site_name" content="ImCBC"><meta property="og:title" content="生成文章摘要"><meta property="og:description" content="市面上有不少AI工具可以生成文章摘要，但是我的站点集成的是自定义生成工具，当触发push时，github action协助调用生成脚本。全量文章（统计约200K字）生成，目前大概消耗1元人民币。一般情况下都是增量生成方案，用量极少。"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-04-25T10:30:51+08:00"><meta property="article:modified_time" content="2025-04-25T10:30:51+08:00"><meta property="article:tag" content="ChatGPT"><meta property="article:tag" content="Prompt"><meta property="article:tag" content="LLM"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://cdn.jsdelivr.net/gh/caibingcheng/resources@main/images/13bOkrO.png"><meta name=twitter:title content="生成文章摘要"><meta name=twitter:description content="市面上有不少AI工具可以生成文章摘要，但是我的站点集成的是自定义生成工具，当触发push时，github action协助调用生成脚本。全量文章（统计约200K字）生成，目前大概消耗1元人民币。一般情况下都是增量生成方案，用量极少。"><meta name=application-name content="ImCBC"><meta name=apple-mobile-web-app-title content="ImCBC"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel=preconnect href=https://fastly.jsdelivr.net crossorigin><link rel=dns-prefetch href=https://fastly.jsdelivr.net><link rel=preconnect href=https://giscus.app crossorigin><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://imcbc.cn/202504/summary-by-ai/><link rel=prev href=https://imcbc.cn/202504/dma-ring/><link rel=next href=https://imcbc.cn/202505/dashcam-video-merge/><style>html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:initial}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}template{display:none}[hidden]{display:none}</style><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css crossorigin=anonymous><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css crossorigin=anonymous><link rel=stylesheet href=/css/custom.css><meta name=google-site-verification content="xy1bCgQPV_H3_o2XD34o2mIByQxmzkV3GPOfhXg_mTM"><meta name=msvalidate.01 content="c81a65b6344571786df543a56c7bbe18"><meta name=baidu-site-verification content="code-WcyzWjgFYo"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"生成文章摘要","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/imcbc.cn\/202504\/summary-by-ai\/"},"image":["https:\/\/imcbc.cn\/android-chrome-192x192.png"],"genre":"posts","keywords":"ChatGPT, Prompt, LLM","wordcount":1591,"url":"https:\/\/imcbc.cn\/202504\/summary-by-ai\/","datePublished":"2025-04-25T10:30:51+08:00","dateModified":"2025-04-25T10:30:51+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Bing","logo":"https:\/\/imcbc.cn\/android-chrome-192x192.png"},"author":{"@type":"Person","name":"bing"},"description":""}</script></head><body header-desktop=fixed header-mobile=normal><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><a href=https://github.com/caibingcheng/ class=github-corner aria-label="View source on GitHub"><svg width="3.5rem" height="3.5rem" viewBox="0 0 250 250" style="fill:#151513;color:#fff;position:absolute;top:0;border:0;left:0;transform:scale(-1,1)" aria-hidden="true"><path d="M0 0 115 115h15l12 27L250 250V0z"/><path d="M128.3 109C113.8 99.7 119 89.6 119 89.6 122 82.7 120.5 78.6 120.5 78.6 119.2 72 123.4 76.3 123.4 76.3 127.3 80.9 125.5 87.3 125.5 87.3 122.9 97.6 130.6 101.9 134.4 103.2" fill="currentColor" style="transform-origin:130px 106px" class="octo-arm"/><path d="M115 115C114.9 115.1 118.7 116.5 119.8 115.4l13.9-13.8C136.9 99.2 139.9 98.4 142.2 98.6 133.8 88 127.5 74.4 143.8 58 148.5 53.4 154 51.2 159.7 51 160.3 49.4 163.2 43.6 171.4 40.1 171.4 40.1 176.1 42.5 178.8 56.2 183.1 58.6 187.2 61.8 190.9 65.4 194.5 69 197.7 73.2 200.1 77.6 213.8 80.2 216.3 84.9 216.3 84.9 212.7 93.1 206.9 96 205.4 96.6 205.1 102.4 203 107.8 198.3 112.5 181.9 128.9 168.3 122.5 157.7 114.1 157.9 116.9 156.7 120.9 152.7 124.9L141 136.5C139.8 137.7 141.6 141.9 141.8 141.8z" fill="currentColor" class="octo-body"/></svg></a><div class=header-title><a href=/ title=ImCBC>ImCBC</a></div><div class=menu><div class=menu-inner><div class=dropdown><a href=/posts/ class="menu-item menu-more dropbtn" title><i class='fas fa fa-archive'></i> 归档</a><div class="menu-more-content dropdown-content"><a href=/tags/ title><i class='fas fa fa-tag'></i> 标签 </a><a href=/categories/ title><i class='fas fa fa-th'></i> 分类</a></div></div><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链</a><div class=dropdown><a href=javascript:void(0); class="menu-item menu-more dropbtn" title><i class='fas fa fa-angle-double-down'></i> 更多</a><div class="menu-more-content dropdown-content"><a href=/tools/ title><i class='fas fa fa-cubes'></i> 工具 </a><a href=/about/ title><i class='fas fa fa-address-card'></i> 关于 </a><a href=/timeline/ title><i class='fas fa fa-building'></i> 建站 </a><a href=/index.xml/ title><i class='fas fa fa-rss'></i> RSS</a></div></div><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder=搜索文章内容 id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw"></i>
+</a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw"></i>
+</a><span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin"></i>
+</span></span><a href=https://www.travellings.cn/go.html target=_blank class=menu-item rel=noopener title=开往-友链接力><i class='fas fa-fw fa-subway'></i>
+</a><a href=https://rssblog.cn/bbing class=menu-item target=_blank rel=noopener title=RSSBlog><i class='fas fa-fw fa-inbox'></i>
+</a><a href=https://www.foreverblog.cn/go.html class=menu-item target=_blank rel=noopener title=穿梭虫洞><i class="fas fa-fw fa-life-ring" title=穿梭虫洞-随机访问十年之约友链博客></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=ImCBC>ImCBC</a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=搜索文章内容 id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw"></i>
+</a><a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw"></i>
+</a><span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin"></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a href=/posts/ class=menu-item title><i class='fas fa fa-archive'></i> 归档
+</a><a href=/tags/ class=menu-item title><i class='fas fa fa-tag'></i> 标签
+</a><a href=/categories/ class=menu-item title><i class='fas fa fa-th'></i> 分类
+</a><a class=menu-item href=/friends/><i class='fas fa fa-users'></i> 友链
+</a><a href=/tools/ class=menu-item title><i class='fas fa fa-cubes'></i> 工具
+</a><a href=/about/ class=menu-item title><i class='fas fa fa-address-card'></i> 关于
+</a><a href=/timeline/ class=menu-item title><i class='fas fa fa-building'></i> 建站
+</a><a href=/index.xml/ class=menu-item title><i class='fas fa fa-rss'></i> RSS</a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class=single-title>生成文章摘要<sup>
+<a id=reader-button-title title=阅读模式><i class="fa fa-book fa-fw"></i></a></sup></h1><div class=post-meta><div class=post-meta-line></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2025-04-25>2025-04-25</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1591 字&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟&nbsp;</div></div><div class="details toc" id=toc-static kept><div class="details-summary toc-title"><span><i class="details-icon fas fa-angle-right"></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><ul><li><a href=#关于api2d>关于API2D</a></li><li><a href=#生成摘要>生成摘要</a></li><li><a href=#总结>总结</a></li></ul></li></ul></nav></div></div><details class=summary-details><summary class=summary-title>摘要</summary><div class=summary title="version: 1.0.4-batch, model: gpt-4o, score: A"><i version=1.0.4-batch model=gpt-4o></i><p>本文介绍了作者如何通过自定义工具和API2D服务实现文章摘要的自动生成，详细描述了生成和评判摘要的prompt设计及优化过程。作者强调了大模型的通用性和工程应用价值，认为掌握LLM的使用能力是未来的重要技能，并建议通过API实现个性化需求，而不仅限于使用现成的聊天工具。</p><div class=summary-meta>评分: A</div></div></details><hr class=summary-separator><br><div data-pagefind-body class=content id=content><p>市面上有不少AI工具可以生成文章摘要，但是我的站点集成的是自定义生成工具，当触发push时，github action协助调用生成脚本。全量文章（统计约200K字）生成，目前大概消耗1元人民币。一般情况下都是增量生成方案，用量极少。</p><h3 id=关于api2d>关于API2D</h3><p>API2D相当于是一个API的中转，它提供了OpenAI相关的API。按照官方的说法，API2D采用点数（P）进行计费，整体价格保持在接口供应商官方价格的1.5倍；其API请求频率上限比官方更高；并且保持和官方接口一致。</p><p>看起来有点贵，个人使用完全足够，而且不用担心网络问题。</p><p>我已使用该方案超2年，从个人使用角度看，目前没有遇到什么大坑。如需使用，可以使用这个邀请链接：<a href=https://api2d.com/r/197854 target=_blank rel="noopener noreffer">https://api2d.com/r/197854</a></p><p><strong>我使用API2D比较早, 现在有很多国内可以直连的大的中转平台, 价格优于API2D, 目前API2D并非好的选择, 注意判别.</strong></p><h3 id=生成摘要>生成摘要</h3><p>最初我把GPT当作一个聊天智能。</p><p>对于“聊天模式”我这样写prompt：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>我是下面文章的作者，请提取以下文章的主要要点。请用一段简短的话概括以下文章的主旨。可以用1-2句话总结以下文章的重点吗？请使用1-3句话概括以下文章的核心内容。您能从以下文章中提炼出最重要的信息吗？请使用100字以内简要概括。
+</span></span></code></pre></td></tr></table></div></div><p>现在我采用这种方式写prompt：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>separator = &#34;################&#34;
+</span></span><span class=line><span class=cl>model = &#34;gpt-4.1-nano&#34;
+</span></span><span class=line><span class=cl>prompt = f&#34;&#34;&#34;
+</span></span><span class=line><span class=cl>以作者本人的视角总结以下文章内容, 注意精简字数, 注意保持语句通畅.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>文章是markdown格式, 文章的主要语言是中文, 文章可能包含代码内容.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>总结使用一段话. 总结的内容需要准确. 需要通过总结的内容就可以判断文章的大致思想.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>不要使用第一人称, 改为&#34;作者&#34;或&#34;本文&#34;等.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>注意1: 精简字数, 注意保持语句通畅.
+</span></span><span class=line><span class=cl>注意2: 以作者本人视角总结, 不要包含你的观点.
+</span></span><span class=line><span class=cl>注意3: 总结的内容需要准确.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>文章整体被{separator}包含.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>文章是:
+</span></span><span class=line><span class=cl>&#34;&#34;&#34;
+</span></span></code></pre></td></tr></table></div></div><p>再把生成的总结从给GTP评判：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>check_prompt = f&#34;&#34;&#34;
+</span></span><span class=line><span class=cl>给你输入一篇文章, 和对这篇文章的总结, 你来判断这个总结是否正确, 是否正确表达了文章的意思.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>文章是markdown格式, 文章的主要语言是中文, 文章可能包含代码内容.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>用户输入的内容如下表示:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>{separator}
+</span></span><span class=line><span class=cl>&lt;文章&gt;
+</span></span><span class=line><span class=cl>{separator}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>{separator}
+</span></span><span class=line><span class=cl>&lt;对文章的总结&gt;
+</span></span><span class=line><span class=cl>{separator}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>请判断文章的总结是否正确, 是否正确表达了文章的意思.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>你需要输出一个评分, 除了评分之外, 你不需要输出任何内容.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>评分细则为:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>[A] 完全表达了文章的意思, 总结的内容都在文章中有体现
+</span></span><span class=line><span class=cl>[B] 表达部分文章的意思, 总结的内容都在文章中有体现
+</span></span><span class=line><span class=cl>[C] 总结的内容在文章中没有体现, 但是总结的内容和文章的意思相近
+</span></span><span class=line><span class=cl>[D] 总结的内容和文章内容不以一致, 总结的思想和文章的思想也不一致
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>注意: 只输出评分, 不要输出其他内容
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>用户的输入是:
+</span></span><span class=line><span class=cl>&#34;&#34;&#34;
+</span></span></code></pre></td></tr></table></div></div><p>一方面，prompt设计更细节化：更多的需求描述、更多的分割符、更多的结构化。</p><p>另一方面，使用AI生成和评判，形成闭环。</p><p>完整脚本见：<a href=/summary.py rel>summary.py</a></p><p>这就像是一种新式的模型训练，先写出大概的prompt，然后使用测试数据评判、调优。只需花费少量的时间和金钱，就能得到一个相对满意的结果。</p><h3 id=总结>总结</h3><p>大模型浪潮下，如何参与进去？已经有很多人给过答案。我的理解是，分为两个方向。其一，是参与到LLM设计和开发中去，迭代出更强的模型，这偏向于专业研究领域。其二，是学会使用，这是工程应用。在我看来，现在的LLM不同于以往的任何模型，这是一个通用工具，以往的模型大都只能适配特定的领域，而LLM可以适配非常多的领域。因此，未来“会使用LLM”也可能变成一种专业技能。</p><p>会使用是指，能够通过LLM的API，实现自己的需求，而不只是使用别人开发的“聊天”工具（比如豆包、NextChat、XX Copilot之类）。我对这种观念的理解来的比较晚。</p></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2025-04-25</span></div><div class=post-info-license><span><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></div><div class=post-info-more><section><i class="fas fa-fw fa-th"></i>&nbsp;<a href=/categories/%E5%B7%A5%E5%85%B7/>工具</a></section><section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/chatgpt/>ChatGPT</a>,&nbsp;<a href=/tags/prompt/>Prompt</a>,&nbsp;<a href=/tags/llm/>LLM</a></section></div><div class=post-nav><a href=/202504/dma-ring/ class=prev rel=prev title=DMA拼接><i class="fas fa-angle-left fa-fw"></i>DMA拼接</a>
+<a href=/202505/dashcam-video-merge/ class=next rel=next title=行车记录仪视频拼接>行车记录仪视频拼接<i class="fas fa-angle-right fa-fw"></i></a></div></div><div id=my-random-posts><div class=loadingThree><span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span></div></div><div id=comments><div id=giscus class=comment></div><script src=https://giscus.app/client.js data-repo=caibingcheng/comment data-repo-id=R_kgDOHgda4w data-category=Announcements data-category-id=DIC_kwDOHgda484CTfDe data-mapping=og:title data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-CN data-loading=lazy crossorigin=anonymous async></script><noscript>Please enable JavaScript to view the comments powered by <a href=https://giscus.app/>giscus</a>.</noscript></div><section><script>const preload_related_posts=[{title:"git-cm：在终端里用 LLM 生成 commit message",link:"/202606/git-cm-llm-commit-message/",date:"2026-06-23"},{title:"Token Tracker - 从 Token 记账到个人 AI Gateway",link:"/202605/token-tracker/",date:"2026-05-23"},{title:"行车记录仪视频拼接",link:"/202505/dashcam-video-merge/",date:"2025-05-05"}]</script></section></article></div></main><footer class=footer><hr style=opacity:.2><div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2020 - 2026</span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br><span class=icp><a href="https://icp.gov.moe/?keyword=20222231" target=_blank>萌ICP备20222231号</a></span></div><div class=footer-line><a href=https://rssblog.cn target=_blank rel=noopener title=RSSBlog>RSSBlog
+</a>&nbsp;|&nbsp;
+<a href=https://www.travellings.cn/go.html target=_blank rel=noopener title=开往-友链接力>开往-友链接力
+</a>&nbsp;|&nbsp;
+<a href=https://www.foreverblog.cn/go.html target=_blank>穿梭虫洞</a></div><div class=footer-line><script>var build_date="2026-08-26T11:40:38+08:00"</script>已运行
+<span id=run-time></span>
+&nbsp;|&nbsp;
+构建于
+<span id=build-time></span>&nbsp;前</div><div class=footer-line><script async src=https://npm.elemecdn.com/penndu@1.0.0/bsz.js></script>共计
+<span id=busuanzi_value_site_uv></span>&nbsp;访客
+&nbsp;|&nbsp;
+<span id=busuanzi_value_site_pv></span>&nbsp;访问
+&nbsp;|&nbsp;
+130&nbsp;篇
+&nbsp;|&nbsp;
+292K&nbsp;字</div><div class=footer-line><a href=/friends title=友情链接>友情链接:</a>&nbsp;&nbsp;
+<a target=_blank href=https://thiscute.world/ title="This Cute World">This Cute World</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://dusays.com title=杜老师说>杜老师说</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://panqiincs.me/ title=辛未羊的网络日志>辛未羊的网络日志</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a target=_blank href=https://lewky.cn title=雨临Lewis的博客>雨临Lewis的博客</a></div></div></footer></div><a id=reader-button class=fixed-button title=阅读模式><i class="fa fa-book fa-fw"></i></a><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw"></i></a></div><link rel=stylesheet href=/css/innerworld-side.css><link rel=stylesheet href=/css/search-loading.css><script type=text/javascript src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/gh/Albejr/jquery-albe-timeline/jquery-albe-timeline.min.js></script><script type=text/javascript src=https://fastly.jsdelivr.net/npm/marked@13.0.2/marked.min.js></script><script type=text/javascript src=/js/custom.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:50},comment:{},search:{highlightTag:"em",maxResultLength:50,noResultsFound:"没有找到结果",snippetLength:50,type:"pagefind"}}</script><script type=text/javascript src=/js/search-results.js></script><script type=text/javascript src=/js/theme.js></script><script type=text/javascript src=/js/innerworld-side.js></script><script type=text/javascript src=/js/search-loading.js></script></body></html>
